@@ -1,0 +1,141 @@
+* {
+  font-family: "Roboto Thin", Roboto, Arial, sans-serif;
+  color: #4e4f51;
+}
+svg > g.cartesianlayer > g > g.plot > g > g > g > g > path {
+  clip-path: inset(0% 0% 0% 0% round 2px);
+}
+g.xy {
+  cursor: pointer;
+}
+
+.screenTitle {
+  padding-top: 15px;
+  margin: 10px 20px;
+}
+
+.container {
+  margin: 20px;
+  padding: 25px 15px;
+  border: 1px solid #999;
+  border-radius: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.blueHeader {
+  color: #053d5d;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+  min-width: 40%;
+}
+.tableLoanComparisonWrapper .tableRow td:first-child {
+  text-align: left;
+}
+.tableDivWrapper {
+  display: inline-block;
+  margin: 2px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.tableWrapper {
+  height: auto;
+  width: 100%;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.headerRow {
+  background-color: #eee;
+  font-size: 15px;
+  font-weight: bold;
+  color: #2c2d30;
+}
+.tableRow {
+  text-align: right;
+}
+.tableLoanComparisonWrapper tr:nth-child(odd) td,
+.oddRow td {
+  background-color: #eee;
+}
+.tableRow td {
+  padding: 5px;
+}
+.tableTitle {
+  color: #053d5d;
+}
+.titleContent {
+  font-size: 28px;
+  color: #053d5d;
+  font-weight: 600;
+  display: block;
+  text-align: center;
+}
+
+
+.tableLoanComparisonWrapper .tableDivWrapper {
+  width: 45%;  
+}
+.amortizationTableWrapper,
+.tableLoanComparisonWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+.amortizationTableWrapper .tableDivWrapper {
+  padding: 20px;
+}
+.greenNumber {
+  color: #216c2a;
+  font-weight: 600;
+}
+.darkWord {
+  color: #4e4f51;
+  font-weight: 600;
+  font-size: 30px;
+}
+.toggleView {
+  margin: 20px 0 30px 0;
+  cursor: pointer;
+}
+.toggleView span {
+  border: 1px solid #999;
+  color: #111;
+  -webkit-border-radius: 2px 0px 0px 2px;
+  -moz-border-radius: 2px 0px 0px 2px;
+  border-radius: 2px 0px 0px 2px;
+  background-color: #eee;
+  padding: 7px 15px;
+  cursor: pointer;
+}
+.toggleView span:first-child {
+  border-right: none;
+}
+.toggleView .selected {
+  border-top: 1px solid #999;
+  border-bottom: 3px solid #1d6c99 !important;
+}
+@media screen and (max-width: 399px) {
+  .tableRow td {
+    font-size: 14px;
+  }
+  .titleContent{
+    font-size: 20px;
+  }
+  .tableLoanComparisonWrapper .tableDivWrapper {
+    width: 90%;  
+  }
+  .tableWrapperSmallView tr:nth-child(odd){
+  background-color: #eee;
+
+  }
+  .tableWrapperSmallView td{
+font-size: 14px;
+    padding: 5px;
+  }
+  .darkWord {
+    font-size: 25px;
+  }
+}

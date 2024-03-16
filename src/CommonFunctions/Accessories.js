@@ -25,7 +25,7 @@ const styles = {
     fontSize: 15,
     backgroundColor: "rgba(0,0,0,.04)",
     color: "#51575d",
-    width: "100%",
+    width: "-webkit-fill-available",
     padding: 5,
     height: 24,
     outline: "none",
@@ -40,30 +40,59 @@ const styles = {
     display: "inline-block",
     cursor: "pointer",
     float: "right",
+    marginBottom: 10,
   },
 };
 
 const InputBox = (props) => {
-  const { label, onChangeText, value, placeholder, disabled = false } = props;
+  const {
+    label,
+    onChangeText,
+    value,
+    placeholder,
+    disabled = false,
+    type = "text",
+    style = {},
+    onBlur = () => {},
+    onFocus = () => {},
+  } = props;
 
   return (
     <div
-      pointerEvents={disabled ? "none" : "auto"}
       style={{
         ...styles.inputBoxContainer,
         ...{
-          //   width,
           border: `1px solid silver`,
           marginBottom: 20,
         },
+        ...style,
       }}
     >
       <span style={styles.inputBoxLabel}>{label || ""}</span>
       <input
-        onChange={(text) => onChangeText(text)}
+        disabled={disabled}
+        onChange={(text) => {
+          if (["number", "float"].includes(type)) {
+            let { value } = text.target;
+            value = value.replace(/[^0-9.]/g, "");
+            if (type === "float") {
+              const decimalCount = (value.match(/\./g) || []).length;
+              if (decimalCount > 1) value = value.slice(0, -1);
+            }
+            text.target.value = value;
+          }
+          onChangeText(text);
+        }}
         value={value || ""}
         placeholder={placeholder || ""}
-        style={styles.inputBox}
+        style={{
+          ...styles.inputBox,
+          ...(disabled
+            ? { backgroundColor: "#dddddd8c", cursor: "not-allowed" }
+            : {}),
+        }}
+        onBlur={onBlur}
+        onFocus={onFocus}
       />
     </div>
   );
@@ -73,6 +102,7 @@ const Dropdown = (props) => {
     label,
     options,
     onSelect,
+    style = {},
     placeholder = "",
     value = null,
     isMap,
@@ -84,19 +114,25 @@ const Dropdown = (props) => {
 
   return (
     <div
-      pointerEvents={disabled ? "none" : "auto"}
       style={{
         ...styles.inputBoxContainer,
         ...{
           border: `1px solid silver`,
           marginBottom: 20,
         },
+        ...style,
       }}
     >
       <span style={styles.inputBoxLabel}>{label || ""}</span>
       <select
         disabled={disabled}
-        style={{ ...styles.inputBox, ...{ height: 30 } }}
+        style={{
+          ...styles.inputBox,
+          ...{ height: 30 },
+          ...(disabled
+            ? { backgroundColor: "#dddddd8c", cursor: "not-allowed" }
+            : {}),
+        }}
         value={value || ""}
         onChange={(e) => {
           let { value, label = e.target.selectedOptions[0].text } = e.target;
@@ -105,7 +141,7 @@ const Dropdown = (props) => {
       >
         {options.map((item, index) => (
           <option key={index} value={item["value"]}>
-            {item["label"]}
+            {item["text"]}
           </option>
         ))}
       </select>

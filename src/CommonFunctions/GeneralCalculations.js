@@ -106,5 +106,76 @@ const CalculateLoanPayment = (loanTerm, IntRate, LnAmt, AmortizeType) => {
 const getValueByKey = (array, key) => {
   return array.map((item) => item[key]);
 };
+const formatCurrency = (value, digit = 2) => {
+  let num = parseFloat(
+      (value || "").toString().replace("$", "").replace(",", "")
+    ).toFixed(0),
+    numParts = num.split("."),
+    dollars = numParts[0],
+    cents = numParts[1] || "",
+    sign = num == (num = Math.abs(num));
+  dollars = dollars.replace(/\$|\,/g, "");
+  if (isNaN(dollars)) dollars = "0";
+  dollars = dollars.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  let val = "$" + ((sign ? "" : "-") + dollars); //+ (cents ? "." + cents : ".00");
+  val = val.replaceAll("-", "");
+  if (val == "$-0.00") val = "$0.00";
+  return val;
+};
+function formatPercentage(value, prefix = 4) {
+  const floatValue = parseFloat(value || 0);
+  if (!isNaN(floatValue)) {
+    const formattedPercentage = floatValue.toFixed(prefix) + "%";
+    return formattedPercentage;
+  } else {
+    return "";
+  }
+}
+const formatDateTimeNew = (date) => {
+  if (date === "") return "";
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear().toString();
 
-export { CalculateLoanPayment, getValueByKey };
+  let [month, day, year] = date.split("/");
+
+  if (!day) {
+    day = month;
+    month = currentDate.getMonth() + 1;
+  }
+
+  const parsedMonth = parseInt(month);
+  const parsedDay = parseInt(day);
+
+  const isValidMonth =
+    !isNaN(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12;
+  const isValidDay = !isNaN(parsedDay) && parsedDay >= 1 && parsedDay <= 31;
+
+  if (!isValidMonth || !isValidDay) {
+    const formattedCurrentMonth = (currentDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0");
+    const formattedCurrentDay = currentDate
+      .getDate()
+      .toString()
+      .padStart(2, "0");
+    return `${formattedCurrentMonth}/${formattedCurrentDay}/${currentYear}`;
+  }
+
+  if (year && year.length === 2) {
+    year = currentYear.slice(0, 2) + year;
+  } else if (!year) {
+    year = currentYear;
+  }
+
+  const formattedMonth = parsedMonth.toString().padStart(2, "0");
+  const formattedDay = parsedDay.toString().padStart(2, "0");
+
+  return `${formattedMonth}/${formattedDay}/${year}`;
+};
+export {
+  CalculateLoanPayment,
+  getValueByKey,
+  formatCurrency,
+  formatDateTimeNew,
+  formatPercentage,
+};

@@ -7,6 +7,7 @@ function App() {
   useEffect(() => {
     // document.getElementById("root").style.maxWidth = "320px";
   }, []);
+
   return (
     <>
       <ARMvsFixed />
