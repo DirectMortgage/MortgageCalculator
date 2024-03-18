@@ -38,13 +38,15 @@ function getFirstDateFormDisbursement(sDate) {
 
   return FirstPayDate;
 }
-
-function calculateFirstDate(dateString, isFormat) {
+const roundValue = (value = 0, roundOf = 2) => {
+  return parseFloat(value.toFixed(roundOf));
+};
+function calculateFirstDate(dateString, isFormat, addMonth = 1) {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
     throw new Error("Invalid date");
   }
-  let month = date.getMonth() + 2,
+  let month = date.getMonth() + addMonth,
     year = date.getFullYear();
   month = month <= 9 ? "0" + month : month;
   const currentDate = `${month}/01/${year}`,
@@ -113,9 +115,8 @@ const calculatePMT = (rate, payments, PV) => {
   let result = 0;
   if (rate && payments && PV !== 0) {
     result = PV / ((1 - Math.pow(1 + rate, -payments)) / rate);
-    // result *= -1;
   }
-  return result;
+  return roundValue(result);
 };
 
 const loansGetFhaTerm = (loanTerm, ltv, fhaCaseDate) => {
@@ -231,7 +232,11 @@ async function calculateAPR(tilCashFlows, zeroFlow, odd_Factor, noteRate) {
       return (
         acc +
         cashflow.paymentWithMi /
-          (Math.pow(onePlusGuess, cashflow.paymentNumber) * oddMultiple)
+          parseFloat(
+            (
+              Math.pow(onePlusGuess, cashflow.paymentNumber) * oddMultiple
+            ).toFixed(6)
+          )
       );
     }, 0);
 
@@ -270,7 +275,11 @@ async function calculateAPR(tilCashFlows, zeroFlow, odd_Factor, noteRate) {
         return (
           acc +
           cashflow.paymentWithMi /
-            (Math.pow(onePlusGuess, cashflow.paymentNumber) * oddMultiple)
+            parseFloat(
+              (
+                Math.pow(onePlusGuess, cashflow.paymentNumber) * oddMultiple
+              ).toFixed(6)
+            )
         );
       }, 0);
 
@@ -284,8 +293,7 @@ async function calculateAPR(tilCashFlows, zeroFlow, odd_Factor, noteRate) {
         loopDirection = loopDirection ? 0 : 1;
         incrementFactor /= 2;
       }
-
-      if (Math.round(guessAmount, 7) === Math.round(prevGuess, 7)) {
+      if (guessAmount.toFixed(7) === prevGuess.toFixed(7)) {
         sameAprCount++;
       } else {
         incrementSign = NPV > 0 ? 1 : -1;
@@ -312,6 +320,219 @@ const cleanValue = (value) => {
   return Number(value);
 };
 
+const calculateCashFlows = (
+  loanAmount,
+  term,
+  firstPayment,
+  ratesArray,
+  mipAmt
+) => {
+  let cashFlows = [];
+  let balance = loanAmount;
+  let cashflowDate = new Date(firstPayment);
+  let periodId = 1;
+
+  ratesArray.forEach((rate) => {
+    let { startTerm, endTerm, noteRate } = rate,
+      termCnt = 1,
+      movingTerm = endTerm - startTerm + 1,
+      remainingTerm = term - startTerm + 1;
+
+    let monthlyRate = noteRate / 12;
+
+    let payment = calculatePMT(monthlyRate, remainingTerm, balance);
+    while (termCnt <= movingTerm) {
+      cashflowDate.setMonth(cashflowDate.getMonth());
+      let stBalance = balance;
+      let monthlyInterest = parseFloat((balance * monthlyRate).toFixed(2));
+
+      if (termCnt === term && stBalance + monthlyInterest !== payment) {
+        payment = stBalance + monthlyInterest;
+      }
+
+      let monthlyPrincipal = payment - monthlyInterest;
+      let endBalance = stBalance + monthlyInterest - payment;
+
+      cashFlows.push({
+        paymentNumber: periodId,
+        cashflowDate: cashflowDate.toISOString().split("T")[0],
+        cashflowType: 1,
+        stBalance: roundValue(stBalance),
+        Amount: roundValue(payment),
+        Interest: roundValue(monthlyInterest),
+        Principal: roundValue(monthlyPrincipal),
+        intRate: noteRate,
+        Balance: roundValue(endBalance),
+        miAmount: mipAmt,
+        paymentWithMi: roundValue(payment) + mipAmt,
+      });
+
+      balance = endBalance;
+      termCnt++;
+      periodId++;
+    }
+  });
+
+  return cashFlows;
+};
+
+const handleCalculateARP = async ({
+  cashFlow,
+  loanType,
+  appraisedValue,
+  purchasePrice,
+  loanAmount,
+  upFrontMIPFactor,
+  loanTerm,
+  fhaCaseDate,
+  iMiPercent,
+  mipAmt,
+  monthlyPayment,
+  movingRate,
+  PropertyBe,
+  propType,
+  amortizeType,
+  zeroFlow,
+  oddFactor,
+  noteRate,
+}) => {
+  const valueForLtv =
+    appraisedValue > purchasePrice && purchasePrice !== 0
+      ? purchasePrice
+      : appraisedValue;
+
+  let miYear = 11,
+    miCancel = 11, //check here
+    lesserOf = 0,
+    appVal78 = 0,
+    appVal80 = 0,
+    wsFunded = "",
+    miCancelLtvAmt = 0,
+    ltv = valueForLtv ? (loanAmount / valueForLtv) * 100 : 0;
+
+  if ([5, 8].includes(loanType)) loanType = 3;
+
+  if (loanType === 1) miYear = 0;
+
+  if (
+    (purchasePrice || 0) !== 0 &&
+    (purchasePrice || 0) < (purchasePrice || loanAmount * 1.1112)
+  ) {
+    lesserOf = purchasePrice || 0;
+  } else {
+    lesserOf = purchasePrice || loanAmount * 1.1112;
+  }
+  appVal78 = lesserOf * 0.78;
+  appVal80 = wsFunded === "" ? appVal78 : lesserOf * 0.8;
+
+  //FHA
+  if (loanType === 2) {
+    //yet to test
+    lesserOf = lesserOf * (1 + upFrontMIPFactor);
+    appVal78 = appVal78 * (1 + upFrontMIPFactor);
+    appVal80 = appVal80 * (1 + upFrontMIPFactor);
+    const { miCancel: iMiCancel, miYear: iMiYear } = loansGetFhaTerm(
+      loanTerm,
+      ltv,
+      fhaCaseDate
+    );
+    miCancel = iMiCancel;
+    miYear = iMiYear;
+    miCancelLtvAmt = appVal78;
+  } else if (loanType === 3) {
+    if (mipAmt > 0) {
+      miYear = loanTerm / 12;
+      miCancelLtvAmt = appVal80;
+      miCancel = 1;
+    } else {
+      miYear = 0;
+    }
+  } else if (loanType === 4) {
+    //yet to test
+    upFrontMIPFactor = 0;
+    miCancelLtvAmt = appVal78;
+    miYear = loanTerm / 12;
+  }
+  upFrontMIPFactor = upFrontMIPFactor / 100; //Convert to %
+
+  let miYearCount = 1,
+    miMonthStartAmt = loanAmount,
+    miMonthEndAmt = 0,
+    miMonthStart = 0,
+    miMonthEnd = 0;
+
+  while (miYearCount <= miYear) {
+    //MIAmt - update to cashflow
+    if ([2, 4].includes(loanType)) {
+      const { MIAmt, finalBal, finalPay } = loansCalculateMI(
+        Number(miMonthStartAmt),
+        movingRate,
+        Number(iMiPercent),
+        upFrontMIPFactor,
+        monthlyPayment,
+        loanType === 2 ? "FHA" : "USD"
+      );
+      mipAmt = roundValue(MIAmt / 100, 2);
+      miMonthStartAmt = finalBal;
+    }
+
+    miMonthStart = (miYearCount - 1) * 12 + 1;
+    miMonthEnd = miYearCount * 12;
+
+    if (loanType === 3) {
+      let blHpa = 0;
+      if (
+        [1, 2].includes(PropertyBe) &&
+        [1, 15, 16, 2, 4, 5, 6, 7, 8, 9].includes(propType)
+      ) {
+        blHpa = 1;
+      }
+
+      if (miMonthStart > 120) {
+        mipAmt = roundValue((loanAmount * 0.002) / 12, 2);
+      }
+      if (blHpa === 1 && miMonthStart > loanTerm * 0.5) {
+        mipAmt = 0;
+        miCancel = 1;
+      }
+    } else {
+      miCancel = 0;
+    }
+    if (miYearCount > 0) {
+      for (
+        let index = Math.abs(miMonthStart - 1);
+        index <= Math.abs(miMonthEnd - 1);
+        index++
+      ) {
+        cashFlow[index]["paymentWithMi"] = cashFlow[index]["Amount"] + mipAmt;
+        cashFlow[index]["miAmount"] = mipAmt;
+      }
+    }
+    miYearCount++;
+  }
+
+  if ((miCancel || 0) > 0 && ![3, 7].includes(amortizeType)) {
+    for (let i = 0; i < cashFlow.length; i++) {
+      if (
+        cashFlow[i].stBalance < miCancelLtvAmt &&
+        (miCancel === 1 || (miCancel === 2 && cashFlow[i].paymentNumber > 60))
+      ) {
+        cashFlow[i].paymentWithMi = cashFlow[i]["Amount"];
+      }
+    }
+  }
+
+  const { guessAmount } = await calculateAPR(
+    cashFlow,
+    zeroFlow,
+    oddFactor,
+    noteRate
+  );
+  console.log({ cashFlow, guessAmount });
+
+  return roundValue(guessAmount * 100, 4) || 0;
+};
+
 export {
   calculatePMT,
   cleanValue,
@@ -322,4 +543,7 @@ export {
   loansGetFhaTerm,
   loansCalculateMI, //dmloans_CalFHAMI
   calculateAPR,
+  roundValue,
+  calculateCashFlows,
+  handleCalculateARP,
 };

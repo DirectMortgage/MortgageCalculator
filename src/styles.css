@@ -63,6 +63,7 @@ g.xy {
 }
 .tableRow td {
   padding: 5px;
+  font-size: 14px;
 }
 .tableTitle {
   color: #053d5d;

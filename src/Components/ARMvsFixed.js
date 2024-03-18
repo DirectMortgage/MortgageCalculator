@@ -2,26 +2,25 @@ import React, { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
 import {
   formatCurrency,
-  formatDateTimeNew,
+  formatDate,
+  formatNewDate,
   formatPercentage,
 } from "../CommonFunctions/GeneralCalculations";
 import { Button, Dropdown, InputBox } from "../CommonFunctions/Accessories";
 import { Fragment } from "react";
 import "../styles.css";
 import {
-  calculateAPR,
+  calculateCashFlows,
   calculateFirstDate,
   calculateOddFactor,
-  calculatePMT,
   cleanValue,
   getFirstDateFormDisbursement,
-  loansCalculateMI,
-  loansGetFhaTerm,
+  handleCalculateARP,
   updateARMRate,
 } from "../CommonFunctions/CalcLibrary";
 
 const isMobile = window.innerWidth <= 400,
-  screenWidth = window.innerWidth;
+  screenWidth = window.innerWidth - 10;
 
 const styles = {
   tableInnerTitle: {
@@ -32,7 +31,7 @@ const styles = {
     margin: "5px 0",
   },
   tableDivWrapper: {
-    padding: isMobile ? 10 : "10px 40px",
+    padding: isMobile ? 10 : "10px",
   },
 };
 
@@ -117,31 +116,32 @@ const GenerateTable = ({
           <table className="tableWrapper tableWrapperSmallView">
             <tbody>
               {array.slice(start, end).map((row, index) => (
-                <>
+                <Fragment key={index}>
                   <tr style={{ fontWeight: "bold" }}>
-                    <td>{`${isYearly ? "Year" : "Pmt"} ${index + 1}`}</td>
+                    <td>{`${isYearly ? "Year" : "Pmt"} ${
+                      row.paymentNumber
+                    }`}</td>
                     <td style={{ textAlign: "right" }}>Fixed</td>
                     <td style={{ textAlign: "right" }}>ARM</td>
                   </tr>
                   {columns.map((column, cIndex) => {
-                    return ["Month", "Year"].includes(column) ? (
-                      <></>
-                    ) : (
-                      <tr key={cIndex}>
-                        <td>{column}:</td>
-                        <td style={{ textAlign: "right" }}>
-                          {formatCurrency(row[column])}
-                        </td>
-                        <td style={{ textAlign: "right" }}>
-                          {formatCurrency(armPaymentsArray[index][column])}
-                        </td>
-                      </tr>
+                    return (
+                      !["Month", "Year"].includes(column) && (
+                        <tr key={cIndex}>
+                          <td>{column}:</td>
+                          <td style={{ textAlign: "right" }}>
+                            {formatCurrency(row[column])}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            {formatCurrency(armPaymentsArray[index][column])}
+                          </td>
+                        </tr>
+                      )
                     );
                   })}
                   <tr>
                     <td>Difference:</td>
                     <td colSpan={2} style={{ textAlign: "center" }}>
-                      {" "}
                       {formatCurrency(
                         Math.abs(
                           row["Balance"] - armPaymentsArray[index]["Balance"]
@@ -149,7 +149,7 @@ const GenerateTable = ({
                       )}
                     </td>
                   </tr>
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -240,7 +240,7 @@ const ARMvsFixed = () => {
       formatType: "$",
     },
     {
-      name: "Cash From Borrower",
+      name: "Til Prepayment",
       value: "$0.00",
       resetValue: "$0.00",
       defaultValue: formatCurrency(0, 2),
@@ -353,16 +353,31 @@ const ARMvsFixed = () => {
       ],
     },
     {
-      name: "First Payment Date",
+      name: "Disbursement Date",
       value: "",
       resetValue: "",
-      defaultValue: formatDateTimeNew(calculateFirstDate(new Date(), true), 2),
+      defaultValue: formatDate(calculateFirstDate(new Date(), true, 2)),
       type: 1,
       onChange: () => {},
       onBlur: () => {},
       onFocus: () => {},
       formatType: "date",
     },
+    {
+      name: "First Payment Date",
+      value: "",
+      resetValue: "",
+      defaultValue: formatNewDate(
+        getFirstDateFormDisbursement(calculateFirstDate(new Date(), true, 2))
+      ),
+      type: 1,
+      onChange: () => {},
+      onBlur: () => {},
+      onFocus: () => {},
+      formatType: "date",
+      disabled: true,
+    },
+
     {
       name: "FHA Case # Date",
       value: "",
@@ -444,7 +459,7 @@ const ARMvsFixed = () => {
     {
       name: "Property Category",
       value: 0,
-      value: 0,
+      resetValue: 0,
       type: 2,
       defaultValue: 1,
       onChange: () => {},
@@ -472,7 +487,7 @@ const ARMvsFixed = () => {
     {
       name: "Property Type",
       value: 0,
-      value: 0,
+      resetValue: 0,
       defaultValue: 1,
       type: 2,
       onChange: () => {},
@@ -603,16 +618,23 @@ const ARMvsFixed = () => {
     });
   };
 
-  const handleLoanFieldValueChange = (index, { name, value }) => {
+  const handleLoanFieldValueChange = (index, { value, dependencyUpdate }) => {
     setLoanInputDetails((prevLoanInputDetails) => {
       prevLoanInputDetails[index]["value"] = value;
+      if (dependencyUpdate === "Disbursement Date") {
+        prevLoanInputDetails[index + 1]["value"] = formatNewDate(
+          getFirstDateFormDisbursement(
+            calculateFirstDate(new Date(value), true)
+          )
+        );
+      }
       return [...prevLoanInputDetails];
     });
   };
 
   const handleFillResetValues = (isFill) => {
     setScreenStatus(null);
-    setInputDetails((prevInputDetails) => {
+    setInputDetails(() => {
       return isFill
         ? {
             loanAmount: formatCurrency(400000, 2),
@@ -658,158 +680,6 @@ const ARMvsFixed = () => {
     console.timeEnd("handleCalculate");
   };
 
-  const handleCalculateARP = async ({
-    cashFlow,
-    loanType,
-    appraisedValue,
-    purchasePrice,
-    loanAmount,
-    upFrontMIPFactor,
-    loanTerm,
-    fhaCaseDate,
-    iMiPercent,
-    mipAmt,
-    monthlyPayment,
-    movingRate,
-    PropertyBe,
-    propType,
-    amortizeType,
-    zeroFlow,
-    oddFactor,
-    noteRate,
-  }) => {
-    const valueForLtv =
-      appraisedValue > purchasePrice && purchasePrice !== 0
-        ? purchasePrice
-        : appraisedValue;
-
-    let miYear = 11,
-      miCancel = 11, //check here
-      lesserOf = 0,
-      appVal78 = 0,
-      appVal80 = 0,
-      wsFunded = "",
-      miCancelLtvAmt = 0,
-      ltv = valueForLtv ? (loanAmount / valueForLtv) * 100 : 0;
-
-    if ([5, 8].includes(loanType)) loanType = 3;
-
-    if (loanType === 1) miYear = 0;
-
-    if (
-      (purchasePrice || 0) !== 0 &&
-      (purchasePrice || 0) < (purchasePrice || loanAmount * 1.1112)
-    ) {
-      lesserOf = purchasePrice || 0;
-    } else {
-      lesserOf = purchasePrice || loanAmount * 1.1112;
-    }
-    appVal78 = lesserOf * 0.78;
-    appVal80 = wsFunded === "" ? appVal78 : lesserOf * 0.8;
-
-    //FHA
-    if (loanType === 2) {
-      lesserOf = lesserOf * (1 + upFrontMIPFactor);
-      appVal78 = appVal78 * (1 + upFrontMIPFactor);
-      appVal80 = appVal80 * (1 + upFrontMIPFactor);
-      const { miCancel: iMiCancel, miYear: iMiYear } = loansGetFhaTerm(
-        loanTerm,
-        ltv,
-        fhaCaseDate
-      );
-      miCancel = iMiCancel;
-      miYear = iMiYear;
-      miCancelLtvAmt = miCancelLtvAmt;
-    } else if (loanType === 3) {
-      if (mipAmt > 0) {
-        miYear = loanTerm / 12;
-        miCancelLtvAmt = appVal80;
-        miCancel = 1;
-      } else {
-        miYear = 0;
-      }
-    } else if (loanType === 4) {
-      upFrontMIPFactor = 0;
-      miCancelLtvAmt = appVal78;
-      miYear = loanTerm / 12;
-    }
-    upFrontMIPFactor = upFrontMIPFactor / 100; //Convert to %
-
-    let miYearCount = 0,
-      miMonthStartAmt = 0,
-      miMonthEndAmt = 0;
-
-    while (miYearCount <= miYear) {
-      //MIAmt - update to cashflow
-      if ([2, 4].includes(loanType)) {
-        const { MIAmt, finalBal, finalPay } = loansCalculateMI(
-          Number(loanAmount),
-          movingRate,
-          Number(iMiPercent),
-          upFrontMIPFactor,
-          monthlyPayment,
-          loanType === 2 ? "FHA" : "USD"
-        );
-        mipAmt = MIAmt;
-        miMonthStartAmt = finalBal;
-      }
-
-      miMonthStartAmt = (miYearCount - 1) * 12 + 1;
-      miMonthEndAmt = miYearCount * 12;
-
-      if (loanType === 3) {
-        let blHpa = 0;
-        if (
-          [1, 2].includes(PropertyBe) &&
-          [1, 15, 16, 2, 4, 5, 6, 7, 8, 9].includes(propType)
-        ) {
-          blHpa = 1;
-        }
-
-        if (miMonthStartAmt > 120) {
-          mipAmt = Math.round((loanAmount * 0.002) / 12, 2);
-        }
-        if (blHpa === 1 && miMonthStartAmt > loanTerm * 0.5) {
-          mipAmt = 0;
-          miCancel = 1;
-        }
-      } else {
-        miCancel = 0;
-      }
-      if (miYearCount > 0) {
-        for (
-          let index = Math.abs(miMonthStartAmt - 1);
-          index <= Math.abs(miMonthEndAmt - 1);
-          index++
-        ) {
-          cashFlow[index]["paymentWithMi"] = cashFlow[index]["Amount"] + mipAmt;
-          cashFlow[index]["miAmount"] = mipAmt;
-        }
-      }
-      miYearCount++;
-    }
-
-    if ((miCancel || 0) > 0 && ![3, 7].includes(amortizeType)) {
-      for (let i = 0; i < cashFlow.length; i++) {
-        if (
-          cashFlow[i].stBalance < miCancelLtvAmt &&
-          (miCancel === 1 || (miCancel === 2 && cashFlow[i].paymentNumber > 60))
-        ) {
-          cashFlow[i].paymentWithMi = cashFlow[i]["Amount"];
-        }
-      }
-    }
-
-    const { guessAmount, loopCount } = await calculateAPR(
-      cashFlow,
-      zeroFlow,
-      oddFactor,
-      noteRate
-    );
-    console.log({ cashFlow, guessAmount, loopCount });
-    return guessAmount.toFixed(3) * 100 || 0;
-  };
-
   const getValuesFromLoanInputDetails = () => {
     let extractedObject = {};
 
@@ -820,88 +690,13 @@ const ARMvsFixed = () => {
     return extractedObject;
   };
 
-  const calculateCashFlows = (
-    loanAmount,
-    term,
-    firstPayment,
-    ratesArray,
-    paidInCash
-  ) => {
-    let cashFlows = [];
-    let balance = loanAmount;
-    let cashflowDate = new Date(firstPayment);
-    let periodId = 1;
-
-    ratesArray.forEach((rate) => {
-      let { startTerm, endTerm, noteRate } = rate,
-        termCnt = 1,
-        movingTerm = endTerm - startTerm + 1,
-        remainingTerm = term - startTerm + 1;
-
-      let monthlyRate = noteRate / 12;
-
-      let payment = calculatePMT(monthlyRate, remainingTerm, balance);
-      while (termCnt <= movingTerm) {
-        cashflowDate.setMonth(cashflowDate.getMonth());
-        let stBalance = balance;
-        let monthlyInterest = parseFloat((balance * monthlyRate).toFixed(2));
-
-        if (termCnt === term && stBalance + monthlyInterest !== payment) {
-          payment = stBalance + monthlyInterest;
-        }
-
-        let monthlyPrincipal = payment - monthlyInterest;
-        let endBalance = stBalance + monthlyInterest - payment;
-
-        cashFlows.push({
-          paymentNumber: periodId,
-          cashflowDate: cashflowDate.toISOString().split("T")[0],
-          cashflowType: 1,
-          stBalance: stBalance,
-          Amount: payment,
-          Interest: monthlyInterest,
-          Principal: monthlyPrincipal,
-          intRate: noteRate,
-          Balance: endBalance,
-          miAmount: paidInCash,
-          paymentWithMi: payment + paidInCash,
-        });
-
-        balance = endBalance;
-        termCnt++;
-        periodId++;
-      }
-    });
-
-    return cashFlows;
-  };
-
   const handleGetAmortizationSchedule = async (amortizeType, getAPR) => {
-    let armRateInitialAdj = 12,
-      armRateSubAdj = 12,
-      armGrossMargin = 2,
-      armLifeCap = 5,
-      armIndexValue = 0, //check this value
+    let //  armGrossMargin = 2,
+      //   armLifeCap = 5,
+      //   armIndexValue = 0, //check this value
       ratesArray = [];
 
     try {
-      const disbursementDates = new Date("2024-03-06"),
-        firstPaymentDate = getFirstDateFormDisbursement(disbursementDates),
-        { oddFactor, oddDays } = calculateOddFactor(
-          disbursementDates,
-          firstPaymentDate
-        );
-
-      let { fixedRate, loanAmount, loanTerm, armTerm, armRate } = inputDetails;
-
-      fixedRate = cleanValue(fixedRate);
-      loanAmount = cleanValue(loanAmount);
-      loanTerm = cleanValue(loanTerm);
-      armTerm = cleanValue(armTerm);
-      armRate = cleanValue(armRate);
-
-      armRate = armRate / 100;
-      loanTerm = loanTerm * 12;
       let {
         ["Paid In Cash"]: paidInCash,
         ["Mortgage Insurance Premium"]: mipAmt,
@@ -915,7 +710,9 @@ const ARMvsFixed = () => {
         ["FHA Case # Date"]: fhaCaseDate,
         ["Property Category"]: PropertyBe,
         ["Property Type"]: propType,
-        ["Cash From Borrower"]: tilPrePay,
+        ["Til Prepayment"]: tilPrePay,
+        ["Disbursement Date"]: disbursementDates,
+        ["First Payment Date"]: firstPaymentDate,
       } = getValuesFromLoanInputDetails();
 
       paidInCash = cleanValue(paidInCash);
@@ -924,18 +721,35 @@ const ARMvsFixed = () => {
       rate2 = cleanValue(rate2);
       iMiPercent = cleanValue(iMiPercent);
       loanType = cleanValue(loanType);
-      upFrontMIPFactor = cleanValue(upFrontMIPFactor);
+      upFrontMIPFactor = cleanValue(upFrontMIPFactor) / 100;
       purchasePrice = cleanValue(purchasePrice);
       appraisedValue = cleanValue(appraisedValue);
       PropertyBe = cleanValue(PropertyBe);
       propType = cleanValue(propType);
       tilPrePay = cleanValue(tilPrePay);
 
+      firstPaymentDate = new Date(firstPaymentDate); //getFirstDateFormDisbursement(disbursementDates)
+      const { oddFactor } = calculateOddFactor(
+        new Date(disbursementDates),
+        firstPaymentDate
+      );
+
+      let { fixedRate, loanAmount, loanTerm, armTerm, armRate } = inputDetails;
+
+      fixedRate = cleanValue(fixedRate);
+      loanAmount = cleanValue(loanAmount);
+      loanTerm = cleanValue(loanTerm);
+      armTerm = cleanValue(armTerm);
+      armRate = cleanValue(armRate);
+
+      armRate = armRate / 100;
+      loanTerm = loanTerm * 12;
+
       let rate = fixedRate,
         miPercent = !iMiPercent ? 0.0085 : iMiPercent,
         // tilPrePay = 0, //Not payment done - get it form (GetPFCLoanValueM_hud901 loanId)
-        adjustHud901 = 0,
-        initialAmt = 0,
+        // adjustHud901 = 0,
+        // initialAmt = 0,
         zeroFlow = 0;
 
       rate = (lienPosition === 2 ? rate2 : rate) / 100;
@@ -949,9 +763,9 @@ const ARMvsFixed = () => {
       if (paidInCash === 1) upFrontMIPFactor = 0;
 
       if (tilPrePay < 0) {
-        adjustHud901 = 1;
+        // adjustHud901 = 1;
         //tilPrePay - get it form vHUDDesc table
-        initialAmt = tilPrePay;
+        // initialAmt = tilPrePay;
       }
 
       zeroFlow = tilPrePay - loanAmount;
@@ -972,8 +786,8 @@ const ARMvsFixed = () => {
       // ARM loans block
       else {
         //do this later
-        let newRate = 0;
-        armLifeCap = armLifeCap + rate;
+        // let newRate = 0;
+        // armLifeCap = armLifeCap + rate;
         ratesArray.push({
           startTerm: 1,
           endTerm: armTerm * 12,
@@ -981,14 +795,14 @@ const ARMvsFixed = () => {
           noteRate: parseFloat(armRate),
         });
 
-        armAdjustmentYears.map((year) => {
-          newRate = updateARMRate(
-            armRate,
-            0,
-            armGrossMargin,
-            armIndexValue,
-            armLifeCap
-          );
+        armAdjustmentYears.forEach((year) => {
+          // newRate = updateARMRate(
+          //   armRate,
+          //   0,
+          //   armGrossMargin,
+          //   armIndexValue,
+          //   armLifeCap
+          // );
           ratesArray.push({
             startTerm: (year - 1) * 12 + 1,
             endTerm: year * 12,
@@ -1005,7 +819,7 @@ const ARMvsFixed = () => {
           noteRate: ratesArray[ratesArray.length - 1]["noteRate"],
         });
       }
-
+      console.log("ratesArray", amortizeType, " - ", ratesArray);
       const cashFlow = calculateCashFlows(
         loanAmount,
         loanTerm,
@@ -1013,11 +827,13 @@ const ARMvsFixed = () => {
         ratesArray,
         mipAmt
       );
+
       const {
         Amount: monthlyPayment,
-        Interest: movingRate,
+        intRate: movingRate,
         intRate: noteRate,
       } = cashFlow[0];
+
       const ARP = getAPR
         ? await handleCalculateARP({
             cashFlow,
@@ -1204,8 +1020,7 @@ const ARMvsFixed = () => {
           FixedArmDifferent = index === 0 ? index : FixedArmDifferent;
           const sIndex = (year - 1) * 12 - 1,
             eIndex = sIndex + 12,
-            { Balance: fixedStartBalance, Amount: fixedMonthlyPI } =
-              fixedPayments[sIndex],
+            { Balance: fixedStartBalance } = fixedPayments[sIndex],
             { Balance: adjStartBalance } = armPayments[sIndex],
             { Balance: fixedEndBalance, Amount: fixedEndPayment } =
               fixedPayments[eIndex],
@@ -1264,11 +1079,14 @@ const ARMvsFixed = () => {
 
                       <table className="tableWrapper">
                         <tbody>
-                          <tr className="tableRow">
+                          <tr
+                            className="tableRow"
+                            style={{ fontWeight: "bold" }}
+                          >
                             <td></td>
                             <td>Fixed</td>
                             <td>ARM</td>
-                          </tr>{" "}
+                          </tr>
                           <tr className="tableRow">
                             <td>Beginning of the Year Loan Balance:</td>
                             <td>{formatCurrency(fixedStartBalance)}</td>
@@ -1398,7 +1216,7 @@ const ARMvsFixed = () => {
   const FinalSummary = () => {
     let adjRate = 0,
       lastAdjYear = armAdjustmentYears[armAdjustmentYears.length - 1];
-    armAdjustmentYears.map((year, index) => {
+    armAdjustmentYears.forEach((year) => {
       adjRate += parseFloat(inputDetails[`Year(${year})`]);
     });
     const { Balance: fixedEndBalance, Amount: fixedEndPayment } =
@@ -1429,11 +1247,11 @@ const ARMvsFixed = () => {
 
                 <table className="tableWrapper">
                   <tbody>
-                    <tr className="tableRow">
+                    <tr className="tableRow" style={{ fontWeight: "bold" }}>
                       <td></td>
                       <td>Fixed</td>
                       <td>ARM</td>
-                    </tr>{" "}
+                    </tr>
                     <tr className="tableRow">
                       <td>Initial Loan Amount:</td>
                       <td>{formatCurrency(inputDetails["loanAmount"])}</td>
@@ -1797,10 +1615,9 @@ const ARMvsFixed = () => {
       <div
         style={{
           ...{
-            maxWidth: isMobile ? screenWidth - 20 : 950,
+            maxWidth: isMobile ? screenWidth : 950,
             margin: "auto",
             overflow: "hidden",
-            border: "1px solid",
           },
         }}
       >
@@ -1957,6 +1774,7 @@ const ARMvsFixed = () => {
                   backgroundColor: "#f7f6f6",
                   padding: "25px 15px 0",
                   margin: "0 -15px",
+                  width: "100%",
                 }}
               >
                 <div className="blueHeader" style={{ marginBottom: 25 }}>
@@ -2019,6 +1837,7 @@ const ARMvsFixed = () => {
                   onFocus = () => {},
                   options = [],
                   formatType = "",
+                  disabled = false,
                 } = field;
 
                 if (name === "FHA Case # Date") {
@@ -2026,7 +1845,7 @@ const ARMvsFixed = () => {
                     (item) => item["name"] === "Agency (Loan) Type"
                   )[0];
                   if (Number(loanType["value"]) !== 2) {
-                    return <></>;
+                    return <Fragment key={index}></Fragment>;
                   }
                 }
 
@@ -2036,7 +1855,7 @@ const ARMvsFixed = () => {
                       <>
                         <InputBox
                           style={{ width: isMobile ? "100%" : "45%" }}
-                          disabled={screenStatus === "showOutput"}
+                          disabled={screenStatus === "showOutput" || disabled}
                           validate={false}
                           label={name}
                           placeholder={name}
@@ -2044,17 +1863,23 @@ const ARMvsFixed = () => {
                           onBlur={(e) => {
                             if (["date", "$", "%"].includes(formatType)) {
                               const { value } = e.target;
-                              handleLoanFieldValueChange(index, {
-                                name,
-                                value:
-                                  formatType === "date"
-                                    ? formatDateTimeNew(value, 2)
-                                    : formatType === "$"
-                                    ? formatCurrency(value)
-                                    : formatType === "%"
-                                    ? formatPercentage(value, 4)
-                                    : value,
-                              });
+                              handleLoanFieldValueChange(
+                                index,
+                                {
+                                  name,
+                                  value:
+                                    formatType === "date"
+                                      ? formatDate(value, 2)
+                                      : formatType === "$"
+                                      ? formatCurrency(value)
+                                      : formatType === "%"
+                                      ? formatPercentage(value, 4)
+                                      : value,
+                                  dependencyUpdate:
+                                    name === "Disbursement Date" ? name : "",
+                                },
+                                name
+                              );
                             }
                             onBlur(e);
                           }}
@@ -2075,7 +1900,7 @@ const ARMvsFixed = () => {
                             width: isMobile ? "100%" : "45%",
                             maxWidth: isMobile ? "95%" : "45%",
                           }}
-                          disabled={screenStatus === "showOutput"}
+                          disabled={screenStatus === "showOutput" || disabled}
                           isValid={false}
                           label={name}
                           options={options}

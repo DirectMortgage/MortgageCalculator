@@ -109,8 +109,8 @@ const getValueByKey = (array, key) => {
 const formatCurrency = (value, digit = 2) => {
   let num = parseFloat(
       (value || "").toString().replace("$", "").replace(",", "")
-    ).toFixed(0),
-    numParts = num.split("."),
+    ),
+    numParts = num?.toFixed(digit).split("."),
     dollars = numParts[0],
     cents = numParts[1] || "",
     sign = num == (num = Math.abs(num));
@@ -131,7 +131,17 @@ function formatPercentage(value, prefix = 4) {
     return "";
   }
 }
-const formatDateTimeNew = (date) => {
+
+const formatNewDate = (date) => {
+  const currentDate = new Date(date);
+
+  const day = currentDate.getDate().toString().padStart(2, "0");
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+  const year = currentDate.getFullYear();
+
+  return `${month}/${day}/${year}`;
+};
+const formatDate = (date) => {
   if (date === "") return "";
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear().toString();
@@ -176,6 +186,7 @@ export {
   CalculateLoanPayment,
   getValueByKey,
   formatCurrency,
-  formatDateTimeNew,
+  formatDate,
   formatPercentage,
+  formatNewDate,
 };
