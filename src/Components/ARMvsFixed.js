@@ -5,6 +5,7 @@ import {
   formatDate,
   formatNewDate,
   formatPercentage,
+  queryStringToObject,
 } from "../CommonFunctions/GeneralCalculations";
 import { Button, Dropdown, InputBox } from "../CommonFunctions/Accessories";
 import { Fragment } from "react";
@@ -19,8 +20,29 @@ import {
   updateARMRate,
 } from "../CommonFunctions/CalcLibrary";
 
-const isMobile = window.innerWidth <= 400,
-  screenWidth = window.innerWidth - 10;
+const { type, w, f } = queryStringToObject(window.location?.href || "");
+const isMobile = f == "m",
+  screenWidth = (parseInt(w) || window.innerWidth) - 10;
+
+const styleElement = document.createElement("style");
+
+styleElement.innerHTML = `@media screen and (max-width: ${parseInt(w)}) {
+  .tableRow td {
+    font-size: 14px;
+  }
+  .titleContent{
+    font-size: 20px;
+  }
+  .tableLoanComparisonWrapper .tableDivWrapper {
+    width: 90%;  
+  }
+  
+  .darkWord {
+    font-size: 25px;
+  }
+}
+`;
+document.head.appendChild(styleElement);
 
 const styles = {
   tableInnerTitle: {

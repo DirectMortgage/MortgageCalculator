@@ -76,9 +76,8 @@ g.xy {
   text-align: center;
 }
 
-
 .tableLoanComparisonWrapper .tableDivWrapper {
-  width: 45%;  
+  width: 45%;
 }
 .amortizationTableWrapper,
 .tableLoanComparisonWrapper {
@@ -118,25 +117,10 @@ g.xy {
   border-top: 1px solid #999;
   border-bottom: 3px solid #1d6c99 !important;
 }
-@media screen and (max-width: 399px) {
-  .tableRow td {
-    font-size: 14px;
-  }
-  .titleContent{
-    font-size: 20px;
-  }
-  .tableLoanComparisonWrapper .tableDivWrapper {
-    width: 90%;  
-  }
-  .tableWrapperSmallView tr:nth-child(odd){
+.tableWrapperSmallView tr:nth-child(odd) {
   background-color: #eee;
-
-  }
-  .tableWrapperSmallView td{
-font-size: 14px;
-    padding: 5px;
-  }
-  .darkWord {
-    font-size: 25px;
-  }
+}
+.tableWrapperSmallView td {
+  font-size: 14px;
+  padding: 5px;
 }

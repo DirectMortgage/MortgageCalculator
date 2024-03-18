@@ -51,22 +51,16 @@ const CalculatePayments_SP_PMT = (fltRate, intPayments, fltPV) => {
   return fltResult;
 };
 
-// function TestMoney(MyNum) {
-//   MyNum1 = MyNum.value.trim();
-//   MyNum1 = replaceAll(MyNum1, "$", "");
-//   MyNum1 = replaceAll(MyNum1, ",", "");
-//   if (!TestBlank(MyNum1)) {
-//     return false;
-//   }
-
-//   resTestMoney = !isNaN(MyNum1);
-//   if (resTestMoney) {
-//     MyNum.value = FormatCurrency(MyNum1, 2, -1, 0);
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
+const queryStringToObject = (queryString) => {
+  if (!queryString) queryString = window.location.href;
+  queryString = queryString.split("?")[1];
+  const params = new URLSearchParams(queryString),
+    result = {};
+  for (const [key, value] of params) {
+    result[key] = value;
+  }
+  return result;
+};
 
 const CalculateLoanPayment = (loanTerm, IntRate, LnAmt, AmortizeType) => {
   let sPmt = "$0.00";
@@ -189,4 +183,5 @@ export {
   formatDate,
   formatPercentage,
   formatNewDate,
+  queryStringToObject,
 };
