@@ -1,21 +1,18 @@
 /* ====== BlendedRate (Start) ===== */
 const calculateBlendedRate = (loans) => {
-  const weightedRates = loans.map((loan) => loan.principal * loan.rate);
+  const weightedRates = loans.map(
+    (loan) => parseInt(loan.balance) * (parseFloat(loan.rate) / 100)
+  );
   const totalPrincipal = loans.reduce(
-    (total, loan) => total + loan.principal,
+    (total, loan) => total + parseInt(loan.balance),
     0
   );
   const blendedRate =
     weightedRates.reduce((sum, weightedRate) => sum + weightedRate, 0) /
     totalPrincipal;
-  return blendedRate;
+  return roundValue((blendedRate || 0) * 100, 3);
 };
 
-// const loans = [
-//     { principal: 45000, rate: 0.05 },
-//     { principal: 46000, rate: 0.06 },
-//     { principal: 47000, rate: 0.07 }
-// ];
 /* ====== BlendedRate (end) ===== */
 
 /* ====== OddFactor (start) ===== */
@@ -546,4 +543,5 @@ export {
   roundValue,
   calculateCashFlows,
   handleCalculateARP,
+  calculateBlendedRate,
 };

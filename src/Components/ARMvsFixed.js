@@ -21,8 +21,7 @@ import {
 } from "../CommonFunctions/CalcLibrary";
 
 const { type, w, f } = queryStringToObject(window.location?.href || "");
-const isMobile = f == "m",
-  screenWidth = (parseInt(w) || window.innerWidth) - 10;
+const isMobile = f == "m";
 
 const styleElement = document.createElement("style");
 
@@ -219,7 +218,8 @@ const GenerateTable = ({
   );
 };
 
-const ARMvsFixed = () => {
+const ARMvsFixed = (props) => {
+  const { screenWidth } = props;
   const [inputDetails, setInputDetails] = useState({});
   const [screenStatus, setScreenStatus] = useState(null);
   const [armAdjustmentYears, setArmAdjustmentYears] = useState([]);

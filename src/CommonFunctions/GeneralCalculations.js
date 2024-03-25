@@ -116,10 +116,10 @@ const formatCurrency = (value, digit = 2) => {
   if (val == "$-0.00") val = "$0.00";
   return val;
 };
-function formatPercentage(value, prefix = 4) {
+function formatPercentage(value, prefix = 4, exp) {
   const floatValue = parseFloat(value || 0);
   if (!isNaN(floatValue)) {
-    const formattedPercentage = floatValue.toFixed(prefix) + "%";
+    const formattedPercentage = floatValue.toFixed(exp ? 0 : prefix) + "%";
     return formattedPercentage;
   } else {
     return "";

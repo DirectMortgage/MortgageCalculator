@@ -55,6 +55,9 @@ const InputBox = (props) => {
     style = {},
     onBlur = () => {},
     onFocus = () => {},
+    symbol = null,
+    symbolPosition = "left",
+    inputBoxStyle = {},
   } = props;
 
   return (
@@ -66,9 +69,13 @@ const InputBox = (props) => {
           marginBottom: 20,
         },
         ...style,
+        ...(symbol
+          ? { flexDirection: "row", display: "flex", alignItems: "center" }
+          : {}),
       }}
     >
       <span style={styles.inputBoxLabel}>{label || ""}</span>
+      {symbolPosition == "left" && symbol}
       <input
         disabled={disabled}
         onChange={(text) => {
@@ -90,10 +97,19 @@ const InputBox = (props) => {
           ...(disabled
             ? { backgroundColor: "#dddddd8c", cursor: "not-allowed" }
             : {}),
+          ...(symbol && symbolPosition == "left"
+            ? {
+                paddingLeft: 20,
+              }
+            : symbol && symbolPosition == "right"
+            ? { paddingRight: 20 }
+            : {}),
+          ...inputBoxStyle,
         }}
         onBlur={onBlur}
         onFocus={onFocus}
       />
+      {symbolPosition == "right" && symbol}
     </div>
   );
 };
