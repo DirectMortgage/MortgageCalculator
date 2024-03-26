@@ -154,12 +154,11 @@ g.xy {
   letter-spacing: 1px;
   text-transform: none;
   color: rgb(255, 255, 255);
-
   font-weight: 300;
   text-align: center;
 }
 .brHeaderDesc {
-  margin: 0px;
+  margin: 0 0 35px 0;
   font-family: Inter;
   font-size: 14px;
   line-height: 24px;
@@ -169,19 +168,32 @@ g.xy {
   font-weight: 400;
   text-align: center;
 }
-.brBodyContainer {
-  max-width: 1136px;
-  margin: -50px auto 15rem auto;
+.fa-circle-play {
+  background-color: #fff;
+  border-radius: 50px;
+}
+.fa-circle-play path {
+  color: #8551dc;
 }
 .brResultSection {
   display: flex;
   flex-direction: column;
   -webkit-box-align: center;
   align-items: center;
+  width: 33.3%;
+}
+.brResultSectionMobile {
+  display: flex;
+  flex-direction: row;
+  -webkit-box-align: center;
+  align-items: center;
+  width: 100%;
+  /* justify-content: space-between; */
+  border-bottom: 1px solid #c1d0ce;
 }
 .brResultTitle {
   margin: 0px;
-  font-size: 14px;
+  text-align: center;
   line-height: 24px;
   letter-spacing: 0.4px;
   text-transform: none;
@@ -191,28 +203,45 @@ g.xy {
   font-family: Inter;
   font-weight: 700;
 }
+.brResultTitleMobile {
+  min-width: 180px;
+  margin: 0px;
+  padding: 20px 0;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  color: rgb(13, 33, 33);
+  flex: 0 0 auto;
+  font-family: Inter;
+  font-weight: 700;
+}
 .brResultValue {
   margin: 0px;
   font-family: Inter;
-
   font-size: 25px;
   line-height: 40px;
   letter-spacing: 0.4px;
   text-transform: none;
-  color: rgb(13, 33, 33);
+  /* color: rgb(13, 33, 33); */
+  text-align: center;
   font-weight: 600;
   display: flex;
   -webkit-box-pack: center;
   justify-content: center;
 }
 .dragged {
-  background-color: lightblue; /* Change background color when dragged */
+  border-left: 4px solid #184247;
+}
+.dragElement {
+  border-left: 4px solid #fff;
 }
 
 .draggable:hover {
   background-color: lightgray; /* Change background color on hover */
 }
-.brAddDebt {
+.brAddDebt,
+.dropdownButton .dropdown-toggle,
+.dropdownButton .dropdown-toggle:hover,
+.dropdownButton .dropdown-toggle:active {
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
@@ -234,14 +263,14 @@ g.xy {
   line-height: 20px;
   letter-spacing: 0.4px;
   text-transform: none;
-  color: rgb(255, 255, 255);
+  color: rgb(255, 255, 255) !important;
   font-weight: 500;
   min-width: 64px;
   transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
     box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
     border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
     color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-  background-color: #8551dc;
+  background-color: #8551dc !important;
   font-size: 14px;
   border-radius: 2px;
   box-shadow: none;
@@ -287,4 +316,31 @@ g.xy {
   text-underline-offset: 2px;
   height: 48px;
   padding: 14px 16px;
+}
+.brPreviewTable th,
+.brPreviewTable td {
+  padding: 10px;
+  border-bottom: 1px solid #deedeb;
+  width: 25%;
+}
+.dropdownButton .dropdown-menu {
+  border-radius: 3px;
+}
+.dropdownButton .dropdown-item:active {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+.dropdownButton .dropdown-item {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  width: 100%;
+  font-family: "Inter";
+  font-size: 13px;
+}
+.fa-link path,
+.download path {
+  color: #8551dc;
 }

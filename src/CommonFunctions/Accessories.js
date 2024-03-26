@@ -43,8 +43,7 @@ const styles = {
     marginBottom: 10,
   },
 };
-
-const InputBox = (props) => {
+const TextAreaBox = (props) => {
   const {
     label,
     onChangeText,
@@ -58,6 +57,7 @@ const InputBox = (props) => {
     symbol = null,
     symbolPosition = "left",
     inputBoxStyle = {},
+    inputBoxLabel = {},
   } = props;
 
   return (
@@ -74,7 +74,81 @@ const InputBox = (props) => {
           : {}),
       }}
     >
-      <span style={styles.inputBoxLabel}>{label || ""}</span>
+      <span style={{ ...styles.inputBoxLabel, ...inputBoxLabel }}>
+        {label || ""}
+      </span>
+      {symbolPosition == "left" && symbol}
+      <textarea
+        disabled={disabled}
+        onChange={(text) => {
+          if (["number", "float"].includes(type)) {
+            let { value } = text.target;
+            value = value.replace(/[^0-9.]/g, "");
+            if (type === "float") {
+              const decimalCount = (value.match(/\./g) || []).length;
+              if (decimalCount > 1) value = value.slice(0, -1);
+            }
+            text.target.value = value;
+          }
+          onChangeText(text);
+        }}
+        value={value || ""}
+        placeholder={placeholder || ""}
+        style={{
+          ...styles.inputBox,
+          ...(disabled
+            ? { backgroundColor: "#dddddd8c", cursor: "not-allowed" }
+            : {}),
+          ...(symbol && symbolPosition == "left"
+            ? {
+                paddingLeft: 20,
+              }
+            : symbol && symbolPosition == "right"
+            ? { paddingRight: 20 }
+            : {}),
+          ...inputBoxStyle,
+        }}
+        onBlur={onBlur}
+        onFocus={onFocus}
+      />
+      {symbolPosition == "right" && symbol}
+    </div>
+  );
+};
+const InputBox = (props) => {
+  const {
+    label,
+    onChangeText,
+    value,
+    placeholder,
+    disabled = false,
+    type = "text",
+    style = {},
+    onBlur = () => {},
+    onFocus = () => {},
+    symbol = null,
+    symbolPosition = "left",
+    inputBoxStyle = {},
+    inputBoxLabel = {},
+  } = props;
+
+  return (
+    <div
+      style={{
+        ...styles.inputBoxContainer,
+        ...{
+          border: `1px solid silver`,
+          marginBottom: 20,
+        },
+        ...style,
+        ...(symbol
+          ? { flexDirection: "row", display: "flex", alignItems: "center" }
+          : {}),
+      }}
+    >
+      <span style={{ ...styles.inputBoxLabel, ...inputBoxLabel }}>
+        {label || ""}
+      </span>
       {symbolPosition == "left" && symbol}
       <input
         disabled={disabled}
@@ -182,4 +256,4 @@ const Button = ({
   </div>
 );
 
-export { InputBox, Dropdown, Button };
+export { InputBox, Dropdown, Button, TextAreaBox };
