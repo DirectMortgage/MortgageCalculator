@@ -1,13 +1,25 @@
 import React, { useRef, useState } from "react";
 import { InputBox } from "../../CommonFunctions/Accessories";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowAltCircleDown,
+  faArrowAltCircleUp,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   formatCurrency,
   formatPercentage,
 } from "../../CommonFunctions/GeneralCalculations";
 
-const RowDrag = ({ item, index, onValueChange, onDelete, isMobile }) => {
+const RowDrag = ({
+  item,
+  index,
+  onValueChange,
+  onDelete,
+  isMobile,
+  lastIndex,
+  handleSwap = () => {},
+}) => {
   return (
     <div
       style={{
@@ -20,20 +32,49 @@ const RowDrag = ({ item, index, onValueChange, onDelete, isMobile }) => {
         marginBottom: 10,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignSelf: "center",
-          transform: "rotate(90deg)",
-          fontSize: 20,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-      >
-        <span style={{ lineHeight: 0 }}>...</span>
-        <span style={{ lineHeight: 0.7 }}>...</span>
-      </div>
+      {isMobile ? (
+        <div
+          style={{
+            flexDirection: "column",
+            display: "flex",
+            justifyContent: "space-evenly",
+          }}
+        >
+          {index ? (
+            <FontAwesomeIcon
+              icon={faArrowAltCircleUp}
+              size="lg"
+              onClick={() => handleSwap({ sIndex: index, eIndex: index - 1 })}
+            />
+          ) : (
+            <></>
+          )}
+          {lastIndex !== index ? (
+            <FontAwesomeIcon
+              icon={faArrowAltCircleDown}
+              size="lg"
+              onClick={() => handleSwap({ sIndex: index, eIndex: index + 1 })}
+            />
+          ) : (
+            <></>
+          )}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignSelf: "center",
+            transform: `rotate(${isMobile ? 0 : 90}deg)`,
+            fontSize: 20,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          <span style={{ lineHeight: 0 }}>...</span>
+          <span style={{ lineHeight: 0.7 }}>...</span>
+        </div>
+      )}
       <div
         style={{
           flexDirection: "row",
@@ -201,6 +242,7 @@ const RowSortTable = (props) => {
     if (draggedIndex === null || draggedIndex === index) {
       return;
     }
+
     const newItemList = [...itemList];
     const draggedItem = newItemList[draggedIndex];
     newItemList.splice(draggedIndex, 1);
@@ -211,6 +253,13 @@ const RowSortTable = (props) => {
   };
   const dragEnd = (e) => {
     setDraggedIndex(null);
+  };
+  const handleSwap = ({ sIndex, eIndex }) => {
+    const newItemList = [...itemList];
+    const draggedItem = newItemList[eIndex];
+    newItemList.splice(eIndex, 1);
+    newItemList.splice(sIndex, 0, draggedItem);
+    setItemList(newItemList);
   };
 
   return (
@@ -225,7 +274,7 @@ const RowSortTable = (props) => {
           className={`draggedRow ${
             draggedIndex === index ? "dragged" : "dragElement"
           }`}
-          draggable={draggedIndex !== index}
+          draggable
         >
           <RowDrag
             isMobile={isMobile}
@@ -233,6 +282,8 @@ const RowSortTable = (props) => {
             index={index}
             onValueChange={onValueChange}
             onDelete={onDelete}
+            lastIndex={itemList.length - 1}
+            handleSwap={handleSwap}
           />
         </div>
       ))}

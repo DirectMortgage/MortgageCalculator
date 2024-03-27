@@ -240,14 +240,20 @@ const BlendedRate = (props) => {
         <div
           ref={resultContentRef}
           style={{
-            justifyContent: "space-evenly",
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            padding: "16px 12px",
-            background: "rgb(255, 255, 255)",
-            borderRadius: "4px",
-            border: "1px solid rgb(222, 237, 235)",
-            marginBottom: 40,
+            ...{
+              justifyContent: "space-evenly",
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              padding: "16px 12px",
+              background: "rgb(255, 255, 255)",
+              borderRadius: "4px",
+              border: "1px solid rgb(222, 237, 235)",
+              marginBottom: 40,
+              position: "sticky",
+              top: 0,
+              zIndex: 1,
+            },
+            ...(isMobile ? {} : {}),
           }}
         >
           <div
@@ -319,8 +325,8 @@ const BlendedRate = (props) => {
   };
 
   return (
-    <>
-      <div
+    <div style={{ padding: 15 }}>
+      {/* <div
         className="dropdownButton"
         style={{
           maxWidth: 1136,
@@ -366,7 +372,7 @@ const BlendedRate = (props) => {
             }
           }}
         />
-      </div>
+      </div> */}
 
       <div className="brHeaderWrapper">
         <div className="brHeader">
@@ -435,7 +441,7 @@ const BlendedRate = (props) => {
           }}
         />
 
-        <div>
+        <div className={isMobile ? "" : "brFooterWrapper"}>
           <button
             type="button"
             className="brAddDebt"
@@ -453,6 +459,16 @@ const BlendedRate = (props) => {
             }}
           >
             + Add debt
+          </button>
+          <button
+            type="button"
+            className="brAddDebt"
+            style={{ float: "right", marginRight: 10 }}
+            onClick={() => {
+              handleDownloadPdf();
+            }}
+          >
+            Download
           </button>
 
           <button
@@ -592,7 +608,7 @@ const BlendedRate = (props) => {
         modalDetails={modalDetails}
         handleModalClose={handleModalClose}
       />
-    </>
+    </div>
   );
 };
 

@@ -1,3 +1,5 @@
+import { cleanValue } from "./CalcLibrary";
+
 const replaceAll = (strText, strRepText, strTextToRep) => {
   try {
     let intIndexOfMatch = strText.indexOf(strRepText);
@@ -101,6 +103,7 @@ const getValueByKey = (array, key) => {
   return array.map((item) => item[key]);
 };
 const formatCurrency = (value, digit = 2) => {
+  value = cleanValue(value);
   let num = parseFloat(
       (value || "").toString().replace("$", "").replace(",", "")
     ),

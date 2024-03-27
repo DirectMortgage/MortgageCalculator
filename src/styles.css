@@ -127,7 +127,7 @@ g.xy {
 
 .brHeaderWrapper {
   display: flex;
-  padding: 2.25rem;
+  padding: 1rem 2.25rem;
   justify-content: center;
   flex-direction: column;
   background-image: linear-gradient(
@@ -135,7 +135,6 @@ g.xy {
     rgb(17, 58, 63) 0%,
     rgb(55, 102, 104) 100%
   );
-  height: 190px;
 }
 .brHeader {
   max-width: 808px;
@@ -329,6 +328,14 @@ g.xy {
 .dropdownButton .dropdown-item:active {
   background-color: #f8f9fa;
   color: #212529;
+}
+.brFooterWrapper {
+  position: sticky;
+  bottom: 0;
+  display: inline-block;
+  width: 100%;
+  padding: 10px 0;
+  background: #fff;
 }
 .dropdownButton .dropdown-item {
   display: flex;
