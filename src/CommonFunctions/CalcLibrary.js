@@ -305,7 +305,7 @@ async function calculateAPR(tilCashFlows, zeroFlow, odd_Factor, noteRate) {
   }
 }
 
-const cleanValue = (value) => {
+const cleanValue = (value = 0) => {
   value = value
     .toString()
     .replaceAll("(", "")

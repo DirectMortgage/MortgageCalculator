@@ -4,7 +4,7 @@ import "./App.css";
 import { queryStringToObject } from "./CommonFunctions/GeneralCalculations";
 import ARMvsFixed from "./Components/ArmVsFixed/ARMvsFixed";
 import BlendedRate from "./Components/BlendedRate/BlendedRate";
-import "bootstrap/dist/css/bootstrap.min.css";
+
 const { type = "aF", w, f } = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
 let screenWidth = (parseInt(w) || window.innerWidth) - 10;

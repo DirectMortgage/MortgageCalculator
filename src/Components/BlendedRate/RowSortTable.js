@@ -90,7 +90,7 @@ const RowDrag = ({
           style={{
             margin: 0,
             width: isMobile ? "85%" : "20%",
-            minWidth: 220,
+            minWidth: 200,
           }}
           type="text"
           inputBoxStyle={{ fontFamily: "Inter", height: 30 }}
@@ -110,7 +110,7 @@ const RowDrag = ({
           style={{
             margin: 0,
             width: isMobile ? "85%" : "20%",
-            minWidth: 220,
+            minWidth: 150,
           }}
           type="text"
           validate={false}
@@ -141,7 +141,7 @@ const RowDrag = ({
           style={{
             margin: 0,
             width: isMobile ? "85%" : "20%",
-            minWidth: 220,
+            minWidth: 150,
           }}
           type="text"
           validate={false}

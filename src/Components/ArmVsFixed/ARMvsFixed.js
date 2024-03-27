@@ -23,26 +23,6 @@ import {
 const { type, w, f } = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
 
-const styleElement = document.createElement("style");
-
-styleElement.innerHTML = `@media screen and (max-width: ${parseInt(w)}) {
-  .tableRow td {
-    font-size: 14px;
-  }
-  .titleContent{
-    font-size: 20px;
-  }
-  .tableLoanComparisonWrapper .tableDivWrapper {
-    width: 90%;  
-  }
-  
-  .darkWord {
-    font-size: 25px;
-  }
-}
-`;
-document.head.appendChild(styleElement);
-
 const styles = {
   tableInnerTitle: {
     fontSize: isMobile ? 15 : 30,
@@ -633,6 +613,34 @@ const ARMvsFixed = (props) => {
       Array.from({ length: yearLength }, (_, i) => armTerm + i + 1)
     );
   }, [inputDetails]);
+
+  useEffect(() => {
+    const styleElement = document.createElement("style");
+
+    styleElement.innerHTML = `
+    *{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif}
+    @media screen and (max-width: ${parseInt(w)}) {
+      .tableRow td {
+        font-size: 14px;
+      }
+      .titleContent{
+        font-size: 20px;
+      }
+      .tableLoanComparisonWrapper .tableDivWrapper {
+        width: 90%;  
+      }
+      
+      .darkWord {
+        font-size: 25px;
+      }
+    }
+    `;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   const handleFieldValueChange = ({ name, value }) => {
     setInputDetails((prevInputDetails) => {

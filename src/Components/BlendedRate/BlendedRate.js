@@ -15,7 +15,8 @@ import {
 import { formatPercentage } from "../../CommonFunctions/GeneralCalculations";
 import html2pdf from "html2pdf.js";
 import ModalComponent from "../../CommonFunctions/Modal";
-import ButtonDropdown from "../../CommonFunctions/DropdownButton";
+// import "bootstrap/dist/css/bootstrap.min.css";
+
 import { InputBox, TextAreaBox } from "../../CommonFunctions/Accessories";
 
 const BlendedRate = (props) => {
@@ -74,7 +75,6 @@ const BlendedRate = (props) => {
     const base64 = btoa(
       await html2pdf().from(htmlContentRef.current).outputPdf()
     );
-    console.log({ base64 });
   };
 
   const handleDownloadPdf = async () => {
@@ -88,6 +88,11 @@ const BlendedRate = (props) => {
     const file = html2pdf().from(htmlContentRef.current);
     file.set(options).save();
   };
+
+  useEffect(() => {
+    require("bootstrap/dist/css/bootstrap.min.css");
+  }, []);
+
   // useEffect(() => {
   //   handleOpenComposeMail();
   // }, [emailDetails]);
@@ -498,7 +503,7 @@ const BlendedRate = (props) => {
                   body: (
                     <span
                       style={{
-                        fontSize: "25px",
+                        fontSize: 18,
                         lineHeight: "40px",
                         letterSpacing: "0.4px",
                         textTransform: "none",
