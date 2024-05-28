@@ -437,6 +437,7 @@ const handleCalculateARP = async ({
     miYear = iMiYear;
     miCancelLtvAmt = appVal78;
   } else if (loanType === 3) {
+    //Conventional
     if (mipAmt > 0) {
       miYear = loanTerm / 12;
       miCancelLtvAmt = appVal80;
@@ -445,7 +446,7 @@ const handleCalculateARP = async ({
       miYear = 0;
     }
   } else if (loanType === 4) {
-    //yet to test
+    //USDA/RHS
     upFrontMIPFactor = 0;
     miCancelLtvAmt = appVal78;
     miYear = loanTerm / 12;
@@ -477,6 +478,7 @@ const handleCalculateARP = async ({
     miMonthEnd = miYearCount * 12;
 
     if (loanType === 3) {
+      //Conventional
       let blHpa = 0;
       if (
         [1, 2].includes(PropertyBe) &&
@@ -529,6 +531,12 @@ const handleCalculateARP = async ({
 
   return roundValue(guessAmount * 100, 4) || 0;
 };
+const getPercentageValue = ({ totalValue, percentage }) => {
+  return totalValue * (percentage % 100);
+};
+const getValuePercentage = ({ totalValue, amount }) => {
+  return (amount / totalValue) * 100;
+};
 
 export {
   calculatePMT,
@@ -544,4 +552,6 @@ export {
   calculateCashFlows,
   handleCalculateARP,
   calculateBlendedRate,
+  getPercentageValue,
+  getValuePercentage,
 };

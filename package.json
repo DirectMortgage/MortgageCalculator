@@ -2,6 +2,7 @@
   "name": "MortgageCalculator",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
@@ -11,9 +12,11 @@
     "bootstrap": "^5.3.3",
     "html2pdf.js": "^0.10.1",
     "react": "^18.2.0",
+    "react-autocomplete": "^1.8.1",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
     "react-plotly.js": "^2.6.0",
+    "react-range-slider-input": "^3.0.7",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },

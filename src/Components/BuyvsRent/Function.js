@@ -1,0 +1,1442 @@
+let inputSource = {},
+  amortSchedule = [],
+  selectedYear = 5,
+  foreApprValues = [
+    {
+      price: 45000,
+      percentChange: 0,
+      month: 0,
+    },
+    {
+      price: 45442.6054021225,
+      percentChange: 0.9835675602722203,
+      month: 1,
+    },
+    {
+      price: 45914.66625935261,
+      percentChange: 2.03259168745025,
+      month: 2,
+    },
+    {
+      price: 46205.806033408204,
+      percentChange: 2.679568963129342,
+      month: 3,
+    },
+    {
+      price: 46306.60994089284,
+      percentChange: 2.903577646428538,
+      month: 4,
+    },
+    {
+      price: 46371.734939572496,
+      percentChange: 3.0482998657166576,
+      month: 5,
+    },
+    {
+      price: 46462.76369958323,
+      percentChange: 3.250585999073842,
+      month: 6,
+    },
+    {
+      price: 46471.039910502994,
+      percentChange: 3.2689775788955417,
+      month: 7,
+    },
+    {
+      price: 46336.504145732186,
+      percentChange: 2.9700092127381907,
+      month: 8,
+    },
+    {
+      price: 46394.42610161237,
+      percentChange: 3.0987246702497133,
+      month: 9,
+    },
+    {
+      price: 46453.87834003165,
+      percentChange: 3.2308407556258967,
+      month: 10,
+    },
+    {
+      price: 46814.192099474196,
+      percentChange: 4.0315379988315465,
+      month: 11,
+    },
+    {
+      price: 47231.537048615784,
+      percentChange: 4.958971219146187,
+      month: 12,
+    },
+    {
+      price: 47644.49363934917,
+      percentChange: 5.876652531887052,
+      month: 13,
+    },
+    {
+      price: 48081.59961707344,
+      percentChange: 6.847999149052096,
+      month: 14,
+    },
+    {
+      price: 48343.82710060363,
+      percentChange: 7.430726890230289,
+      month: 15,
+    },
+    {
+      price: 48421.10822431971,
+      percentChange: 7.602462720710464,
+      month: 16,
+    },
+    {
+      price: 48459.46364033936,
+      percentChange: 7.6876969785319105,
+      month: 17,
+    },
+    {
+      price: 48517.611933694316,
+      percentChange: 7.81691540820959,
+      month: 18,
+    },
+    {
+      price: 48494.653914441136,
+      percentChange: 7.765897587646969,
+      month: 19,
+    },
+    {
+      price: 48373.05955055573,
+      percentChange: 7.495687890123841,
+      month: 20,
+    },
+    {
+      price: 48433.095923407185,
+      percentChange: 7.629102052015966,
+      month: 21,
+    },
+    {
+      price: 48497.336140435116,
+      percentChange: 7.771858089855814,
+      month: 22,
+    },
+    {
+      price: 48850.733994428396,
+      percentChange: 8.557186654285324,
+      month: 23,
+    },
+    {
+      price: 49263.03738339342,
+      percentChange: 9.473416407540935,
+      month: 24,
+    },
+    {
+      price: 49672.4335874479,
+      percentChange: 10.383185749884223,
+      month: 25,
+    },
+    {
+      price: 50105.077075154084,
+      percentChange: 11.344615722564631,
+      month: 26,
+    },
+    {
+      price: 50368.44415148842,
+      percentChange: 11.929875892196481,
+      month: 27,
+    },
+    {
+      price: 50452.03842042622,
+      percentChange: 12.115640934280494,
+      month: 28,
+    },
+    {
+      price: 50496.500112723006,
+      percentChange: 12.214444694940013,
+      month: 29,
+    },
+    {
+      price: 50559.90029049829,
+      percentChange: 12.355333978885092,
+      month: 30,
+    },
+    {
+      price: 50545.16617155387,
+      percentChange: 12.322591492341937,
+      month: 31,
+    },
+    {
+      price: 50436.7321130756,
+      percentChange: 12.081626917945783,
+      month: 32,
+    },
+    {
+      price: 50502.22536720803,
+      percentChange: 12.227167482684518,
+      month: 33,
+    },
+    {
+      price: 50574.34536120036,
+      percentChange: 12.387434136000795,
+      month: 34,
+    },
+    {
+      price: 50930.7709848888,
+      percentChange: 13.179491077530662,
+      month: 35,
+    },
+    {
+      price: 51346.828467779356,
+      percentChange: 14.104063261731902,
+      month: 36,
+    },
+    {
+      price: 51760.33757503981,
+      percentChange: 15.02297238897736,
+      month: 37,
+    },
+    {
+      price: 52196.29364057052,
+      percentChange: 15.991763645712265,
+      month: 38,
+    },
+    {
+      price: 52465.595296819396,
+      percentChange: 16.59021177070977,
+      month: 39,
+    },
+    {
+      price: 52556.75297774228,
+      percentChange: 16.79278439498285,
+      month: 40,
+    },
+    {
+      price: 52607.97267165284,
+      percentChange: 16.906605937006308,
+      month: 41,
+    },
+    {
+      price: 52675.39354422238,
+      percentChange: 17.056430098271957,
+      month: 42,
+    },
+    {
+      price: 52665.09533242448,
+      percentChange: 17.0335451831655,
+      month: 43,
+    },
+    {
+      price: 52562.889258905045,
+      percentChange: 16.806420575344543,
+      month: 44,
+    },
+    {
+      price: 52630.93033340568,
+      percentChange: 16.95762296312374,
+      month: 45,
+    },
+    {
+      price: 52707.050173452684,
+      percentChange: 17.126778163228188,
+      month: 46,
+    },
+    {
+      price: 53070.11686905019,
+      percentChange: 17.933593042333747,
+      month: 47,
+    },
+    {
+      price: 53495.898404138905,
+      percentChange: 18.879774231419788,
+      month: 48,
+    },
+    {
+      price: 53919.79907538271,
+      percentChange: 19.82177572307269,
+      month: 49,
+    },
+    {
+      price: 54366.462793337865,
+      percentChange: 20.814361762973032,
+      month: 50,
+    },
+    {
+      price: 54643.8581276535,
+      percentChange: 21.430795839229994,
+      month: 51,
+    },
+    {
+      price: 54740.032945950916,
+      percentChange: 21.6445176576687,
+      month: 52,
+    },
+    {
+      price: 54794.74421032433,
+      percentChange: 21.76609824516518,
+      month: 53,
+    },
+    {
+      price: 54864.668419182664,
+      percentChange: 21.921485375961478,
+      month: 54,
+    },
+    {
+      price: 54855.41770629236,
+      percentChange: 21.90092823620525,
+      month: 55,
+    },
+    {
+      price: 54753.403702621945,
+      percentChange: 21.67423045027099,
+      month: 56,
+    },
+    {
+      price: 54824.29077537251,
+      percentChange: 21.831757278605572,
+      month: 57,
+    },
+    {
+      price: 54892.195293160934,
+      percentChange: 21.9826562070243,
+      month: 58,
+    },
+    {
+      price: 55021.45874495426,
+      percentChange: 22.26990832212058,
+      month: 59,
+    },
+    {
+      price: 55292.82710698226,
+      percentChange: 22.87294912662724,
+      month: 60,
+    },
+    {
+      price: 55593.0266773711,
+      percentChange: 23.540059283046883,
+      month: 61,
+    },
+    {
+      price: 55927.6806590719,
+      percentChange: 24.283734797937555,
+      month: 62,
+    },
+    {
+      price: 56249.03483461178,
+      percentChange: 24.997855188026183,
+      month: 63,
+    },
+    {
+      price: 56505.11434629403,
+      percentChange: 25.56692076954229,
+      month: 64,
+    },
+    {
+      price: 56729.85880212796,
+      percentChange: 26.066352893617683,
+      month: 65,
+    },
+    {
+      price: 56936.80498547613,
+      percentChange: 26.52623330105806,
+      month: 66,
+    },
+    {
+      price: 57095.88797460252,
+      percentChange: 26.879751054672262,
+      month: 67,
+    },
+    {
+      price: 57232.64136457923,
+      percentChange: 27.183647476842726,
+      month: 68,
+    },
+    {
+      price: 57285.52382174219,
+      percentChange: 27.301164048315968,
+      month: 69,
+    },
+    {
+      price: 57355.04953065947,
+      percentChange: 27.455665623687707,
+      month: 70,
+    },
+    {
+      price: 57489.121258203144,
+      percentChange: 27.753602796006987,
+      month: 71,
+    },
+    {
+      price: 57771.39239620159,
+      percentChange: 28.380871991559093,
+      month: 72,
+    },
+    {
+      price: 58082.755428259436,
+      percentChange: 29.072789840576522,
+      month: 73,
+    },
+    {
+      price: 58430.381973573174,
+      percentChange: 29.845293274607055,
+      month: 74,
+    },
+    {
+      price: 58770.48372354452,
+      percentChange: 30.60107494121005,
+      month: 75,
+    },
+    {
+      price: 59044.08155173865,
+      percentChange: 31.20907011497478,
+      month: 76,
+    },
+    {
+      price: 59284.74546599201,
+      percentChange: 31.74387881331558,
+      month: 77,
+    },
+    {
+      price: 59502.693695951704,
+      percentChange: 32.22820821322601,
+      month: 78,
+    },
+    {
+      price: 59669.669362188906,
+      percentChange: 32.59926524930868,
+      month: 79,
+    },
+    {
+      price: 59813.234651774146,
+      percentChange: 32.91829922616477,
+      month: 80,
+    },
+    {
+      price: 59871.58184109989,
+      percentChange: 33.04795964688865,
+      month: 81,
+    },
+    {
+      price: 59946.901227006245,
+      percentChange: 33.215336060013875,
+      month: 82,
+    },
+    {
+      price: 60088.85389018627,
+      percentChange: 33.530786422636154,
+      month: 83,
+    },
+    {
+      price: 60385.51573013183,
+      percentChange: 34.19003495584852,
+      month: 84,
+    },
+    {
+      price: 60713.026541123814,
+      percentChange: 34.91783675805292,
+      month: 85,
+    },
+    {
+      price: 61078.074429007145,
+      percentChange: 35.72905428668254,
+      month: 86,
+    },
+    {
+      price: 61432.764661014015,
+      percentChange: 36.51725480225337,
+      month: 87,
+    },
+    {
+      price: 61717.44548775757,
+      percentChange: 37.14987886168349,
+      month: 88,
+    },
+    {
+      price: 61968.17467009358,
+      percentChange: 37.707054822430166,
+      month: 89,
+    },
+    {
+      price: 62196.34256291145,
+      percentChange: 38.21409458424767,
+      month: 90,
+    },
+    {
+      price: 62371.233001035864,
+      percentChange: 38.60274000230192,
+      month: 91,
+    },
+    {
+      price: 62521.298255683585,
+      percentChange: 38.936218345963525,
+      month: 92,
+    },
+    {
+      price: 62580.87104022158,
+      percentChange: 39.06860231160351,
+      month: 93,
+    },
+    {
+      price: 62658.38273824203,
+      percentChange: 39.24085052942673,
+      month: 94,
+    },
+    {
+      price: 62807.8242502836,
+      percentChange: 39.572942778408,
+      month: 95,
+    },
+    {
+      price: 63120.32069316591,
+      percentChange: 40.26737931814646,
+      month: 96,
+    },
+    {
+      price: 63463.973438219386,
+      percentChange: 41.03105208493197,
+      month: 97,
+    },
+    {
+      price: 63847.15063838167,
+      percentChange: 41.88255697418148,
+      month: 98,
+    },
+    {
+      price: 64217.60928456253,
+      percentChange: 42.70579841013896,
+      month: 99,
+    },
+    {
+      price: 64513.281310648104,
+      percentChange: 43.362847356995786,
+      month: 100,
+    },
+    {
+      price: 64772.0386471428,
+      percentChange: 43.93786366031733,
+      month: 101,
+    },
+    {
+      price: 65007.333744219024,
+      percentChange: 44.46074165382005,
+      month: 102,
+    },
+    {
+      price: 65186.927898519985,
+      percentChange: 44.859839774488854,
+      month: 103,
+    },
+    {
+      price: 65340.48840369589,
+      percentChange: 45.201085341546424,
+      month: 104,
+    },
+    {
+      price: 65399.133239310024,
+      percentChange: 45.33140719846672,
+      month: 105,
+    },
+    {
+      price: 65476.47918286433,
+      percentChange: 45.50328707303184,
+      month: 106,
+    },
+    {
+      price: 65627.08446395904,
+      percentChange: 45.83796547546453,
+      month: 107,
+    },
+    {
+      price: 65947.33362836535,
+      percentChange: 46.54963028525633,
+      month: 108,
+    },
+    {
+      price: 66301.81809356346,
+      percentChange: 47.337373541252134,
+      month: 109,
+    },
+    {
+      price: 66697.48985645689,
+      percentChange: 48.216644125459744,
+      month: 110,
+    },
+    {
+      price: 67079.44604218095,
+      percentChange: 49.065435649291004,
+      month: 111,
+    },
+    {
+      price: 67381.8894044417,
+      percentChange: 49.737532009870435,
+      month: 112,
+    },
+    {
+      price: 67644.29665521135,
+      percentChange: 50.320659233803,
+      month: 113,
+    },
+    {
+      price: 67881.57481019005,
+      percentChange: 50.84794402264456,
+      month: 114,
+    },
+    {
+      price: 68060.91224745539,
+      percentChange: 51.246471661011974,
+      month: 115,
+    },
+    {
+      price: 68213.11326255229,
+      percentChange: 51.58469613900508,
+      month: 116,
+    },
+    {
+      price: 68453.98860695548,
+      percentChange: 52.119974682123285,
+      month: 117,
+    },
+    {
+      price: 68695.44524301372,
+      percentChange: 52.65654498447493,
+      month: 118,
+    },
+    {
+      price: 68936.3614121331,
+      percentChange: 53.19191424918468,
+      month: 119,
+    },
+    {
+      price: 69176.72544332201,
+      percentChange: 53.726056540715575,
+      month: 120,
+    },
+    {
+      price: 69416.53390449838,
+      percentChange: 54.25896423221863,
+      month: 121,
+    },
+    {
+      price: 69655.77519598715,
+      percentChange: 54.79061154663811,
+      month: 122,
+    },
+    {
+      price: 69894.41280110083,
+      percentChange: 55.32091733577962,
+      month: 123,
+    },
+    {
+      price: 70132.45151733536,
+      percentChange: 55.849892260745236,
+      month: 124,
+    },
+    {
+      price: 70369.89636581842,
+      percentChange: 56.37754747959649,
+      month: 125,
+    },
+    {
+      price: 70606.7022583468,
+      percentChange: 56.90378279632624,
+      month: 126,
+    },
+    {
+      price: 70842.88257162039,
+      percentChange: 57.4286279369342,
+      month: 127,
+    },
+    {
+      price: 71078.42568411355,
+      percentChange: 57.95205707580789,
+      month: 128,
+    },
+    {
+      price: 71313.30302728701,
+      percentChange: 58.47400672730446,
+      month: 129,
+    },
+    {
+      price: 71547.51981411324,
+      percentChange: 58.9944884758072,
+      month: 130,
+    },
+    {
+      price: 71781.05589543094,
+      percentChange: 59.51345754540208,
+      month: 131,
+    },
+    {
+      price: 72013.89101311848,
+      percentChange: 60.03086891804107,
+      month: 132,
+    },
+    {
+      price: 72246.03914076692,
+      percentChange: 60.54675364614872,
+      month: 133,
+    },
+    {
+      price: 72477.45430186545,
+      percentChange: 61.061009559701006,
+      month: 134,
+    },
+    {
+      price: 72708.1592036523,
+      percentChange: 61.57368711922735,
+      month: 135,
+    },
+    {
+      price: 72938.11632786554,
+      percentChange: 62.08470295081232,
+      month: 136,
+    },
+    {
+      price: 73167.3139189799,
+      percentChange: 62.594030931066435,
+      month: 137,
+    },
+    {
+      price: 73395.76639717007,
+      percentChange: 63.10170310482237,
+      month: 138,
+    },
+    {
+      price: 73623.43602214489,
+      percentChange: 63.60763560476642,
+      month: 139,
+    },
+    {
+      price: 73850.33739737669,
+      percentChange: 64.11186088305931,
+      month: 140,
+    },
+    {
+      price: 74076.42383683148,
+      percentChange: 64.61427519295884,
+      month: 141,
+    },
+    {
+      price: 74301.71887998395,
+      percentChange: 65.11493084440878,
+      month: 142,
+    },
+    {
+      price: 74526.18450763714,
+      percentChange: 65.61374335030476,
+      month: 143,
+    },
+    {
+      price: 74749.81793006268,
+      percentChange: 66.1107065112504,
+      month: 144,
+    },
+    {
+      price: 74972.61647991807,
+      percentChange: 66.60581439981793,
+      month: 145,
+    },
+    {
+      price: 75194.55973737458,
+      percentChange: 67.0990216386102,
+      month: 146,
+    },
+    {
+      price: 75415.627193649,
+      percentChange: 67.59028265255333,
+      month: 147,
+    },
+    {
+      price: 75635.82522374576,
+      percentChange: 68.07961160832392,
+      month: 148,
+    },
+    {
+      price: 75855.1333827296,
+      percentChange: 68.56696307273246,
+      month: 149,
+    },
+    {
+      price: 76073.54922618378,
+      percentChange: 69.05233161374173,
+      month: 150,
+    },
+    {
+      price: 76291.04322889454,
+      percentChange: 69.53565161976566,
+      month: 151,
+    },
+    {
+      price: 76507.62205859464,
+      percentChange: 70.0169379079881,
+      month: 152,
+    },
+    {
+      price: 76723.25613141475,
+      percentChange: 70.49612473647721,
+      month: 153,
+    },
+    {
+      price: 76937.9614123964,
+      percentChange: 70.9732475831031,
+      month: 154,
+    },
+    {
+      price: 77151.68999701891,
+      percentChange: 71.44819999337535,
+      month: 155,
+    },
+    {
+      price: 77364.4763734679,
+      percentChange: 71.92105860770644,
+      month: 156,
+    },
+    {
+      price: 77576.2633392482,
+      percentChange: 72.39169630944043,
+      month: 157,
+    },
+    {
+      price: 77787.06719643381,
+      percentChange: 72.86014932540846,
+      month: 158,
+    },
+    {
+      price: 77996.86748693723,
+      percentChange: 73.32637219319386,
+      month: 159,
+    },
+    {
+      price: 78205.66227819302,
+      percentChange: 73.7903606182067,
+      month: 160,
+    },
+    {
+      price: 78413.43112250329,
+      percentChange: 74.25206916111841,
+      month: 161,
+    },
+    {
+      price: 78620.15350472381,
+      percentChange: 74.7114522327196,
+      month: 162,
+    },
+    {
+      price: 78825.83696124183,
+      percentChange: 75.1685265805374,
+      month: 163,
+    },
+    {
+      price: 79030.46106880151,
+      percentChange: 75.62324681955891,
+      month: 164,
+    },
+    {
+      price: 79234.01476231687,
+      percentChange: 76.07558836070416,
+      month: 165,
+    },
+    {
+      price: 79436.50590369273,
+      percentChange: 76.52556867487273,
+      month: 166,
+    },
+    {
+      price: 79637.88576725865,
+      percentChange: 76.97307948279699,
+      month: 167,
+    },
+    {
+      price: 79838.1812291419,
+      percentChange: 77.41818050920423,
+      month: 168,
+    },
+    {
+      price: 80037.35296521329,
+      percentChange: 77.86078436714064,
+      month: 169,
+    },
+    {
+      price: 80235.40911145971,
+      percentChange: 78.30090913657713,
+      month: 170,
+    },
+    {
+      price: 80432.32933979637,
+      percentChange: 78.73850964399193,
+      month: 171,
+    },
+    {
+      price: 80628.09326965584,
+      percentChange: 79.17354059923521,
+      month: 172,
+    },
+    {
+      price: 80822.71891679746,
+      percentChange: 79.60604203732768,
+      month: 173,
+    },
+    {
+      price: 81016.18608034226,
+      percentChange: 80.03596906742725,
+      month: 174,
+    },
+    {
+      price: 81208.45519489469,
+      percentChange: 80.46323376643264,
+      month: 175,
+    },
+    {
+      price: 81401.19996767824,
+      percentChange: 80.89155548372943,
+      month: 176,
+    },
+    {
+      price: 81594.38280432486,
+      percentChange: 81.32085067627747,
+      month: 177,
+    },
+    {
+      price: 81788.04355967714,
+      percentChange: 81.75120791039365,
+      month: 178,
+    },
+    {
+      price: 81982.15421060154,
+      percentChange: 82.18256491244786,
+      month: 179,
+    },
+    {
+      price: 82176.72555166061,
+      percentChange: 82.6149456703569,
+      month: 180,
+    },
+  ],
+  histApprValues = [
+    {
+      price: 45000,
+      percentChange: 0,
+      year: 0,
+    },
+    {
+      price: 46896,
+      percentChange: 4.213425636291504,
+      year: 1,
+    },
+    {
+      price: 48872,
+      percentChange: 8.604380828508583,
+      year: 2,
+    },
+    {
+      price: 50931,
+      percentChange: 13.180345652472623,
+      year: 3,
+    },
+    {
+      price: 53077,
+      percentChange: 17.949115351437246,
+      year: 4,
+    },
+    {
+      price: 55313,
+      percentChange: 22.918813615433738,
+      year: 5,
+    },
+    {
+      price: 57644,
+      percentChange: 28.097906420131803,
+      year: 6,
+    },
+    {
+      price: 60073,
+      percentChange: 33.49521644879032,
+      year: 7,
+    },
+    {
+      price: 62604,
+      percentChange: 39.11993812186648,
+      year: 8,
+    },
+    {
+      price: 65242,
+      percentChange: 44.98165325988608,
+      year: 9,
+    },
+    {
+      price: 67991,
+      percentChange: 51.090347406257386,
+      year: 10,
+    },
+    {
+      price: 70855,
+      percentChange: 57.45642683783452,
+      year: 11,
+    },
+    {
+      price: 73841,
+      percentChange: 64.0907362922084,
+      year: 12,
+    },
+    {
+      price: 76952,
+      percentChange: 71.00457744192381,
+      year: 13,
+    },
+    {
+      price: 80194,
+      percentChange: 78.20972814709378,
+      year: 14,
+    },
+    {
+      price: 83573,
+      percentChange: 85.7184625192088,
+      year: 15,
+    },
+    {
+      price: 87095,
+      percentChange: 93.54357183031958,
+      year: 16,
+    },
+    {
+      price: 90764,
+      percentChange: 101.6983863032125,
+      year: 17,
+    },
+    {
+      price: 94589,
+      percentChange: 110.19679781969833,
+      year: 18,
+    },
+    {
+      price: 98574,
+      percentChange: 119.05328358569732,
+      year: 19,
+    },
+    {
+      price: 102727,
+      percentChange: 128.2829307934354,
+      year: 20,
+    },
+    {
+      price: 107056,
+      percentChange: 137.9014623227636,
+      year: 21,
+    },
+    {
+      price: 111566,
+      percentChange: 147.9252635253833,
+      year: 22,
+    },
+    {
+      price: 116267,
+      percentChange: 158.37141013760504,
+      year: 23,
+    },
+    {
+      price: 121166,
+      percentChange: 169.25769736919077,
+      year: 24,
+    },
+    {
+      price: 126271,
+      percentChange: 180.60267021783244,
+      year: 25,
+    },
+    {
+      price: 131592,
+      percentChange: 192.42565506090907,
+      year: 26,
+    },
+    {
+      price: 137136,
+      percentChange: 204.74679257833878,
+      year: 27,
+    },
+    {
+      price: 142914,
+      percentChange: 217.58707206261062,
+      year: 28,
+    },
+    {
+      price: 148936,
+      percentChange: 230.9683671744442,
+      year: 29,
+    },
+    {
+      price: 155211,
+      percentChange: 244.9134732049876,
+      year: 30,
+    },
+  ],
+  stateTaxRate = [
+    {
+      rate: 10,
+      singleMin: 0,
+      singleMax: 11600,
+      marriedMin: 0,
+      marriedMax: 23200,
+      hohMin: 0,
+      hohMax: 16550,
+    },
+    {
+      rate: 12,
+      singleMin: 11601,
+      singleMax: 47150,
+      marriedMin: 23501,
+      marriedMax: 94300,
+      hohMin: 16551,
+      hohMax: 63100,
+    },
+    {
+      rate: 22,
+      singleMin: 47151,
+      singleMax: 100525,
+      marriedMin: 94301,
+      marriedMax: 201505,
+      hohMin: 63101,
+      hohMax: 100500,
+    },
+    {
+      rate: 24,
+      singleMin: 100526,
+      singleMax: 191950,
+      marriedMin: 201051,
+      marriedMax: 383900,
+      hohMin: 100501,
+      hohMax: 191950,
+    },
+    {
+      rate: 32,
+      singleMin: 191951,
+      singleMax: 243925,
+      marriedMin: 383901,
+      marriedMax: 487450,
+      hohMin: 191951,
+      hohMax: 243700,
+    },
+    {
+      rate: 35,
+      singleMin: 243726,
+      singleMax: 609350,
+      marriedMin: 487451,
+      marriedMax: 731200,
+      hohMin: 243701,
+      hohMax: 609350,
+    },
+    {
+      rate: 37,
+      singleMin: 609351,
+      singleMax: 0,
+      marriedMin: 731201,
+      marriedMax: 0,
+      hohMin: 609351,
+      hohMax: 0,
+    },
+  ];
+
+const mode = Object.freeze({
+    FORECAST: "forecast",
+    HISTORICAL: "historical",
+    HISTORICAL_5: "historical5",
+    HISTORICAL_10: "historical10",
+    CUSTOM: "custom",
+  }),
+  appreciationModeType = Object.freeze({
+    WORST: "worst",
+    HISTORY: "histAVG",
+    CUSTOM: "custom",
+  }),
+  standardDeductionObj = {
+    single: 14600,
+    hoh: 21900,
+    marriedJoint: 29200,
+    marriedSeparate: 14600,
+  };
+
+const getTotalCashflow = (t) => {
+  let totalCashflowBuying = 0,
+    totalCashflowRenting = 0,
+    cashFlow = {};
+  for (let i = 0; i <= 12 * t - 1; i++) {
+    cashFlow = getCashFlowAtMonth(i);
+    totalCashflowBuying += round(cashFlow.buy.total);
+    totalCashflowRenting += round(cashFlow.rent.total);
+  }
+
+  return {
+    totalCashflowBuying,
+    totalCashflowRenting,
+    cashFlow,
+  };
+};
+
+const round = function (e) {
+  let a = arguments.length > 1 && undefined !== arguments[1] ? arguments[1] : 0;
+  let n = Math.pow(10, a);
+  let t = Math.round(+e * n) / n;
+
+  return [Infinity, -Infinity, NaN].includes(t) ? 0 : t;
+};
+
+const getCashFlowAtMonth = (t) => {
+  let amortScheduleItem = amortSchedule[t] || {
+    Interest: 0,
+    Principal: 0,
+    miAmount: 0,
+  };
+
+  let {
+    Interest: interest,
+    Principal: principal,
+    miAmount: MI,
+  } = amortScheduleItem;
+
+  let userTaxRate = inputSource["propTax"] / 100 / 100,
+    userTaxAmount = userTaxRate * inputSource["purValue"];
+
+  let taxIncCompoundInterest =
+    compoundInterest(
+      inputSource["propTaxIncrease"],
+      Math.floor(t / 12),
+      userTaxAmount
+    ) / 12;
+  let rentIncCompoundInterest = compoundInterest(
+    inputSource["annualRentIncrease"],
+    Math.floor(t / 12),
+    inputSource["monthlyRent"]
+  );
+  let rentInsCompoundInterest = compoundInterest(
+    inputSource["annualRentIncrease"],
+    Math.floor(t / 12),
+    inputSource["rentersInsurance"]
+  );
+
+  let totalMonthlyExpenses =
+    inputSource["associationFee"] +
+    taxIncCompoundInterest +
+    MI +
+    inputSource["repairsCost"] +
+    inputSource["homeInsurance"];
+
+  return {
+    buy: {
+      principal: principal,
+      interest: interest,
+      taxInsEtc: totalMonthlyExpenses,
+      total: interest + principal + totalMonthlyExpenses,
+    },
+    rent: {
+      principal: rentIncCompoundInterest,
+      taxInsEtc: rentInsCompoundInterest,
+      total: rentIncCompoundInterest + rentInsCompoundInterest,
+    },
+  };
+};
+
+const calcAvgPercentChange = (e, a, n) => {
+  let t = 0;
+  return 0 !== e && (t = (Math.pow(1 + (a - e) / e, 1 / n) - 1) * 100), t;
+};
+
+const calculatePercentChange = (e, a) => ((a - e) / e) * 100 || 0;
+
+const appreciationGovernor = (e, a, n) => {
+  let t = 0,
+    r = Math.abs(calculatePercentChange(n, e));
+  return (
+    r > 400
+      ? (t = 0.8)
+      : r > 350
+      ? (t = 0.6)
+      : r > 300
+      ? (t = 0.4)
+      : r > 250 && (t = 0.2),
+    a * (1 - t)
+  );
+};
+
+const compoundInterest = function (e, a) {
+  let n = arguments.length > 2 && arguments[2] ? arguments[2] : 0,
+    t = arguments.length > 3 && arguments[3] ? arguments[3] : 1,
+    r = arguments.length > 4 && arguments[4] ? arguments[4] : 0;
+  if (0 === n) return 0;
+  let o = e / 100;
+  return n * Math.pow(1 + o / t, a * t) + futureValueOfSeries(r, e, a, t);
+};
+
+const futureValueOfSeries = (e, a, n, t) => {
+  let r = t || 1,
+    o = a / 100,
+    l = 0 !== o ? (e * (Math.pow(1 + o / r, n * r) - 1)) / (o / r) : 0;
+  return l;
+};
+
+const getAppr = (a) => {
+  if ("forecast" === inputSource["appCalcType"]) {
+    return foreApprValues[12 * a] || 0; //check here
+  } else {
+    let purchasePrice = inputSource["purValue"];
+    let appreciationRate =
+      inputSource["appCalcType"] === appreciationModeType.CUSTOM
+        ? inputSource["appCalcCustomRate"]
+        : 0; //e.historicalData[0].histAppr ||0; check here
+
+    let governorAppreciationRate = appreciationGovernor(
+      purchasePrice,
+      appreciationRate,
+      inputSource["medianHomePrice"] //check here
+    );
+    let futurePrice = compoundInterest(
+      governorAppreciationRate,
+      a,
+      purchasePrice
+    );
+    let percentChange = calculatePercentChange(purchasePrice, futurePrice);
+
+    return {
+      percentChange,
+      price: futurePrice,
+      month: 12 * a,
+    };
+  }
+};
+
+const calculateTaxDeductionsFromLoan = (e, a, n, t, r) => {
+  let o = n / 100,
+    l = standardDeductionObj[r] * o,
+    i = ("marriedSeparate" === r || "single" === r ? 375e3 : 75e4) * (t / 100),
+    d = ((e > i ? i : e) + (a > 1e4 ? 1e4 : a)) * o;
+  return d > l ? d - l : 0;
+};
+
+const handleCalculateNetGain = (
+  iInputSource,
+  iAmortSchedule,
+  iSelectedYear
+) => {
+  inputSource = iInputSource;
+  amortSchedule = iAmortSchedule;
+  selectedYear = iSelectedYear;
+
+  let e, t;
+
+  function calculateInterestPaid(e) {
+    let t,
+      n,
+      a = amortSchedule[0].Amount,
+      i =
+        (e - 1) * 12 == 0
+          ? inputSource["loanAmt"]
+          : null === (t = amortSchedule[(e - 1) * 12 - 1]) || undefined === t
+          ? undefined
+          : t.balance,
+      l =
+        i -
+        (null === (n = amortSchedule[12 * e - 1]) || undefined === n
+          ? undefined
+          : n.Balance);
+
+    return 12 * a - l;
+  }
+
+  function calculateTaxBenefit(e) {
+    let t = inputSource["stateTaxRate"],
+      a = calculateInterestPaid(e),
+      l = (inputSource["propTax"] / 100) * inputSource["purValue"],
+      o = l * Math.pow(1 + inputSource["propTaxIncrease"] / 100, e - 1),
+      s = inputSource["rate"],
+      d = calculateTaxDeductionsFromLoan(
+        a,
+        o,
+        t,
+        s,
+        inputSource["filingStatus"]
+      );
+
+    return {
+      taxBracketBenefit: t,
+      taxBenefit: d,
+    };
+  }
+
+  let l = selectedYear,
+    o = inputSource["appCalcType"],
+    s = inputSource["purValue"],
+    d = -((inputSource["closingCosts"] + inputSource["upfrontMI"]) * 1),
+    c = inputSource["loanAmt"],
+    h =
+      (null === (e = amortSchedule[12 * l - 1]) || undefined === e
+        ? undefined
+        : e.Balance) || 0,
+    p = inputSource["costToSell"],
+    u = Array.from(
+      {
+        length: 9,
+      },
+      (e, t) => {
+        var n;
+        let l = t + 1;
+        let d = getAppr(l);
+        let c =
+          inputSource["appCalcType"] === mode.FORECAST
+            ? calcAvgPercentChange(s, d.price, l)
+            : inputSource["appCalcType"] === mode.HISTORICAL
+            ? inputSource["averageHistorical"]
+            : inputSource["appCalcCustomRate"];
+        let h = d.price;
+        let u = h - s;
+        let x =
+          (null === (n = amortSchedule[12 * l - 1]) || undefined === n
+            ? undefined
+            : n.Principal) || 0;
+
+        const totalCahFlow = getTotalCashflow(l);
+
+        let { totalCashflowRenting: y, totalCashflowBuying: m } = totalCahFlow;
+
+        let { taxBenefit: g, taxBracketBenefit: f } = calculateTaxBenefit(l);
+        return {
+          year: l,
+          appreciationPercentChange: c,
+          estimatedAppreciationValue: h,
+          appreciationGain: u,
+          amortizationGain: x,
+          costToSell: -(((h * p) / 100) * 1),
+          cashflowDifference: y - m,
+          taxBenefit: g,
+          taxBracketBenefit: f,
+          appreciationType: o,
+          totalCahFlow,
+        };
+      }
+    );
+
+  return {
+    years: l,
+    startingHomeValue: s,
+    initialClosingCosts: d,
+    originalLoanAmount: c,
+    remainingPrincipal: h,
+    realEstateCommission: p,
+    appreciationType: o,
+    yearlyValues:
+      ((t = 0),
+      u.map(
+        (e) => (
+          (t += e.taxBenefit),
+          {
+            ...e,
+            taxBenefit: t,
+            netGain:
+              e.appreciationGain +
+              e.amortizationGain +
+              d +
+              t +
+              e.cashflowDifference +
+              e.costToSell,
+          }
+        )
+      )),
+    standardDeduction: standardDeductionObj[inputSource["filingStatus"]],
+    // loanID: r.id,
+  };
+};
+
+export { handleCalculateNetGain, stateTaxRate };

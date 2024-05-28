@@ -102,7 +102,8 @@ const CalculateLoanPayment = (loanTerm, IntRate, LnAmt, AmortizeType) => {
 const getValueByKey = (array, key) => {
   return array.map((item) => item[key]);
 };
-const formatCurrency = (value, digit = 2) => {
+
+const formatCurrency = (value, digit = 2, isNeedSymbol = true) => {
   value = cleanValue(value);
   let num = parseFloat(
       (value || "").toString().replace("$", "").replace(",", "")
@@ -117,7 +118,7 @@ const formatCurrency = (value, digit = 2) => {
   let val = "$" + ((sign ? "" : "-") + dollars); //+ (cents ? "." + cents : ".00");
   val = val.replaceAll("-", "");
   if (val == "$-0.00") val = "$0.00";
-  return val;
+  return isNeedSymbol ? val : val.replace("$", "");
 };
 function formatPercentage(value, prefix = 4, exp) {
   const floatValue = parseFloat(value || 0);

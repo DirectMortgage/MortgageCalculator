@@ -75,7 +75,39 @@ g.xy {
   display: block;
   text-align: center;
 }
-
+.fa-chevron-right path {
+  color: #fff;
+}
+.btnPrimary {
+  padding: 7px 10px;
+  background-color: #508bc9;
+  border: 2px solid #508bc9;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.btnPrimary:hover {
+  background-color: #3872af !important;
+  border: 2px solid #295b9a !important;
+}
+.secondaryBtn {
+  padding: 7px 10px;
+  background-color: #fff;
+  border: 2px solid #508bc9;
+  border-radius: 6px;
+  color: #508bc9;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-size: 12px;
+  text-align: center;
+}
+.secondaryBtn:hover {
+  background-color: #f9f9f9 !important;
+  border: 2px solid #3872af !important;
+}
 .tableLoanComparisonWrapper .tableDivWrapper {
   width: 45%;
 }
@@ -130,11 +162,7 @@ g.xy {
   padding: 1rem 2.25rem;
   justify-content: center;
   flex-direction: column;
-  background-image: linear-gradient(
-    225.19deg,
-    rgb(17, 58, 63) 0%,
-    rgb(55, 102, 104) 100%
-  );
+  background-image: linear-gradient(225.19deg, #376596 0%, #508bc9 100%);
 }
 .brHeader {
   max-width: 808px;
@@ -172,7 +200,7 @@ g.xy {
   border-radius: 50px;
 }
 .fa-circle-play path {
-  color: #8551dc;
+  color: #508bc9;
 }
 .brResultSection {
   display: flex;
@@ -240,7 +268,8 @@ g.xy {
 .brAddDebt,
 .dropdownButton .dropdown-toggle,
 .dropdownButton .dropdown-toggle:hover,
-.dropdownButton .dropdown-toggle:active {
+.dropdownButton .dropdown-toggle:active,
+.purpleButton {
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
@@ -269,7 +298,7 @@ g.xy {
     box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
     border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
     color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-  background-color: #8551dc !important;
+  background-color: #508bc9 !important;
   font-size: 14px;
   border-radius: 2px;
   box-shadow: none;
@@ -278,7 +307,8 @@ g.xy {
   padding: 14px 16px;
 }
 
-.brResetDebt {
+.brResetDebt,
+.purpleSecButton {
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
@@ -298,7 +328,7 @@ g.xy {
   line-height: 20px;
   letter-spacing: 0.4px;
   text-transform: none;
-  color: rgb(133, 81, 220);
+  color: #508bc9;
   font-weight: 500;
   min-width: 64px;
   transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
@@ -349,5 +379,440 @@ g.xy {
 }
 .fa-link path,
 .download path {
-  color: #8551dc;
+  color: #508bc9;
+}
+
+.bsHeaderTab,
+.bsBodyTab,
+.bsFooterTab {
+  max-width: 479px;
+  margin: 0px auto;
+  padding: 0 13px;
+}
+
+.bsBodyTab {
+  border: 1px solid rgb(193, 208, 206);
+  border-radius: 8px;
+  /* background-color: rgb(244, 248, 248); */
+  padding: 10px 0;
+  margin-top: 25px;
+}
+::placeholder {
+  color: #b2b2b2c0;
+  opacity: 1; /* Firefox */
+}
+.purpleButton path {
+  color: white;
+}
+.purpleButton svg {
+  margin-left: 5px;
+}
+.purpleButton:disabled {
+  background-color: #508bc9a8 !important;
+}
+::-ms-input-placeholder {
+  /* Edge 12-18 */
+  color: #b2b2b2c0;
+}
+.autoCompleteWrapper input {
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  background-color: #00000000;
+  color: rgb(81, 87, 93);
+  width: -webkit-fill-available;
+  padding: 5px;
+  height: 24px;
+  outline: none;
+  font-family: Inter;
+}
+.autoCompleteWrapper input + div {
+  z-index: 2;
+}
+.autoCompleteOptionWrapper {
+  border: 1px solid #b2b2b2c0;
+  margin-top: -25px;
+  border-radius: 6px;
+  overflow: hidden;
+  max-height: 350px;
+  z-index: 2;
+  width: inherit;
+  overflow: auto;
+  position: absolute;
+  font-size: 13px;
+}
+.autoCompleteOptionList {
+  cursor: pointer;
+}
+
+.rbCard {
+  padding: 16px;
+  border: 1px solid rgb(193, 208, 206);
+  border-radius: 4px;
+  background-color: rgb(244, 248, 248);
+  margin-bottom: 30px;
+}
+.rbDarkWord {
+  margin: 0px;
+  font-family: Inter;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  color: rgb(13, 33, 33);
+}
+.rbWord {
+  margin: 0px;
+  font-family: Inter;
+  font-size: 13px;
+  line-height: 24px;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  color: rgb(13, 33, 33);
+}
+.rbDarkValue {
+  text-align: center;
+  font-family: Inter;
+  margin: 0px;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  color: rgb(13, 33, 33);
+}
+#rbRangeSelector .range-slider__thumb[data-lower] {
+  width: 0 !important;
+  background-color: #508bc9;
+  transition: transform 0.3s;
+}
+#rbRangeSelector .range-slider__range {
+  border-radius: 10px;
+  background-color: #508bc9 !important;
+  transition: height 0.3s;
+}
+#rbRangeSelector {
+  height: 12px;
+}
+#rbRangeSelector .range-slider__thumb {
+  background: #508bc9;
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s;
+}
+.sliderContainerWrapper {
+  padding: 50px 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: white;
+  border-bottom: 1px solid #deedeb;
+}
+.sliderContainer {
+  position: relative;
+  width: 70%;
+  margin: auto;
+}
+
+.tooltip {
+  position: absolute;
+  top: -45px;
+  min-width: max-content;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  z-index: 1;
+  font-size: 13px;
+  font-weight: normal;
+  background-color: unset;
+  color: rgb(13, 33, 33);
+  font-family: Inter;
+  font-weight: 100;
+}
+.plotly * {
+  font-family: "Inter";
+  color: #d60000 !important;
+}
+.rbResultTable {
+  display: grid;
+  column-gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "appreciation amortization" "cashflowDifference closingCosts" "taxBenefit costToSell";
+  line-height: 22px;
+}
+.rbResultTable .rbResultRow {
+  justify-content: space-between;
+  display: flex;
+  flex-flow: wrap;
+}
+.rbResultTable > div {
+  padding: 15px 10px 15px 10px;
+  border-bottom: 1px solid #c1d0ce;
+}
+.rbResultTable .rbGreenValue {
+  margin: 0px;
+  font-family: "Inter";
+  font-size: 13px;
+  /* line-height: 28px; */
+  letter-spacing: 0.4px;
+  text-transform: none;
+  font-weight: 400;
+  color: #247c00;
+}
+.rbResultTable .rbRedValue {
+  margin: 0px;
+  font-family: "Inter";
+  font-size: 13px;
+  /* line-height: 28px; */
+  letter-spacing: 0.4px;
+  text-transform: none;
+  font-weight: 400;
+  color: #d60000;
+}
+.rbTotalResultSection b {
+  font-size: 18px;
+}
+.rbTotalResultSection .rbTotalValue {
+  font-size: 28px;
+  color: #0d2121;
+}
+.rbTotalResultSection {
+  border: 1px solid #c1d0ce;
+  border-radius: 4px;
+  padding: 1.5rem 1rem;
+  min-height: unset;
+  min-width: unset;
+  justify-content: unset;
+  margin-top: 20px;
+  line-height: 40px;
+}
+.rbDifferenceTable tbody td p {
+  font-size: 14px;
+  font-weight: unset;
+  letter-spacing: 1px;
+}
+
+.rbDifferenceTable * {
+  color: #1b2e2f;
+  font-family: "Inter";
+}
+.rbDifferenceTable tbody td div {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  font-size: 14px;
+}
+.rbDifferenceTable tbody td {
+  font-size: 14px;
+}
+.rbDifferenceTable thead th,
+.rbDifferenceTable tbody td {
+  padding: 3px 10px;
+  border-bottom: 1px solid #deedeb;
+  text-align: start;
+}
+.rbDifferenceTable tbody tr:last-child td {
+  border: none;
+  border-top: 2px solid #0d2121;
+  font-weight: bold;
+
+  padding: 5px 10px;
+}
+.rbDifferenceTable tbody tr:last-child td p {
+  font-size: 16px;
+}
+.rbDifferenceTable thead th div:first-child {
+  font-size: 12px;
+  float: inline-end;
+}
+.rbDifferenceTable thead th div:last-child {
+  font-weight: bold;
+  font-size: 15px;
+  float: inline-end;
+}
+path.xdivider.crisp {
+  display: none !important;
+}
+
+.toolTipTable {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.2), 0 3px 0px 0 rgba(0, 0, 0, 0.19);
+  padding: 15px 30px;
+  font-size: 13px;
+}
+.toolTipTable * {
+  color: black;
+}
+.toolTipTable tr td:first-child {
+  box-sizing: border-box;
+  width: 200px;
+  padding: 3px 0;
+  line-height: 1.3;
+  text-align: left;
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+}
+.toolTipTable tr td:last-child {
+  text-align: right;
+}
+.toolTipTable tr:last-child td {
+  border-top: 1px solid #deedeb;
+}
+.floatingScreen {
+  width: 35%;
+  min-width: 700px;
+  height: 100%;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  padding: 20px 0 20px 20px;
+  top: 0;
+  position: absolute;
+  right: 0;
+}
+
+.floatingScreenWrapper.visible {
+  height: 100%;
+  z-index: 2;
+  right: 0;
+}
+.floatingScreenWrapper {
+  position: fixed;
+  right: -200%;
+  top: 0;
+  width: 100%;
+  min-width: 100%;
+  transition: right 0.5s ease-in-out;
+}
+.floatingScreenSpace {
+  width: 65%;
+  max-width: calc(100% - 720px);
+  background-color: #0000006e;
+  min-height: 100%;
+  cursor: pointer;
+}
+.appCalcType label {
+  display: flex;
+  line-height: 30px;
+  cursor: pointer;
+}
+.appCalcType {
+  margin-bottom: 20px;
+}
+.buyRentChart .hoverlayer {
+  display: none !important;
+}
+.rbResultBodyWrapper {
+  display: flex;
+  flex-direction: row;
+  padding: 15px;
+}
+.rbResultBodyWrapper > div:first-child {
+  width: 25%;
+}
+.rbResultBodyWrapperMobile {
+  display: flex;
+  flex-direction: column;
+
+  padding: 15px;
+}
+.rbResultBodyWrapperMobile > div:first-child {
+  width: 100%;
+}
+.rbBodyContainer {
+  width: 75%;
+  margin: 15px;
+  border: 1px solid #c1d0ce;
+  border-radius: 4px;
+  padding: 15px;
+}
+.rbBodyContainerMobile {
+  width: 100%;
+}
+.rbDifferenceTable {
+  overflow: auto;
+}
+.rbDifferenceTable th:first-child,
+.rbDifferenceTable td:first-child {
+  position: sticky;
+  left: -1px;
+  z-index: 1;
+  background-color: #ffffff;
+}
+.indicator {
+  min-width: 12px;
+  max-height: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 5px;
+}
+.amortSchedule,
+.popUpTable,
+.rbDifferenceTable table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.amortSchedule th,
+.amortSchedule td {
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  font-weight: 400;
+  display: table-cell;
+  vertical-align: inherit;
+  border-bottom: 1px solid rgb(224, 224, 224);
+  text-align: left;
+  padding: 10px 13px;
+  color: rgb(13, 33, 33);
+}
+.amortSchedule th {
+  border-top: 1px solid rgb(224, 224, 224);
+  font-weight: bold;
+}
+.amortSchedule thead {
+  position: sticky;
+  top: -15px;
+  background-color: #fff;
+}
+.popUpTable {
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  margin-bottom: 30px;
+  margin-top: -20px;
+}
+.popUpTable td {
+  border-top: 1px solid #e0e0e0;
+  cursor: pointer;
+}
+.popUpTable td,
+.popUpTable th {
+  padding: 10px;
+  font-size: 13px;
+  text-align: left;
+}
+.inputBoxControl {
+  position: absolute;
+  right: 15px;
+  font-size: 14px;
+  border: 1px solid black;
+  height: 30px;
+  align-content: center;
+}
+.inputBoxControl span {
+  font-family: "Inter";
+  padding: 8px;
+  cursor: pointer;
+}
+.inputBoxControl span.active {
+  background-color: black;
+  padding: 7px;
+  color: #fff;
 }

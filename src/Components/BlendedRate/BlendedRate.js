@@ -203,7 +203,7 @@ const BlendedRate = (props) => {
             <div>
               <button
                 type="button"
-                className="brAddDebt"
+                className="btnPrimary"
                 style={{ float: "right", marginRight: 10 }}
                 onClick={() => {
                   handleModalClose();
@@ -449,7 +449,7 @@ const BlendedRate = (props) => {
         <div className={isMobile ? "" : "brFooterWrapper"}>
           <button
             type="button"
-            className="brAddDebt"
+            className="btnPrimary"
             style={{ float: "right" }}
             onClick={() => {
               setItemList((prevItemList) => {
@@ -467,7 +467,7 @@ const BlendedRate = (props) => {
           </button>
           <button
             type="button"
-            className="brAddDebt"
+            className="btnPrimary"
             style={{ float: "right", marginRight: 10 }}
             onClick={() => {
               handleDownloadPdf();
@@ -478,8 +478,8 @@ const BlendedRate = (props) => {
 
           <button
             type="button"
-            className="brResetDebt"
-            style={{ float: "right" }}
+            className="secondaryBtn"
+            style={{ float: "right", marginRight: 10 }}
             onClick={() => {
               setModalDetails(() => {
                 return {
@@ -528,7 +528,7 @@ const BlendedRate = (props) => {
                       </button>
                       <button
                         type="button"
-                        className="brAddDebt"
+                        className="btnPrimary"
                         style={{ float: "right", marginRight: 10 }}
                         onClick={() => {
                           setItemList([...debtList]);

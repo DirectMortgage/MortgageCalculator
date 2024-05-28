@@ -1,0 +1,157 @@
+[
+    {
+      price: 45000,
+      percentChange: 0,
+      year: 0,
+    },
+    {
+      price: 46896,
+      percentChange: 4.213425636291504,
+      year: 1,
+    },
+    {
+      price: 48872,
+      percentChange: 8.604380828508583,
+      year: 2,
+    },
+    {
+      price: 50931,
+      percentChange: 13.180345652472623,
+      year: 3,
+    },
+    {
+      price: 53077,
+      percentChange: 17.949115351437246,
+      year: 4,
+    },
+    {
+      price: 55313,
+      percentChange: 22.918813615433738,
+      year: 5,
+    },
+    {
+      price: 57644,
+      percentChange: 28.097906420131803,
+      year: 6,
+    },
+    {
+      price: 60073,
+      percentChange: 33.49521644879032,
+      year: 7,
+    },
+    {
+      price: 62604,
+      percentChange: 39.11993812186648,
+      year: 8,
+    },
+    {
+      price: 65242,
+      percentChange: 44.98165325988608,
+      year: 9,
+    },
+    {
+      price: 67991,
+      percentChange: 51.090347406257386,
+      year: 10,
+    },
+    {
+      price: 70855,
+      percentChange: 57.45642683783452,
+      year: 11,
+    },
+    {
+      price: 73841,
+      percentChange: 64.0907362922084,
+      year: 12,
+    },
+    {
+      price: 76952,
+      percentChange: 71.00457744192381,
+      year: 13,
+    },
+    {
+      price: 80194,
+      percentChange: 78.20972814709378,
+      year: 14,
+    },
+    {
+      price: 83573,
+      percentChange: 85.7184625192088,
+      year: 15,
+    },
+    {
+      price: 87095,
+      percentChange: 93.54357183031958,
+      year: 16,
+    },
+    {
+      price: 90764,
+      percentChange: 101.6983863032125,
+      year: 17,
+    },
+    {
+      price: 94589,
+      percentChange: 110.19679781969833,
+      year: 18,
+    },
+    {
+      price: 98574,
+      percentChange: 119.05328358569732,
+      year: 19,
+    },
+    {
+      price: 102727,
+      percentChange: 128.2829307934354,
+      year: 20,
+    },
+    {
+      price: 107056,
+      percentChange: 137.9014623227636,
+      year: 21,
+    },
+    {
+      price: 111566,
+      percentChange: 147.9252635253833,
+      year: 22,
+    },
+    {
+      price: 116267,
+      percentChange: 158.37141013760504,
+      year: 23,
+    },
+    {
+      price: 121166,
+      percentChange: 169.25769736919077,
+      year: 24,
+    },
+    {
+      price: 126271,
+      percentChange: 180.60267021783244,
+      year: 25,
+    },
+    {
+      price: 131592,
+      percentChange: 192.42565506090907,
+      year: 26,
+    },
+    {
+      price: 137136,
+      percentChange: 204.74679257833878,
+      year: 27,
+    },
+    {
+      price: 142914,
+      percentChange: 217.58707206261062,
+      year: 28,
+    },
+    {
+      price: 148936,
+      percentChange: 230.9683671744442,
+      year: 29,
+    },
+    {
+      price: 155211,
+      percentChange: 244.9134732049876,
+      year: 30,
+    },
+  ]

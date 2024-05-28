@@ -619,7 +619,7 @@ const ARMvsFixed = (props) => {
 
     styleElement.innerHTML = `
     *{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif}
-    @media screen and (max-width: ${parseInt(w)}) {
+    @media screen and (max-width: ${parseInt(w)}px) {
       .tableRow td {
         font-size: 14px;
       }
@@ -721,9 +721,11 @@ const ARMvsFixed = (props) => {
   };
 
   const handleGetAmortizationSchedule = async (amortizeType, getAPR) => {
-    let //  armGrossMargin = 2,
-      //   armLifeCap = 5,
-      //   armIndexValue = 0, //check this value
+    let armGrossMargin = 2,
+      armLifeCap = 0.5,
+      armIndexValue = 0, //check this value
+      armRateInitialAdj = 12,
+      armRateSubAdj = 12,
       ratesArray = [];
 
     try {
@@ -816,30 +818,31 @@ const ARMvsFixed = (props) => {
       // ARM loans block
       else {
         //do this later
-        // let newRate = 0;
-        // armLifeCap = armLifeCap + rate;
+        let newRate = parseFloat(armRate);
+        armLifeCap = armLifeCap + rate;
         ratesArray.push({
           startTerm: 1,
           endTerm: armTerm * 12,
           totalTerm: loanTerm,
-          noteRate: parseFloat(armRate),
+          noteRate: newRate,
         });
 
         armAdjustmentYears.forEach((year) => {
-          // newRate = updateARMRate(
-          //   armRate,
-          //   0,
-          //   armGrossMargin,
-          //   armIndexValue,
-          //   armLifeCap
-          // );
+          newRate = updateARMRate(
+            newRate,
+            0,
+            armGrossMargin,
+            armIndexValue,
+            armLifeCap
+          );
           ratesArray.push({
             startTerm: (year - 1) * 12 + 1,
             endTerm: year * 12,
             totalTerm: loanTerm,
             noteRate:
+              newRate ||
               ratesArray[ratesArray.length - 1]["noteRate"] +
-              parseFloat(inputDetails[`Year(${year})`] / 100),
+                parseFloat(inputDetails[`Year(${year})`] / 100),
           });
         });
         ratesArray.push({
@@ -1556,7 +1559,7 @@ const ARMvsFixed = (props) => {
         name: "Fixed",
         hoverinfo: "y",
         marker: {
-          color: "#053d5d",
+          color: "#a6cbf2",
         },
         width: 0.2,
       },
@@ -1567,7 +1570,7 @@ const ARMvsFixed = (props) => {
         name: "ARM",
         hoverinfo: "y",
         marker: {
-          color: "#84329b",
+          color: "#508bc9",
         },
         width: 0.2,
       },
@@ -1661,22 +1664,7 @@ const ARMvsFixed = (props) => {
           >
             ARM vs Fixed Calculator
           </div>
-          <p
-            style={{
-              margin: "auto 20px",
-              fontSize: 16,
-              fontFamily: '"Libre Franklin", Arial, sans-serif',
-              fontWeight: 300,
-            }}
-          >
-            95% of borrowers take out a Fixed Rate Mortgage, even though it may
-            not be the best option for them. Most borrowers stay in their home
-            on average 10 years and keep the same mortgage for only 7 years.
-            It’s not our job to steer a customer into a certain product, but it
-            is our job to present the options. By sharing this calculator with
-            your clients, you will become a trusted resource and show that you
-            are a lot smarter than your competition.
-          </p>
+
           <div
             className="container"
             style={{ width: isMobile ? "80%" : "450px" }}
@@ -1958,17 +1946,17 @@ const ARMvsFixed = (props) => {
               }}
             >
               <Button
-                style={{ backgroundColor: "#34495e" }}
                 title="Start Over"
                 onClick={() => handleFillResetValues()}
+                className="btnPrimary"
               />
               <Button
-                style={{ backgroundColor: "#179b55" }}
+                className="secondaryBtn"
                 title="Calculate and Compare"
                 onClick={handleCalculate}
               />
               <Button
-                style={{ backgroundColor: "#e5a31f" }}
+                className="btnPrimary"
                 title="Run a Demo"
                 onClick={() => handleFillResetValues(true)}
               />
