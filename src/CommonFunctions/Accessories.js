@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Autocomplete from "react-autocomplete";
+import { formatCurrency } from "./GeneralCalculations";
+import { cleanValue } from "./CalcLibrary";
 
 const styles = {
   inputBoxLabel: {
@@ -133,7 +135,15 @@ const InputBox = (props) => {
     symbolPosition = "left",
     inputBoxStyle = {},
     inputBoxLabel = {},
+    format = null,
   } = props;
+
+  const [iValue, setIValue] = useState(value || "");
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    setIValue(value);
+  }, [value]);
 
   return (
     <div
@@ -154,20 +164,28 @@ const InputBox = (props) => {
       </span>
       {symbolPosition == "left" && symbol}
       <input
+        type={type}
         disabled={disabled}
-        onChange={(text) => {
-          if (["number", "float"].includes(type)) {
-            let { value } = text.target;
-            value = value.replace(/[^0-9.]/g, "");
-            if (type === "float") {
-              const decimalCount = (value.match(/\./g) || []).length;
-              if (decimalCount > 1) value = value.slice(0, -1);
-            }
-            text.target.value = value;
+        onChange={(event) => {
+          let { value: text } = event.target;
+          if (format == "Currency") {
+            text = text
+              .replace(/[^\d.]/g, "")
+              .split(".")
+              .slice(0, 2)
+              .join(".");
+          } else if (["numeric"].includes(format)) {
+            text = text.replace(/\D/g, "");
           }
-          onChangeText(text);
+
+          setIValue(text);
+          onChangeText(event);
         }}
-        value={value || ""}
+        value={
+          format === "Currency" && !isFocused
+            ? formatCurrency(iValue || "")
+            : iValue || ""
+        }
         placeholder={placeholder || ""}
         style={{
           ...styles.inputBox,
@@ -183,8 +201,27 @@ const InputBox = (props) => {
             : {}),
           ...inputBoxStyle,
         }}
-        onBlur={onBlur}
-        onFocus={onFocus}
+        onBlur={(e) => {
+          let { value: text } = e.target;
+          if (format == "Currency") {
+            text = formatCurrency(text);
+          }
+          setIValue(text);
+          setIsFocused(false);
+          onBlur(e);
+        }}
+        onFocus={(e) => {
+          let { value: text } = e.target;
+          if (format == "Currency") {
+            text =
+              cleanValue(text) == 0
+                ? ""
+                : text?.toString()?.replaceAll("$", "").replaceAll(",", "");
+          }
+          setIValue(text);
+          setIsFocused(true);
+          onFocus(e);
+        }}
       />
       {symbolPosition == "right" && symbol}
     </div>

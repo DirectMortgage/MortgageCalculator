@@ -407,8 +407,9 @@ g.xy {
 .purpleButton svg {
   margin-left: 5px;
 }
-.purpleButton:disabled {
-  background-color: #508bc9a8 !important;
+.btnPrimary:disabled {
+  background-color: #508bc9bf !important;
+  border-color: #508bc9bf !important;
 }
 ::-ms-input-placeholder {
   /* Edge 12-18 */

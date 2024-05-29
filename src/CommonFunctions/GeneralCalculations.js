@@ -103,22 +103,23 @@ const getValueByKey = (array, key) => {
   return array.map((item) => item[key]);
 };
 
-const formatCurrency = (value, digit = 2, isNeedSymbol = true) => {
-  value = cleanValue(value);
+const formatCurrency = (value) => {
   let num = parseFloat(
       (value || "").toString().replace("$", "").replace(",", "")
-    ),
-    numParts = num?.toFixed(digit).split("."),
+    )
+      ?.toFixed(2)
+      .toString(),
+    numParts = num.split("."),
     dollars = numParts[0],
     cents = numParts[1] || "",
     sign = num == (num = Math.abs(num));
   dollars = dollars.replace(/\$|\,/g, "");
   if (isNaN(dollars)) dollars = "0";
   dollars = dollars.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  let val = "$" + ((sign ? "" : "-") + dollars); //+ (cents ? "." + cents : ".00");
-  val = val.replaceAll("-", "");
+  let val = "$" + ((sign ? "" : "-") + dollars + (cents ? "." + cents : ".00"));
+  val = val.replaceAll("--", "-");
   if (val == "$-0.00") val = "$0.00";
-  return isNeedSymbol ? val : val.replace("$", "");
+  return val;
 };
 function formatPercentage(value, prefix = 4, exp) {
   const floatValue = parseFloat(value || 0);

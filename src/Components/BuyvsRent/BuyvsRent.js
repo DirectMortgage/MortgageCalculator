@@ -678,7 +678,7 @@ const NetGainBarChart = ({ year, netGainValue = [] }) => {
             ? iYear === year
               ? "#508bc9"
               : "#79aade"
-            : "red"
+            : "#d60000"
         ),
       },
     },
@@ -886,7 +886,7 @@ const AmortSchedule = ({ amortSchedule }) => {
                 <button
                   key={index}
                   className={`${
-                    activeTab === index ? "btnPrimary" : "purpleSecButton"
+                    activeTab === index ? "purpleButton" : "purpleSecButton"
                   }`}
                   style={{
                     textDecoration: "none",
@@ -1096,7 +1096,8 @@ const BuyRentDifferenceBarChart = ({
         data={data}
         layout={layout}
         config={config}
-        onHover={handleHover}
+        onHover={!isMobile ? handleHover : () => {}}
+        onClick={isMobile ? handleHover : () => {}}
         onUnhover={() => {
           setTooltipTableDetails({
             x: 0,
@@ -1433,7 +1434,7 @@ const BuyRent = () => {
       miAmt: 24,
       averageHistorical: 4.213,
       upfrontMI: 0,
-      purValue: "",
+      purValue: 0,
       closingCosts: 1200,
       armRateInitialAdj: 12,
       prepaidEscrows: "0",
@@ -1892,25 +1893,14 @@ const BuyRent = () => {
                     type="text"
                     inputBoxStyle={{ fontFamily: "Inter" }}
                     validate={false}
+                    format="Currency"
                     label="Purchase Value"
                     placeholder="Purchase Value"
                     onChangeText={({ target }) => {
                       const { value } = target;
                       handleInputSource({ value, name: "purValue" });
                     }}
-                    value={inputSource["purValue"]}
-                    symbol={
-                      <span
-                        style={{
-                          position: "absolute",
-                          left: 15,
-                          fontFamily: "inter",
-                          fontSize: 14,
-                        }}
-                      >
-                        $
-                      </span>
-                    }
+                    value={inputSource["purValue"] || "$0.00"}
                   />
                 ) : activeTab === 1 ? (
                   <>
@@ -1919,29 +1909,14 @@ const BuyRent = () => {
                       style={{ marginBottom: 35 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
+                      format="Currency"
                       label="Desired Monthly Payment"
                       placeholder="Desired Monthly Payment"
                       onChangeText={({ target }) => {
                         const { value } = target;
                         handleInputSource({ value, name: "desMonthlyPayment" });
                       }}
-                      value={formatCurrency(
-                        inputSource["desMonthlyPayment"] || 0,
-                        0,
-                        false
-                      )}
-                      symbol={
-                        <span
-                          style={{
-                            position: "absolute",
-                            left: 15,
-                            fontFamily: "inter",
-                            fontSize: 14,
-                          }}
-                        >
-                          $
-                        </span>
-                      }
+                      value={inputSource["desMonthlyPayment"] || 0}
                     />
                     <InputBox
                       type="text"
@@ -1973,18 +1948,7 @@ const BuyRent = () => {
                 ) : activeTab === 2 ? (
                   <>
                     <InputBox
-                      symbol={
-                        <span
-                          style={{
-                            position: "absolute",
-                            left: 15,
-                            fontFamily: "inter",
-                            fontSize: 14,
-                          }}
-                        >
-                          $
-                        </span>
-                      }
+                      format="Currency"
                       type="text"
                       style={{ marginBottom: 35 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
@@ -1995,11 +1959,7 @@ const BuyRent = () => {
                         const { value } = target;
                         handleInputSource({ value, name: "monthlyAllowance" });
                       }}
-                      value={formatCurrency(
-                        inputSource["monthlyAllowance"] || 0,
-                        0,
-                        false
-                      )}
+                      value={inputSource["monthlyAllowance"] || 0}
                     />
                   </>
                 ) : (
@@ -2080,7 +2040,7 @@ const BuyRent = () => {
                 className="btnPrimary"
                 style={{ padding: "10px 15px" }}
                 type="button"
-                // disabled={true}
+                disabled={cleanValue(inputSource["purValue"]) === 0}
                 onClick={() => {
                   try {
                     let iInputSource = inputSource,
@@ -2161,7 +2121,7 @@ const BuyRent = () => {
                 <Card title="Property">
                   <div>
                     <span className="rbDarkWord">
-                      {formatCurrency(inputSource["purValue"])}
+                      {inputSource["purValue"]}
                     </span>
                   </div>
                   <button
@@ -2182,7 +2142,9 @@ const BuyRent = () => {
                 {/* Renting Info*/}
                 <Card title="Renting">
                   <div>
-                    <span className="rbDarkWord">{formatCurrency(2000)}</span>
+                    <span className="rbDarkWord">
+                      {formatCurrency(inputSource["monthlyRent"])}
+                    </span>
                   </div>
                   <button
                     className="purpleSecButton"
@@ -2679,7 +2641,7 @@ const BuyRent = () => {
                   style={{
                     overflow: "auto",
                     maxHeight: "80vh",
-                    padding: "15px 30px",
+                    padding: isMobile ? "15px" : "15px 5px",
                   }}
                 >
                   {editScreen === "Client" ? (
@@ -2851,18 +2813,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -2883,7 +2834,8 @@ const BuyRent = () => {
                         }}
                       >
                         <div style={{ display: "flex" }}>
-                          County est. tax: <b>${inputSource["estPropTax"]}</b>
+                          County est. tax:{" "}
+                          <b>${(inputSource["estPropTax"] || "").toFixed(2)}</b>
                           <button
                             className="purpleSecButton"
                             type="button"
@@ -2910,7 +2862,7 @@ const BuyRent = () => {
                           </button>
                         </div>
                         <div>
-                          Est. tax: <b>${tempInputSource["propTax"]}</b>
+                          Est. tax: <b>${inputSource["propTax"]}</b>
                         </div>
                       </div>
                       <InputBox
@@ -2981,18 +2933,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3009,18 +2950,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3039,18 +2969,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3218,18 +3137,7 @@ const BuyRent = () => {
                     <>
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3243,18 +3151,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3320,18 +3217,7 @@ const BuyRent = () => {
                     <>
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3640,18 +3526,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         style={{ marginBottom: 35 }}
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Monthly Mortgage Insurance (MI)"
@@ -3670,18 +3545,7 @@ const BuyRent = () => {
                           <InputBox
                             type="text"
                             style={{ marginBottom: 35 }}
-                            symbol={
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  left: 15,
-                                  fontFamily: "inter",
-                                  fontSize: 14,
-                                }}
-                              >
-                                $
-                              </span>
-                            }
+                            format="Currency"
                             inputBoxStyle={{ fontFamily: "Inter" }}
                             validate={false}
                             label="Upfront MIP"
@@ -3700,18 +3564,7 @@ const BuyRent = () => {
                         <InputBox
                           type="text"
                           style={{ marginBottom: 35 }}
-                          symbol={
-                            <span
-                              style={{
-                                position: "absolute",
-                                left: 15,
-                                fontFamily: "inter",
-                                fontSize: 14,
-                              }}
-                            >
-                              $
-                            </span>
-                          }
+                          format="Currency"
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
                           label="Guarantee Fee"
@@ -3729,18 +3582,7 @@ const BuyRent = () => {
                         <InputBox
                           type="text"
                           style={{ marginBottom: 35 }}
-                          symbol={
-                            <span
-                              style={{
-                                position: "absolute",
-                                left: 15,
-                                fontFamily: "inter",
-                                fontSize: 14,
-                              }}
-                            >
-                              $
-                            </span>
-                          }
+                          format="Currency"
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
                           label="Funding Fee"
@@ -3760,18 +3602,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         style={{ marginBottom: 35 }}
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Closing Costs"
@@ -3788,18 +3619,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         style={{ marginBottom: 35 }}
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Credits"
@@ -3816,18 +3636,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         style={{ marginBottom: 35 }}
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              left: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            $
-                          </span>
-                        }
+                        format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Prepaid & Escrows"
