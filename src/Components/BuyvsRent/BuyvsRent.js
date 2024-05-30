@@ -650,6 +650,43 @@ const headerTabs = [
     { Id: 52, StateCode: "WY", RETaxRate: 0.0061 },
   ];
 
+const inputDetails = {
+  clientName: "",
+  desMonthlyPayment: 3000,
+  ltvRatio: 90,
+  rate: 6.25,
+  term: 30,
+  monthlyAllowance: 3000,
+  stateTaxRate: 22,
+  filingStatus: "marriedJoint",
+  propTax: 324,
+  homeInsurance: 13,
+  associationFee: 0,
+  repairsCost: 19,
+  propTaxIncrease: 2,
+  costToSell: 6,
+  appCalcCustomRate: 4,
+  monthlyRent: 2000,
+  rentersInsurance: 30,
+  annualRentIncrease: 4.5,
+  appCalcType: "custom",
+  loanAmt: "",
+  loanType: 3,
+  amortizeType: 1,
+  loanTypeText: "Conventional",
+  amortizeTypeText: "Fixed",
+  point: "0",
+  miAmt: 24,
+  averageHistorical: 4.213,
+  upfrontMI: 0,
+  purValue: 0,
+  closingCosts: 1200,
+  armRateInitialAdj: 12,
+  prepaidEscrows: "0",
+  apr: 0,
+  credits: "0",
+};
+
 const Card = ({ title = "", children }) => {
   return (
     <div>
@@ -1370,25 +1407,24 @@ const TaxRateTableRow = ({
 );
 
 const BuyRent = () => {
-  const [year, setYear] = useState(5);
-  const handleChange = (newValues) => {
-    setYear(newValues[1]);
-  };
-  const [editScreen, setEditScreen] = useState(null);
-  const [propTaxView, setPropTaxView] = useState("$");
-  const [focusElement, setFocusElement] = useState({ target: null, top: 0 });
-  const handleEditMode = (screenName) => {
-    setEditScreen(screenName);
+  const [year, setYear] = useState(5),
+    handleChange = (newValues) => {
+      setYear(newValues[1]);
+    },
+    [editScreen, setEditScreen] = useState(null),
+    [focusElement, setFocusElement] = useState({ target: null, top: 0 }),
+    handleEditMode = (screenName) => {
+      setEditScreen(screenName);
 
-    document.querySelector("body").style.overflow = screenName
-      ? "hidden"
-      : "auto";
+      document.querySelector("body").style.overflow = screenName
+        ? "hidden"
+        : "auto";
 
-    document.querySelector("body").style.paddingRight = screenName
-      ? getScrollbarWidth() + "px"
-      : 0;
-  };
-  function getScrollbarWidth() {
+      document.querySelector("body").style.paddingRight = screenName
+        ? getScrollbarWidth() + "px"
+        : 0;
+    };
+  const getScrollbarWidth = () => {
     const scrollDiv = document.createElement("div");
     scrollDiv.style.width = "100px";
     scrollDiv.style.height = "100px";
@@ -1402,81 +1438,11 @@ const BuyRent = () => {
     document.body.removeChild(scrollDiv);
 
     return scrollbarWidth;
-  }
+  };
 
   const [activeTab, setActiveTab] = useState(0),
-    [inputSource, setInputSource] = useState({
-      clientName: "",
-      desMonthlyPayment: 3000,
-      ltvRatio: 90,
-      rate: 6.25,
-      term: 30,
-      monthlyAllowance: 3000,
-      stateTaxRate: 22,
-      filingStatus: "marriedJoint",
-      propTax: 324,
-      homeInsurance: 13,
-      associationFee: 0,
-      repairsCost: 19,
-      propTaxIncrease: 2,
-      costToSell: 6,
-      appCalcCustomRate: 4,
-      monthlyRent: 2000,
-      rentersInsurance: 30,
-      annualRentIncrease: 4.5,
-      appCalcType: "custom",
-      loanAmt: "",
-      loanType: 3,
-      amortizeType: 1,
-      loanTypeText: "Conventional",
-      amortizeTypeText: "Fixed",
-      point: "0",
-      miAmt: 24,
-      averageHistorical: 4.213,
-      upfrontMI: 0,
-      purValue: 0,
-      closingCosts: 1200,
-      armRateInitialAdj: 12,
-      prepaidEscrows: "0",
-      apr: 0,
-      credits: "0",
-    }),
-    [tempInputSource, setTempInputSource] = useState({
-      clientName: "",
-      desMonthlyPayment: 3000,
-      ltvRatio: 90,
-      rate: 6.25,
-      purValue: "",
-      armRateInitialAdj: 12,
-      term: 30,
-      monthlyAllowance: 3000,
-      stateTaxRate: 22,
-      filingStatus: "marriedJoint",
-      propTax: 324,
-      homeInsurance: 13,
-      associationFee: 0,
-      repairsCost: 19,
-      propTaxIncrease: 2,
-      costToSell: 6,
-      appCalcCustomRate: 4,
-      monthlyRent: 2000,
-      rentersInsurance: 30,
-      annualRentIncrease: 4.5,
-      appCalcType: "custom",
-      loanAmt: "",
-      loanType: 3,
-      amortizeType: 1,
-      loanTypeText: "Conventional",
-      amortizeTypeText: "Fixed",
-      point: "0",
-      miAmt: 24,
-      closingCosts: 1200,
-      credits: "0",
-      prepaidEscrows: "0",
-      apr: 0,
-      averageHistorical: 4.213,
-      upfrontMI: 0,
-    }),
+    [inputSource, setInputSource] = useState({ ...inputDetails }),
+    [tempInputSource, setTempInputSource] = useState({ ...inputDetails }),
     [netGainDetails, setNetGainDetails] = useState([]),
     [amortSchedule, setAmortSchedule] = useState([]),
     [outPutDetails, setOutPutDetails] = useState({}),
@@ -1590,7 +1556,7 @@ const BuyRent = () => {
 
       iTempInputSource["estPropTaxPercent"] = estPropTaxPercent;
       iTempInputSource["estPropTaxPercentStatic"] = estPropTaxPercent;
-      iTempInputSource["locationText"] = location.reverse().join(", ");
+      iTempInputSource["locationText"] = location.join(", ");
 
       setTempInputSource((prevTempInputSource) => {
         return { ...prevTempInputSource, ...iTempInputSource };
@@ -1682,7 +1648,7 @@ const BuyRent = () => {
       });
       //=============== 2nd - End ===============
     }
-    console.log({ ratesArray });
+
     const cashFlow = calculateCashFlows(
       cleanValue(purValue),
       loanTerm,
@@ -1701,14 +1667,14 @@ const BuyRent = () => {
     zeroFlow = 0 - loanAmt;
 
     if (zeroFlow >= 0) {
-      throw new Error("Invalid zeroFlow");
+      console.error("Invalid zeroFlow");
     }
 
     const { oddFactor } = calculateOddFactor(
       new Date(disbursementDates),
       firstPaymentDate
     );
-    const aprParams = {
+    let aprParams = {
       cashFlow,
       loanType,
       purchasePrice: cleanValue(purValue),
@@ -1728,6 +1694,9 @@ const BuyRent = () => {
       oddFactor,
       noteRate,
     };
+    if (activeTab === 1) {
+      aprParams["ltvRatio"] = inputSource["ltvRatio"];
+    }
     const ARP = await handleCalculateARP(aprParams);
 
     console.log("ARP ===> ", { ARP });
@@ -1763,6 +1732,38 @@ const BuyRent = () => {
       };
     });
     return iDownPaymentDetails;
+  };
+
+  const handleValidateFields = () => {
+    let isValid = false,
+      iIsValid = false;
+    const { clientName, location } = inputSource;
+
+    if (clientName && location) {
+      isValid = true;
+    }
+    if (activeTab === 0) {
+      const { purValue } = inputSource;
+      if (Number(purValue)) {
+        iIsValid = true;
+      }
+    } else if (activeTab === 1) {
+      const { desMonthlyPayment, ltvRatio, rate, term } = inputSource;
+      if (
+        Number(desMonthlyPayment) &&
+        Number(ltvRatio) &&
+        Number(rate) &&
+        Number(term)
+      ) {
+        iIsValid = true;
+      }
+    } else if (activeTab === 2) {
+      const { monthlyAllowance, rate, term } = inputSource;
+      if (Number(monthlyAllowance) && Number(rate) && Number(term)) {
+        iIsValid = true;
+      }
+    }
+    return !(isValid && iIsValid);
   };
 
   return (
@@ -1891,6 +1892,7 @@ const BuyRent = () => {
                   <InputBox
                     style={{ marginBottom: 35 }}
                     type="text"
+                    inputMode="numeric"
                     inputBoxStyle={{ fontFamily: "Inter" }}
                     validate={false}
                     format="Currency"
@@ -1925,6 +1927,7 @@ const BuyRent = () => {
                       validate={false}
                       label="LTV Ratio"
                       placeholder="LTV Ratio"
+                      format="percentage"
                       onChangeText={({ target }) => {
                         const { value } = target;
                         handleInputSource({ value, name: "ltvRatio" });
@@ -1975,6 +1978,7 @@ const BuyRent = () => {
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       label="Rate"
+                      format="percentage"
                       placeholder="Rate"
                       onChangeText={({ target }) => {
                         const { value } = target;
@@ -2000,6 +2004,7 @@ const BuyRent = () => {
                       style={{ marginBottom: 35 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
+                      format="percentage"
                       label="Term"
                       placeholder="Term"
                       onChangeText={({ target }) => {
@@ -2040,7 +2045,7 @@ const BuyRent = () => {
                 className="btnPrimary"
                 style={{ padding: "10px 15px" }}
                 type="button"
-                disabled={cleanValue(inputSource["purValue"]) === 0}
+                disabled={handleValidateFields()}
                 onClick={() => {
                   try {
                     let iInputSource = inputSource,
@@ -2064,9 +2069,7 @@ const BuyRent = () => {
                     iInputSource["estPropTaxPercent"] = estPropTaxPercent;
                     iInputSource["estPropTaxPercentStatic"] = estPropTaxPercent;
                     iInputSource["loanAmt"] = iDownPaymentDetails[2]["loanAmt"];
-                    iInputSource["locationText"] = location
-                      .reverse()
-                      .join(", ");
+                    iInputSource["locationText"] = location.join(", ");
 
                     setTempInputSource((prevTempInputSource) => {
                       return { ...prevTempInputSource, ...iInputSource };
@@ -2089,13 +2092,26 @@ const BuyRent = () => {
           </>
         ) : (
           <>
+            <div style={{ padding: "0 15px" }}>
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={() => {
+                  setCurrentScreen("inputBlock");
+                  setInputSource({ ...inputDetails });
+                  setTempInputSource({ ...inputDetails });
+                  setActiveTab(0);
+                }}
+              >
+                Create New
+              </button>
+            </div>
             <div
               className={
                 isMobile ? "rbResultBodyWrapperMobile" : "rbResultBodyWrapper"
               }
             >
               <div>
-                {/* <button onClick={handleCalculation}>Test </button> */}
                 <Card title="Client">
                   <div>
                     <span className="rbDarkWord">
@@ -2121,7 +2137,7 @@ const BuyRent = () => {
                 <Card title="Property">
                   <div>
                     <span className="rbDarkWord">
-                      {inputSource["purValue"]}
+                      {formatCurrency(inputSource["purValue"])}
                     </span>
                   </div>
                   <button
@@ -2273,7 +2289,7 @@ const BuyRent = () => {
                         className="rbDarkWord"
                         style={{ textAlign: "center" }}
                       >
-                        ZIP Code, County, State
+                        State, County, ZIP Code
                       </div>
                     </div>
                   </div>
@@ -2677,6 +2693,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        format="percentage"
                         label="Fed/State Tax Rate"
                         placeholder="Tax Rate"
                         onChangeText={({ target }) => {
@@ -2861,30 +2878,32 @@ const BuyRent = () => {
                             Use
                           </button>
                         </div>
-                        <div>
-                          Est. tax: <b>${inputSource["propTax"]}</b>
-                        </div>
+                        {/* <div>
+                          Est. tax:{" "}
+                          <b>${(inputSource["propTax"] || "").toFixed(2)}</b>
+                        </div> */}
                       </div>
-                      <InputBox
-                        type="text"
-                        style={{ marginBottom: 35 }}
-                        inputBoxStyle={{ fontFamily: "Inter" }}
-                        validate={false}
-                        label="Annual Property Tax"
-                        placeholder="Property Tax"
-                        onChangeText={({ target }) => {
-                          let { value } = target,
-                            amt = 0,
-                            percent = 0;
-                          if (propTaxView === "%") {
-                            percent = parseFloat(value) / 100;
-                            amt = getPercentageValue({
-                              totalValue: parseFloat(
-                                tempInputSource["purValue"]
-                              ),
-                              percentage: percent,
-                            });
-                          } else {
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <InputBox
+                          type="text"
+                          style={{ marginBottom: 35, width: "45%" }}
+                          inputBoxStyle={{ fontFamily: "Inter" }}
+                          validate={false}
+                          format="Currency"
+                          label="Annual Property Tax Amount"
+                          placeholder="Property Tax"
+                          onChangeText={({ target }) => {
+                            let { value } = target,
+                              amt = 0,
+                              percent = 0;
+
                             amt = parseFloat(value);
                             percent =
                               getValuePercentage({
@@ -2893,44 +2912,67 @@ const BuyRent = () => {
                                 ),
                                 amount: amt,
                               }) / 100;
-                          }
 
-                          handleTempInputSource({
-                            value: percent,
-                            name: "estPropTaxPercent",
-                          });
-                          handleTempInputSource({
-                            value: roundValue(amt, 0),
-                            name: "propTax",
-                          });
-                        }}
-                        value={
-                          propTaxView === "$"
-                            ? tempInputSource["propTax"]
-                            : roundValue(
-                                parseFloat(
-                                  tempInputSource["estPropTaxPercent"]
-                                ) * 100
-                              )
-                        }
-                        symbol={
-                          <div className="inputBoxControl" style={{}}>
+                            handleTempInputSource({
+                              value: percent,
+                              name: "estPropTaxPercent",
+                            });
+                            handleTempInputSource({
+                              value: roundValue(amt, 0),
+                              name: "propTax",
+                            });
+                          }}
+                          value={tempInputSource["propTax"]}
+                        />
+                        <InputBox
+                          type="text"
+                          style={{ marginBottom: 35, width: "45%" }}
+                          inputBoxStyle={{ fontFamily: "Inter" }}
+                          validate={false}
+                          label="Annual Property Tax Percentage"
+                          placeholder="Property Tax"
+                          format="percentage"
+                          onChangeText={({ target }) => {
+                            let { value } = target,
+                              amt = 0,
+                              percent = 0;
+
+                            percent = parseFloat(value) / 100;
+                            amt = getPercentageValue({
+                              totalValue: parseFloat(
+                                tempInputSource["purValue"]
+                              ),
+                              percentage: percent,
+                            });
+
+                            handleTempInputSource({
+                              value: percent || "",
+                              name: "estPropTaxPercent",
+                            });
+                            handleTempInputSource({
+                              value: roundValue(amt, 0),
+                              name: "propTax",
+                            });
+                          }}
+                          value={roundValue(
+                            parseFloat(tempInputSource["estPropTaxPercent"]) *
+                              100
+                          )}
+                          symbol={
                             <span
-                              onClick={() => setPropTaxView("$")}
-                              className={propTaxView === "$" ? "active" : ""}
-                            >
-                              $
-                            </span>
-                            <span
-                              onClick={() => setPropTaxView("%")}
-                              className={propTaxView === "%" ? "active" : ""}
+                              style={{
+                                position: "absolute",
+                                right: 15,
+                                fontFamily: "inter",
+                                fontSize: 14,
+                              }}
                             >
                               %
                             </span>
-                          </div>
-                        }
-                        symbolPosition="right"
-                      />
+                          }
+                          symbolPosition="right"
+                        />
+                      </div>
                       <InputBox
                         type="text"
                         format="Currency"
@@ -2999,6 +3041,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        format="percentage"
                         label="Annual Property Tax Increase"
                         placeholder="Annual Property Tax Increase"
                         onChangeText={({ target }) => {
@@ -3028,6 +3071,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        format="percentage"
                         label="Cost to Sell"
                         placeholder="Cost to Sell"
                         onChangeText={({ target }) => {
@@ -3103,6 +3147,7 @@ const BuyRent = () => {
                               style={{ marginBottom: 35 }}
                               inputBoxStyle={{ fontFamily: "Inter" }}
                               validate={false}
+                              format="percentage"
                               label="Rate"
                               placeholder="Rate"
                               onChangeText={({ target }) => {
@@ -3201,6 +3246,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        format="percentage"
                         label="Annual Rent Increase"
                         placeholder="Annual Rent Increase"
                         onChangeText={({ target }) => {
@@ -3313,6 +3359,7 @@ const BuyRent = () => {
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Term"
+                        inputMode="numeric"
                         placeholder="Term"
                         onChangeText={({ target }) => {
                           const { value } = target;
@@ -3496,6 +3543,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        format="percentage"
                         label="Rate"
                         placeholder="rate"
                         onChangeText={({ target }) => {
@@ -3512,6 +3560,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        inputMode="numeric"
                         label="Point"
                         placeholder="point"
                         onChangeText={({ target }) => {
@@ -3668,6 +3717,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 35 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
+                        format="percentage"
                         label="APR"
                         placeholder="apr"
                         onChangeText={({ target }) => {

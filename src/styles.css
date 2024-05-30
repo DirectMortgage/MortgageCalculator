@@ -2,6 +2,11 @@
   font-family: "Roboto Thin", Roboto, Arial, sans-serif;
   color: #4e4f51;
 }
+input,
+select,
+textarea {
+  box-sizing: unset !important;
+}
 svg > g.cartesianlayer > g > g.plot > g > g > g > g > path {
   clip-path: inset(0% 0% 0% 0% round 2px);
 }

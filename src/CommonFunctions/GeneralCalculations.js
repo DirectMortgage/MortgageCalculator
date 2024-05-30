@@ -117,7 +117,7 @@ const formatCurrency = (value) => {
   if (isNaN(dollars)) dollars = "0";
   dollars = dollars.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   let val = "$" + ((sign ? "" : "-") + dollars + (cents ? "." + cents : ".00"));
-  val = val.replaceAll("--", "-");
+  val = val.replaceAll("--", "");
   if (val == "$-0.00") val = "$0.00";
   return val;
 };

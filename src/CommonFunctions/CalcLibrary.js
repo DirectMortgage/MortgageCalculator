@@ -392,6 +392,7 @@ const handleCalculateARP = async ({
   zeroFlow,
   oddFactor,
   noteRate,
+  ltvRatio = 0,
 }) => {
   const valueForLtv =
     appraisedValue > purchasePrice && purchasePrice !== 0
@@ -419,8 +420,13 @@ const handleCalculateARP = async ({
   } else {
     lesserOf = purchasePrice || loanAmount * 1.1112;
   }
-  appVal78 = lesserOf * 0.78;
-  appVal80 = wsFunded === "" ? appVal78 : lesserOf * 0.8;
+  if (ltvRatio) {
+    appVal78 = lesserOf * ltvRatio;
+    appVal80 = wsFunded === "" ? appVal78 : lesserOf * ltvRatio;
+  } else {
+    appVal78 = lesserOf * 0.78;
+    appVal80 = wsFunded === "" ? appVal78 : lesserOf * 0.8;
+  }
 
   //FHA
   if (loanType === 2) {

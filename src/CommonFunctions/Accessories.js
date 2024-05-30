@@ -136,6 +136,7 @@ const InputBox = (props) => {
     inputBoxStyle = {},
     inputBoxLabel = {},
     format = null,
+    inputMode = "",
   } = props;
 
   const [iValue, setIValue] = useState(value || "");
@@ -164,6 +165,9 @@ const InputBox = (props) => {
       </span>
       {symbolPosition == "left" && symbol}
       <input
+        inputMode={
+          ["Currency", "percentage"].includes(format) ? "numeric" : inputMode
+        }
         type={type}
         disabled={disabled}
         onChange={(event) => {
@@ -174,10 +178,16 @@ const InputBox = (props) => {
               .split(".")
               .slice(0, 2)
               .join(".");
-          } else if (["numeric"].includes(format)) {
+          } else if (["numeric"].includes(format) || inputMode == "numeric") {
             text = text.replace(/\D/g, "");
+          } else if (["percentage"].includes(format)) {
+            text = text
+              .toString()
+              .replace(/[^0-9.-]/g, "")
+              .replace(/(\..*)\./g, "$1")
+              .replace(/(?!^)-/g, "");
           }
-
+          event.target.value = text;
           setIValue(text);
           onChangeText(event);
         }}
@@ -262,6 +272,9 @@ const AutoCompleteInputBox = (props) => {
       );
     }
     setFilteredOption(iFilteredOption);
+    if (searchText == "") {
+      onSelect({ label: "" });
+    }
   }, [searchText]);
 
   return (
