@@ -565,7 +565,7 @@ g.xy {
   /* line-height: 28px; */
   letter-spacing: 0.4px;
   text-transform: none;
-  font-weight: 400;
+  /* font-weight: 400; */
   color: #247c00;
 }
 .rbResultTable .rbRedValue {
@@ -575,7 +575,7 @@ g.xy {
   /* line-height: 28px; */
   letter-spacing: 0.4px;
   text-transform: none;
-  font-weight: 400;
+  /* font-weight: 400; */
   color: #d60000;
 }
 .rbTotalResultSection b {

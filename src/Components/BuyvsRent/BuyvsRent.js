@@ -2122,7 +2122,7 @@ const BuyRent = () => {
                 <Card title="Client">
                   <div>
                     <span className="rbDarkWord">
-                      {inputSource["clientName"]}
+                      <b>{inputSource["clientName"]}</b>
                     </span>
                   </div>
                   <button
@@ -2144,7 +2144,7 @@ const BuyRent = () => {
                 <Card title="Property">
                   <div>
                     <span className="rbDarkWord">
-                      {formatCurrency(inputSource["purValue"])}
+                      <b>{formatCurrency(inputSource["purValue"])}</b>
                     </span>
                   </div>
                   <button
@@ -2166,7 +2166,7 @@ const BuyRent = () => {
                 <Card title="Renting">
                   <div>
                     <span className="rbDarkWord">
-                      {formatCurrency(inputSource["monthlyRent"])}
+                      <b>{formatCurrency(inputSource["monthlyRent"])}</b>
                     </span>
                   </div>
                   <button
@@ -2187,7 +2187,7 @@ const BuyRent = () => {
                 <Card title="Loan">
                   <div>
                     <span className="rbDarkWord">
-                      {formatCurrency(inputSource["loanAmt"] || 0)}
+                      <b>{formatCurrency(inputSource["loanAmt"] || 0)}</b>
                     </span>
                     <div className="rbWord">{inputSource["term"]} Years</div>
                     <div className="rbWord">
@@ -2271,7 +2271,7 @@ const BuyRent = () => {
                         className="rbDarkWord"
                         style={{ textAlign: "center" }}
                       >
-                        Purchase Price
+                        <b>Purchase Price</b>
                       </div>
                     </div>
                     <div
@@ -2296,7 +2296,7 @@ const BuyRent = () => {
                         className="rbDarkWord"
                         style={{ textAlign: "center" }}
                       >
-                        State, County, ZIP Code
+                        <b>State, County, ZIP Code</b>
                       </div>
                     </div>
                   </div>
@@ -2340,7 +2340,7 @@ const BuyRent = () => {
                         <div>
                           <div className="rbResultRow">
                             <span className="rbDarkWord">
-                              Appreciation Gain
+                              <b>Appreciation Gain</b>
                             </span>
                             <b
                               className="rbGreenValue"
@@ -2376,7 +2376,7 @@ const BuyRent = () => {
                               className="rbDarkWord"
                               style={{ display: "flex" }}
                             >
-                              Amortization Gain
+                              <b>Amortization Gain</b>
                               <button
                                 className="purpleSecButton"
                                 type="button"
@@ -2432,7 +2432,7 @@ const BuyRent = () => {
                         <div>
                           <div className="rbResultRow">
                             <span className="rbDarkWord">
-                              Cashflow Difference
+                              <b>Cashflow Difference</b>
                             </span>
                             <b
                               className="rbGreenValue"
@@ -2448,7 +2448,7 @@ const BuyRent = () => {
                         <div>
                           <div className="rbResultRow">
                             <span className="rbDarkWord">
-                              Purchase Closing Cost
+                              <b>Purchase Closing Cost</b>
                             </span>
                             <b
                               className={
@@ -2472,7 +2472,7 @@ const BuyRent = () => {
                         <div>
                           <div className="rbResultRow">
                             <span className="rbDarkWord">
-                              Tax Benefit Over Renting†
+                              <b>Tax Benefit Over Renting†</b>
                             </span>
                             <b
                               className="rbGreenValue"
@@ -2501,7 +2501,9 @@ const BuyRent = () => {
                         <div>
                           <div className="rbResultRow">
                             <span className="rbDarkWord">
-                              Cost To Sell Est. {inputSource["costToSell"]}%
+                              <b>
+                                Cost To Sell Est. {inputSource["costToSell"]}%
+                              </b>
                             </span>
                             <b
                               className={
