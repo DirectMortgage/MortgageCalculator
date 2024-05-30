@@ -2,9 +2,9 @@
   font-family: "Roboto Thin", Roboto, Arial, sans-serif;
   color: #4e4f51;
 }
-input,
-select,
-textarea {
+
+:after,
+:before {
   box-sizing: unset !important;
 }
 svg > g.cartesianlayer > g > g.plot > g > g > g > g > path {
