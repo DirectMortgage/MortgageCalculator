@@ -3,6 +3,10 @@
   color: #4e4f51;
 }
 
+button {
+  box-sizing: border-box !important;
+}
+*,
 :after,
 :before {
   box-sizing: unset !important;
@@ -392,7 +396,7 @@ g.xy {
 .bsFooterTab {
   max-width: 479px;
   margin: 0px auto;
-  padding: 0 13px;
+  /* padding: 0 13px; */
 }
 
 .bsBodyTab {
@@ -532,6 +536,7 @@ g.xy {
   color: rgb(13, 33, 33);
   font-family: Inter;
   font-weight: 100;
+  opacity: 1 !important;
 }
 .plotly * {
   font-family: "Inter";
