@@ -1490,10 +1490,17 @@ const BuyRent = () => {
     styleElement.innerHTML = `
     @media screen and (max-width: ${parseInt(w)}px) {
       .rbBodyWrapper{
-        margin: 2.5rem 20px 15rem !important;
+        margin: 2.5rem 0px 15rem !important;
       }
       .rbResultBodyWrapper {
         display: unset;
+      }
+      .bsHeaderTab,
+      .bsFooterTab {
+        padding: 0 13px; 
+      }
+      .amortSchedule *{
+        font-size:12px !important
       }
       .rbResultBodyWrapper > div {
         width: unset !important;
@@ -2893,7 +2900,10 @@ const BuyRent = () => {
                       >
                         <InputBox
                           type="text"
-                          style={{ marginBottom: 35, width: "45%" }}
+                          style={{
+                            marginBottom: 35,
+                            width: isMobile ? "100%" : "45%",
+                          }}
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
                           format="Currency"
@@ -2926,7 +2936,10 @@ const BuyRent = () => {
                         />
                         <InputBox
                           type="text"
-                          style={{ marginBottom: 35, width: "45%" }}
+                          style={{
+                            marginBottom: 35,
+                            width: isMobile ? "100%" : "45%",
+                          }}
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
                           label="Annual Property Tax Percentage"
