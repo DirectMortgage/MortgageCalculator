@@ -3,11 +3,13 @@ import {
   AutoCompleteInputBox,
   Dropdown,
   InputBox,
+  useScrollIndicator,
 } from "../../CommonFunctions/Accessories";
 import {
   faAngleDown,
   faAngleUp,
   faCalendarAlt,
+  faChevronDown,
   faChevronRight,
   faLocationDot,
   faMagnifyingGlass,
@@ -652,6 +654,8 @@ const headerTabs = [
 
 const inputDetails = {
   clientName: "",
+  location: "",
+  purValue: 0,
   desMonthlyPayment: 3000,
   ltvRatio: 90,
   rate: 6.25,
@@ -679,7 +683,6 @@ const inputDetails = {
   miAmt: 24,
   averageHistorical: 4.213,
   upfrontMI: 0,
-  purValue: 0,
   closingCosts: 1200,
   armRateInitialAdj: 12,
   prepaidEscrows: "0",
@@ -690,7 +693,9 @@ const inputDetails = {
 const Card = ({ title = "", children }) => {
   return (
     <div>
-      <span className="rbDarkWord">{title}</span>
+      <span className="rbDarkWord">
+        <b>{title}</b>
+      </span>
       <div className="rbCard">{children}</div>
     </div>
   );
@@ -779,6 +784,8 @@ const NetGainBarChart = ({ year, netGainValue = [] }) => {
     displayModeBar: false,
   };
 
+  useScrollIndicator(".netGainChart", ".netGainChartScrollIndicator");
+
   return (
     <div
       style={{
@@ -814,12 +821,21 @@ const NetGainBarChart = ({ year, netGainValue = [] }) => {
       <Plot
         style={{
           width: "100%",
-          overflowX: "scroll",
+          overflowX: "auto",
         }}
+        className="netGainChart"
         data={data}
         layout={layout}
         config={config}
       />
+      {isMobile && (
+        <div
+          className="scrollIndicatorWrapper"
+          style={{ backgroundColor: "#f4f8f8" }}
+        >
+          <div className="netGainChartScrollIndicator scrollIndicator"></div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1117,6 +1133,21 @@ const BuyRentDifferenceBarChart = ({
       propTaxRepair: iPropTaxRepair,
     });
   };
+  useScrollIndicator(".buyRentChart", ".buyRentChartScrollIndicator");
+
+  useEffect(() => {
+    const onScroll = () => {
+      setTooltipTableDetails({
+        x: 0,
+        y: 0,
+        isShow: false,
+      });
+    };
+    window?.addEventListener("scroll", onScroll);
+    return () => {
+      window?.removeEventListener("scroll", onScroll);
+    };
+  }, []);
 
   return (
     <div
@@ -1143,6 +1174,12 @@ const BuyRentDifferenceBarChart = ({
           });
         }}
       />
+      {isMobile && (
+        <div className="scrollIndicatorWrapper">
+          <div className="buyRentChartScrollIndicator scrollIndicator"></div>
+        </div>
+      )}
+
       {tooltipTableDetails["isShow"] && (
         <div
           style={{
@@ -1305,75 +1342,84 @@ const DifferenceTable = ({
       amount: estimate,
     },
   ];
+  useScrollIndicator(".rbDifferenceTable", ".differenceTableScrollIndicator");
+
   return (
-    <div className="rbDifferenceTable">
-      <table cellSpacing="0" style={{ width: isMobile ? "unset" : "100%" }}>
-        <thead>
-          <tr>
-            <th style={{ boxSizing: "border-box", width: "200px" }}></th>
-            {yearArr.map((year, index) => {
+    <div style={{ position: "relative" }}>
+      <div className="rbDifferenceTable">
+        <table cellSpacing="0" style={{ width: isMobile ? "unset" : "100%" }}>
+          <thead>
+            <tr>
+              <th style={{ boxSizing: "border-box", width: "200px" }}></th>
+              {yearArr.map((year, index) => {
+                return (
+                  <Fragment key={index}>
+                    <th>
+                      <div>Year {year}</div>
+                      <div>Buying</div>
+                    </th>
+                    <th
+                      style={{
+                        verticalAlign: "bottom",
+                      }}
+                    >
+                      <div>Renting</div>
+                    </th>
+                  </Fragment>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, index) => {
               return (
                 <Fragment key={index}>
-                  <th>
-                    <div>Year {year}</div>
-                    <div>Buying</div>
-                  </th>
-                  <th
-                    style={{
-                      verticalAlign: "bottom",
-                    }}
-                  >
-                    <div>Renting</div>
-                  </th>
+                  <tr>
+                    <td>
+                      <p>{row["category"]}</p>
+                    </td>
+                    {row["amount"].map((rData, iIndex) => {
+                      return (
+                        <Fragment key={iIndex}>
+                          <td>
+                            <div>
+                              {/* <p>$</p> */}
+                              <p>
+                                {formatCurrency(
+                                  Math.round(rData["buy"]) || 0,
+                                  2,
+                                  !false
+                                )}
+                              </p>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              {/* <p>$</p> */}
+                              <p>
+                                {formatCurrency(
+                                  Math.round(rData["rent"]) || 0,
+                                  2,
+                                  !false
+                                )}
+                              </p>
+                            </div>
+                          </td>
+                        </Fragment>
+                      );
+                    })}
+                  </tr>
                 </Fragment>
               );
             })}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, index) => {
-            return (
-              <Fragment key={index}>
-                <tr>
-                  <td>
-                    <p>{row["category"]}</p>
-                  </td>
-                  {row["amount"].map((rData, iIndex) => {
-                    return (
-                      <Fragment key={iIndex}>
-                        <td>
-                          <div>
-                            {/* <p>$</p> */}
-                            <p>
-                              {formatCurrency(
-                                Math.round(rData["buy"]) || 0,
-                                2,
-                                !false
-                              )}
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div>
-                            {/* <p>$</p> */}
-                            <p>
-                              {formatCurrency(
-                                Math.round(rData["rent"]) || 0,
-                                2,
-                                !false
-                              )}
-                            </p>
-                          </div>
-                        </td>
-                      </Fragment>
-                    );
-                  })}
-                </tr>
-              </Fragment>
-            );
-          })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
+      {isMobile && (
+        <div className="scrollIndicatorWrapper">
+          <div className="differenceTableScrollIndicator scrollIndicator"></div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1521,8 +1567,8 @@ const BuyRent = () => {
         padding:0
       }
       .floatingScreenWrapper{
-        width:90%;
-        min-width: 90%;
+        width:100%;
+        min-width: 100%;
       }
       .rbDifferenceTable table{
         table-layout: unset;
@@ -1839,7 +1885,7 @@ const BuyRent = () => {
               <div style={{ margin: "15px" }}>
                 <InputBox
                   type="text"
-                  style={{ marginBottom: 35 }}
+                  style={{ marginBottom: 25 }}
                   inputBoxStyle={{ fontFamily: "Inter" }}
                   validate={false}
                   label="Client name"
@@ -1860,7 +1906,7 @@ const BuyRent = () => {
                   }}
                   inputBoxStyle={{ fontFamily: "Inter" }}
                   validate={false}
-                  style={{ marginBottom: 35, paddingLeft: 10 }}
+                  style={{ marginBottom: 25, paddingLeft: 10 }}
                   label="Location"
                   placeholder="Enter address, city, county, or ZIP code."
                   listIcon=<FontAwesomeIcon
@@ -1897,7 +1943,7 @@ const BuyRent = () => {
                 />
                 {activeTab === 0 ? (
                   <InputBox
-                    style={{ marginBottom: 35 }}
+                    style={{ marginBottom: 25 }}
                     type="text"
                     inputMode="numeric"
                     inputBoxStyle={{ fontFamily: "Inter" }}
@@ -1915,7 +1961,7 @@ const BuyRent = () => {
                   <>
                     <InputBox
                       type="text"
-                      style={{ marginBottom: 35 }}
+                      style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       format="Currency"
@@ -1929,7 +1975,7 @@ const BuyRent = () => {
                     />
                     <InputBox
                       type="text"
-                      style={{ marginBottom: 35 }}
+                      style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       label="LTV Ratio"
@@ -1960,7 +2006,7 @@ const BuyRent = () => {
                     <InputBox
                       format="Currency"
                       type="text"
-                      style={{ marginBottom: 35 }}
+                      style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       label="Monthly Allowance"
@@ -1981,7 +2027,7 @@ const BuyRent = () => {
                   >
                     <InputBox
                       type="text"
-                      style={{ marginBottom: 35 }}
+                      style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       label="Rate"
@@ -2008,7 +2054,7 @@ const BuyRent = () => {
                     />
                     <InputBox
                       type="text"
-                      style={{ marginBottom: 35 }}
+                      style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       format="percentage"
@@ -2055,8 +2101,11 @@ const BuyRent = () => {
                 disabled={handleValidateFields()}
                 onClick={() => {
                   try {
-                    let iInputSource = inputSource,
-                      { purValue } = iInputSource;
+                    let iInputSource = inputSource;
+
+                    if (activeTab !== 0) iInputSource["purValue"] = 336905;
+
+                    let { purValue } = iInputSource;
                     purValue = Number(cleanValue(purValue));
                     const iDownPaymentDetails = handleGetDownPaymentDetails({
                         loanAmt: purValue,
@@ -2321,7 +2370,7 @@ const BuyRent = () => {
                             ?.width || "50%",
                       }}
                     >
-                      {year} Years
+                      <b>{year} Years</b>
                     </div>
                   </div>
                 </div>
@@ -2660,20 +2709,54 @@ const BuyRent = () => {
                 onClick={() => handleEditMode(null)}
                 className="floatingScreenSpace"
               ></div>
-              <div className="floatingScreen">
-                <h2 style={{ textAlign: "center" }}>{editScreen}</h2>
+
+              <div
+                className={isMobile ? "floatingScreen" : "floatingScreenWeb"}
+              >
+                {isMobile && (
+                  <div
+                    onClick={() => handleEditMode(null)}
+                    className="floatingScreenClose"
+                  >
+                    <FontAwesomeIcon icon={faChevronDown} className="fa-lg" />
+                  </div>
+                )}
+                {!isMobile && (
+                  <span
+                    title="Close"
+                    onClick={() => handleEditMode(null)}
+                    style={{
+                      color: "red",
+                      position: "absolute",
+                      right: 25,
+                      top: 5,
+                      fontSize: 32,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ×
+                  </span>
+                )}
+                <h2
+                  style={{
+                    textAlign: "center",
+                    marginTop: isMobile ? 30 : -10,
+                  }}
+                >
+                  {editScreen}
+                </h2>
                 <div
                   style={{
                     overflow: "auto",
-                    maxHeight: "80vh",
-                    padding: isMobile ? "15px" : "15px 5px",
+                    maxHeight: isMobile ? "65vh" : "73vh",
+                    padding: "15px",
                   }}
                 >
                   {editScreen === "Client" ? (
                     <>
                       <InputBox
                         type="text"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Client name"
@@ -2699,7 +2782,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         format="percentage"
@@ -2801,7 +2884,7 @@ const BuyRent = () => {
                         }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         label="Location"
                         placeholder="Enter address, city, county, or ZIP code."
                         listIcon=<FontAwesomeIcon
@@ -2840,7 +2923,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Price"
@@ -2903,7 +2986,7 @@ const BuyRent = () => {
                         <InputBox
                           type="text"
                           style={{
-                            marginBottom: 35,
+                            marginBottom: 25,
                             width: isMobile ? "100%" : "45%",
                           }}
                           inputBoxStyle={{ fontFamily: "Inter" }}
@@ -2939,7 +3022,7 @@ const BuyRent = () => {
                         <InputBox
                           type="text"
                           style={{
-                            marginBottom: 35,
+                            marginBottom: 25,
                             width: isMobile ? "100%" : "45%",
                           }}
                           inputBoxStyle={{ fontFamily: "Inter" }}
@@ -2991,7 +3074,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Monthly Home Insurance"
@@ -3008,7 +3091,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Monthly Association Fee"
@@ -3027,7 +3110,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Monthly Repairs"
@@ -3053,7 +3136,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         format="percentage"
@@ -3083,7 +3166,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         format="percentage"
@@ -3106,38 +3189,6 @@ const BuyRent = () => {
                         </div>
                         <span>Select which rate you want to display.</span>
                         <div className="appCalcType">
-                          {/* <label>
-                            <input
-                              type="radio"
-                              value="forecast"
-                              checked={
-                                tempInputSource["appCalcType"] === "forecast"
-                              }
-                              onChange={() =>
-                                handleTempInputSource({
-                                  value: "forecast",
-                                  name: "appCalcType",
-                                })
-                              }
-                            />
-                            Forecast: 4.252%
-                          </label>
-                          <label> 
-                            <input
-                              type="radio"
-                              value="historical"
-                              checked={
-                                tempInputSource["appCalcType"] === "historical"
-                              }
-                              onChange={() =>
-                                handleTempInputSource({
-                                  value: "historical",
-                                  name: "appCalcType",
-                                })
-                              }
-                            />
-                            Historical: {inputSource["averageHistorical"]}%
-                          </label>*/}
                           <label>
                             <input
                               type="radio"
@@ -3159,7 +3210,7 @@ const BuyRent = () => {
                           <>
                             <InputBox
                               type="text"
-                              style={{ marginBottom: 35 }}
+                              style={{ marginBottom: 25 }}
                               inputBoxStyle={{ fontFamily: "Inter" }}
                               validate={false}
                               format="percentage"
@@ -3198,7 +3249,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Monthly Rent"
@@ -3212,7 +3263,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Renters Insurance"
@@ -3258,7 +3309,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         format="percentage"
@@ -3279,7 +3330,7 @@ const BuyRent = () => {
                       <InputBox
                         type="text"
                         format="Currency"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Loan Amount"
@@ -3370,7 +3421,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         label="Term"
@@ -3446,7 +3497,7 @@ const BuyRent = () => {
                       {tempInputSource["loanType"] == 5 && (
                         <InputBox
                           type="text"
-                          style={{ marginBottom: 35 }}
+                          style={{ marginBottom: 25 }}
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
                           label="Program Name"
@@ -3462,7 +3513,7 @@ const BuyRent = () => {
                         />
                       )}
                       <Dropdown
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         isValid={false}
                         label="Loan Type"
                         options={[
@@ -3525,7 +3576,7 @@ const BuyRent = () => {
                       ) && (
                         <InputBox
                           type="text"
-                          style={{ marginBottom: 35 }}
+                          style={{ marginBottom: 25 }}
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
                           label="Initial Adjustment (Months)"
@@ -3555,7 +3606,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         format="percentage"
@@ -3572,7 +3623,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         inputMode="numeric"
@@ -3589,7 +3640,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3608,7 +3659,7 @@ const BuyRent = () => {
                         <>
                           <InputBox
                             type="text"
-                            style={{ marginBottom: 35 }}
+                            style={{ marginBottom: 25 }}
                             format="Currency"
                             inputBoxStyle={{ fontFamily: "Inter" }}
                             validate={false}
@@ -3627,7 +3678,7 @@ const BuyRent = () => {
                       ) : tempInputSource["loanType"] == 4 ? (
                         <InputBox
                           type="text"
-                          style={{ marginBottom: 35 }}
+                          style={{ marginBottom: 25 }}
                           format="Currency"
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
@@ -3645,7 +3696,7 @@ const BuyRent = () => {
                       ) : tempInputSource["loanType"] == 1 ? (
                         <InputBox
                           type="text"
-                          style={{ marginBottom: 35 }}
+                          style={{ marginBottom: 25 }}
                           format="Currency"
                           inputBoxStyle={{ fontFamily: "Inter" }}
                           validate={false}
@@ -3665,7 +3716,7 @@ const BuyRent = () => {
                       )}
                       <InputBox
                         type="text"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3682,7 +3733,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3699,7 +3750,7 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         format="Currency"
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3729,7 +3780,7 @@ const BuyRent = () => {
                           </span>
                         }
                         symbolPosition="right"
-                        style={{ marginBottom: 35 }}
+                        style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
                         format="percentage"

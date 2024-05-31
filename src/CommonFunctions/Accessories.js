@@ -474,7 +474,7 @@ const Dropdown = (props) => {
         ...styles.inputBoxContainer,
         ...{
           border: `1px solid silver`,
-          marginBottom: 20,
+          marginBottom: 25,
         },
         ...style,
       }}
@@ -523,5 +523,31 @@ const Button = ({
     {title}
   </div>
 );
+const useScrollIndicator = (
+  scrollContainerSelector,
+  scrollIndicatorSelector
+) => {
+  useEffect(() => {
+    const scrollIndicator = document.querySelector(scrollIndicatorSelector);
+    const scrollContainer = document.querySelector(scrollContainerSelector);
 
-export { InputBox, Dropdown, Button, TextAreaBox, AutoCompleteInputBox };
+    const onScroll = ({ target: { scrollLeft, scrollWidth, clientWidth } }) => {
+      let left = (scrollLeft / (scrollWidth - clientWidth)) * 100;
+      left = left >= 88 ? 88 : left; // Ensure left does not exceed 88%
+      scrollIndicator.style.left = left + "%";
+    };
+
+    scrollContainer?.addEventListener("scroll", onScroll);
+    return () => {
+      scrollContainer?.removeEventListener("scroll", onScroll);
+    };
+  }, [scrollContainerSelector, scrollIndicatorSelector]);
+};
+export {
+  InputBox,
+  Dropdown,
+  Button,
+  TextAreaBox,
+  AutoCompleteInputBox,
+  useScrollIndicator,
+};

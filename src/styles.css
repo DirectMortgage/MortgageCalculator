@@ -1,5 +1,5 @@
 * {
-  font-family: "Inter", "Roboto Thin", Roboto, Arial, sans-serif;
+  font-family: "Inter", "Roboto Thin", Roboto, Arial, sans-serif !important;
   color: #4e4f51;
 }
 
@@ -184,13 +184,12 @@ g.xy {
 }
 .brHeaderText {
   margin: 0px;
-  font-family: Financier;
-  font-size: 48px;
+  /* font-family: Financier; */
+  font-size: 43px;
   line-height: 48px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   text-transform: none;
   color: rgb(255, 255, 255);
-  font-weight: 300;
   text-align: center;
 }
 .brHeaderDesc {
@@ -417,8 +416,9 @@ g.xy {
   margin-left: 5px;
 }
 .btnPrimary:disabled {
-  background-color: #508bc9bf !important;
-  border-color: #508bc9bf !important;
+  background-color: #7fa9d7 !important;
+  border-color: #7fa9d7 !important;
+  cursor: not-allowed;
 }
 ::-ms-input-placeholder {
   /* Edge 12-18 */
@@ -672,31 +672,53 @@ path.xdivider.crisp {
 .floatingScreen {
   width: 35%;
   min-width: 700px;
-  height: 100%;
+  height: 88%;
   background-color: white;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
   padding: 20px 0 20px 20px;
-  top: 0;
+  bottom: 0;
   position: absolute;
   right: 0;
 }
-
+.floatingScreenWeb {
+  width: 35%;
+  min-width: 700px;
+  height: 88%;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+  padding: 20px 0 20px 20px;
+  bottom: 3%;
+  position: absolute;
+  left: 25%;
+}
+.floatingScreenClose {
+  top: -17px;
+  position: absolute;
+  background: white;
+  width: 100%;
+  left: 0;
+  text-align: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #c1bfbf;
+}
 .floatingScreenWrapper.visible {
   height: 100%;
   z-index: 2;
-  right: 0;
+  bottom: 0;
+  transition: all 0.5s ease-in-out;
+  left: 0;
 }
 .floatingScreenWrapper {
   position: fixed;
-  right: -200%;
-  top: 0;
+  bottom: -300%;
+  /* top: 0; */
   width: 100%;
   min-width: 100%;
-  transition: right 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 .floatingScreenSpace {
-  width: 65%;
-  max-width: calc(100% - 720px);
+  width: 100%;
+  /* max-width: calc(100% - 720px); */
   background-color: #0000006e;
   min-height: 100%;
   cursor: pointer;
@@ -826,4 +848,22 @@ path.xdivider.crisp {
   background-color: black;
   padding: 7px;
   color: #fff;
+}
+.scrollIndicator {
+  min-width: 50px;
+  position: absolute;
+  bottom: 0;
+  border-radius: 20px;
+  height: 7px;
+  background: #9e9e9eeb;
+  width: 0;
+  transition: width 0.1s ease-out;
+}
+.scrollIndicatorWrapper {
+  width: 100%;
+  background-color: #fff;
+  position: absolute;
+  bottom: -1px;
+  height: 10px;
+  z-index: 1;
 }
