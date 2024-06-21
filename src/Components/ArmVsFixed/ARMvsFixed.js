@@ -19,8 +19,9 @@ import {
   handleCalculateARP,
   updateARMRate,
 } from "../../CommonFunctions/CalcLibrary";
+import { handleGetLoanData } from "../../CommonFunctions/CommonFunctions";
 
-const { type, w, f } = queryStringToObject(window.location?.href || "");
+const { w, f, loanId } = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
 
 const styles = {
@@ -185,7 +186,9 @@ const GenerateTable = ({
                     >
                       {cIndex === 0 && !isBalance
                         ? row[column]
-                        : formatCurrency(row[column])}
+                        : formatCurrency(
+                            parseInt(row[column] > 0 ? row[column] : 0)
+                          )}
                     </td>
                   );
                 })}
@@ -586,6 +589,61 @@ const ARMvsFixed = (props) => {
   const [fixedAPRValue, setFixedAPRValue] = useState(0);
 
   useEffect(() => {
+    (async () => {
+      let response = await handleGetLoanData(loanId);
+
+      let {
+        loanAmount,
+        "Monthly Payment Factor %": monthlyPaymentFactorPercent,
+        amortizeType,
+        loanTerm,
+        armGrossMargin = 0.2,
+        rate,
+        armRateInitialAdj = 12,
+        armLifeCap = 0.5,
+        armIndexValue = 0,
+        armRateSubAdj = 12,
+        armRateAdjCap = 0,
+      } = response;
+
+      response["Monthly Payment Factor %"] = monthlyPaymentFactorPercent * 100;
+
+      loanTerm = loanTerm / 12;
+
+      setInputDetails({
+        loanAmount: formatCurrency(loanAmount),
+        loanTerm,
+        armGrossMargin,
+        armRateInitialAdj,
+        armTerm: 7,
+        armLifeCap,
+        armIndexValue,
+        armRateSubAdj,
+        armRateAdjCap,
+        [[3, 7].includes(parseInt(amortizeType)) ? "armRate" : "fixedRate"]:
+          formatPercentage(rate * 100),
+        [![3, 7].includes(parseInt(amortizeType)) ? "armRate" : "fixedRate"]:
+          formatPercentage(![3, 7].includes(parseInt(amortizeType)) ? 6 : 6.75),
+        initialAdjustmentMonths: armRateInitialAdj,
+      });
+      const iLoanInputDetails = loanInputDetails;
+      iLoanInputDetails.forEach((field) => {
+        const { name, formatType } = field,
+          value = response[name];
+
+        field["value"] =
+          formatType === "%"
+            ? formatCurrency(value)
+            : formatType === "$"
+            ? formatCurrency(value)
+            : value;
+      });
+
+      setLoanInputDetails([...iLoanInputDetails]);
+    })();
+  }, []);
+
+  useEffect(() => {
     if (armPayments.length && fixedPayments.length) {
       let iBalanceDiff = [];
       for (let i = 0; i < armPayments.length; i++) {
@@ -600,18 +658,8 @@ const ARMvsFixed = (props) => {
   }, [fixedPayments, armPayments]);
 
   useEffect(() => {
-    let { armTerm = 0 } = inputDetails,
-      yearLength = 0;
-    armTerm = parseInt(armTerm);
-    if ([5, 7, 10].includes(armTerm)) {
-      yearLength = 3;
-    } else if (armTerm === 9) {
-      yearLength = 1;
-    }
-
-    setArmAdjustmentYears(
-      Array.from({ length: yearLength }, (_, i) => armTerm + i + 1)
-    );
+    let { initialAdjustmentMonths } = inputDetails;
+    setArmAdjustmentYears([initialAdjustmentMonths / 12]);
   }, [inputDetails]);
 
   useEffect(() => {
@@ -654,7 +702,7 @@ const ARMvsFixed = (props) => {
       if (dependencyUpdate === "Disbursement Date") {
         prevLoanInputDetails[index + 1]["value"] = formatNewDate(
           getFirstDateFormDisbursement(
-            calculateFirstDate(new Date(value), true)
+            calculateFirstDate(new Date(value || null), true)
           )
         );
       }
@@ -672,9 +720,8 @@ const ARMvsFixed = (props) => {
             fixedRate: formatPercentage(6.75, 4),
             armTerm: 7,
             armRate: formatPercentage(6, 4),
-            "Year(8)": 2,
-            "Year(9)": 2,
-            "Year(10)": 2,
+            // initialNoteRate: formatPercentage(6.75, 4),
+            initialAdjustmentMonths: 84,
           }
         : {
             loanAmount: "",
@@ -697,15 +744,15 @@ const ARMvsFixed = (props) => {
     console.time("handleCalculate");
     const { cashFlow: fixedCashFlow, ARP } =
         await handleGetAmortizationSchedule(1, true), //fixed
-      { cashFlow: armCashFlow } = await handleGetAmortizationSchedule(
-        3 || 7,
-        false
-      ); //ARM
+      { cashFlow: armCashFlow, finalAdjRate } =
+        await handleGetAmortizationSchedule(3 || 7, !false); //ARM
 
     setFixedPayments(fixedCashFlow);
     setArmPayments(armCashFlow);
     setFixedAPRValue(ARP);
-
+    setInputDetails((prevInputDetails) => {
+      return { ...prevInputDetails, initialNoteRate: finalAdjRate * 100 };
+    });
     setScreenStatus("showOutput");
     console.timeEnd("handleCalculate");
   };
@@ -721,12 +768,8 @@ const ARMvsFixed = (props) => {
   };
 
   const handleGetAmortizationSchedule = async (amortizeType, getAPR) => {
-    let armGrossMargin = 2,
-      armLifeCap = 0.5,
-      armIndexValue = 0, //check this value
-      armRateInitialAdj = 12,
-      armRateSubAdj = 12,
-      ratesArray = [];
+    let ratesArray = [],
+      finalAdjRate = 0;
 
     try {
       let {
@@ -766,15 +809,34 @@ const ARMvsFixed = (props) => {
         firstPaymentDate
       );
 
-      let { fixedRate, loanAmount, loanTerm, armTerm, armRate } = inputDetails;
+      let {
+        fixedRate,
+        loanAmount,
+        loanTerm,
+        armTerm,
+        armRate,
+        initialNoteRate,
+        initialAdjustmentMonths,
+        armGrossMargin = 0.2,
+        armLifeCap = 0.5,
+        armIndexValue = 0,
+        armRateInitialAdj = 12,
+        armRateSubAdj = 12,
+        armRateAdjCap = 0,
+      } = inputDetails;
 
       fixedRate = cleanValue(fixedRate);
       loanAmount = cleanValue(loanAmount);
       loanTerm = cleanValue(loanTerm);
       armTerm = cleanValue(armTerm);
       armRate = cleanValue(armRate);
+      initialNoteRate = cleanValue(initialNoteRate);
+
+      armRateInitialAdj =
+        Number(initialAdjustmentMonths || armRateInitialAdj) || 0;
 
       armRate = armRate / 100;
+      initialNoteRate = initialNoteRate / 100;
       loanTerm = loanTerm * 12;
 
       let rate = fixedRate,
@@ -820,39 +882,58 @@ const ARMvsFixed = (props) => {
         //do this later
         let newRate = parseFloat(armRate);
         armLifeCap = armLifeCap + rate;
+
+        //=============== Initial ===============
         ratesArray.push({
           startTerm: 1,
-          endTerm: armTerm * 12,
+          endTerm: armRateInitialAdj,
+          totalTerm: loanTerm,
+          noteRate: newRate,
+        });
+        //=============== Initial - End ===============
+
+        //=============== 1st ===============
+
+        newRate = updateARMRate(
+          newRate,
+          armRateAdjCap,
+          armGrossMargin,
+          armIndexValue,
+          armLifeCap
+        );
+        ratesArray.push({
+          startTerm: armRateInitialAdj + 1,
+          endTerm: armRateInitialAdj + armRateSubAdj,
+          totalTerm: loanTerm,
+          noteRate: newRate,
+        });
+        //=============== 1st - End ===============
+
+        //=============== 2nd ===============
+        newRate = updateARMRate(
+          newRate,
+          armRateSubAdj,
+          armGrossMargin,
+          armIndexValue,
+          armLifeCap
+        );
+
+        ratesArray.push({
+          startTerm: armRateInitialAdj + armRateSubAdj + 1,
+          endTerm: loanTerm,
           totalTerm: loanTerm,
           noteRate: newRate,
         });
 
-        armAdjustmentYears.forEach((year) => {
-          newRate = updateARMRate(
-            newRate,
-            0,
-            armGrossMargin,
-            armIndexValue,
-            armLifeCap
-          );
-          ratesArray.push({
-            startTerm: (year - 1) * 12 + 1,
-            endTerm: year * 12,
-            totalTerm: loanTerm,
-            noteRate:
-              newRate ||
-              ratesArray[ratesArray.length - 1]["noteRate"] +
-                parseFloat(inputDetails[`Year(${year})`] / 100),
-          });
-        });
-        ratesArray.push({
-          startTerm: ratesArray[ratesArray.length - 1]["endTerm"] + 1,
-          endTerm: loanTerm,
-          totalTerm: loanTerm,
-          noteRate: ratesArray[ratesArray.length - 1]["noteRate"],
-        });
+        finalAdjRate = newRate;
       }
-      console.log("ratesArray", amortizeType, " - ", ratesArray);
+      console.log({
+        loanAmount,
+        loanTerm,
+        firstPaymentDate,
+        ratesArray,
+        mipAmt,
+      });
       const cashFlow = calculateCashFlows(
         loanAmount,
         loanTerm,
@@ -889,7 +970,8 @@ const ARMvsFixed = (props) => {
             noteRate,
           })
         : 0;
-      return { cashFlow, ARP };
+      console.log(ARP);
+      return { cashFlow, ARP, finalAdjRate };
     } catch (error) {
       console.error("Error form handleGetAmortizationSchedule ===> ", error);
     }
@@ -1046,7 +1128,7 @@ const ARMvsFixed = (props) => {
 
   const SummaryDetails = () => {
     let FixedArmDifferent = 0,
-      adjRate = parseFloat(inputDetails["armRate"] || 0);
+      adjRate = parseFloat(cleanValue(inputDetails["initialNoteRate"]) || 0);
     return (
       <>
         {armAdjustmentYears.map((year, index) => {
@@ -1066,7 +1148,9 @@ const ARMvsFixed = (props) => {
 
           const balance = balanceDifference + FixedArmDifferent;
 
-          adjRate += parseFloat(inputDetails[`Year(${year})`]);
+          {
+            /* adjRate += parseFloat(inputDetails[`Year(${year})`]); */
+          }
 
           return (
             <Fragment key={index}>
@@ -1247,18 +1331,17 @@ const ARMvsFixed = (props) => {
   };
 
   const FinalSummary = () => {
-    let adjRate = 0,
+    let adjRate = cleanValue(inputDetails["initialNoteRate"]) || 0,
       lastAdjYear = armAdjustmentYears[armAdjustmentYears.length - 1];
-    armAdjustmentYears.forEach((year) => {
-      adjRate += parseFloat(inputDetails[`Year(${year})`]);
-    });
+    // armAdjustmentYears.forEach((year) => {
+    //   adjRate += parseFloat(inputDetails[`Year(${year})`]);
+    // });
+
     const { Balance: fixedEndBalance, Amount: fixedEndPayment } =
         fixedPayments[lastAdjYear * 12 - 1],
       { Balance: adjEndBalance, Amount: adjEndPayment } =
-        armPayments[lastAdjYear * 12 - 1];
-
-    const remainingPaymentCount =
-      inputDetails["loanTerm"] * 12 - lastAdjYear * 12;
+        armPayments[lastAdjYear * 12 - 1],
+      remainingPaymentCount = inputDetails["loanTerm"] * 12 - lastAdjYear * 12;
 
     return (
       <>
@@ -1380,12 +1463,7 @@ const ARMvsFixed = (props) => {
                     </tr>
                     <tr className="tableRow">
                       <td>Adjusted Annual Rate:</td>
-                      <td>
-                        {formatPercentage(
-                          inputDetails["armRate"] + adjRate || 0,
-                          4
-                        )}
-                      </td>
+                      <td>{formatPercentage(adjRate || 0, 4)}</td>
                     </tr>
                     <tr className="tableRow">
                       <td>Monthly P & I:</td>
@@ -1648,7 +1726,7 @@ const ARMvsFixed = (props) => {
       <div
         style={{
           ...{
-            maxWidth: isMobile ? screenWidth : 950,
+            maxWidth: isMobile ? screenWidth : 1100,
             margin: "auto",
             overflow: "hidden",
           },
@@ -1671,7 +1749,8 @@ const ARMvsFixed = (props) => {
           >
             <InputBox
               disabled={screenStatus === "showOutput"}
-              type="number"
+              type="text"
+              inputMode="numeric"
               style={{ width: isMobile ? "100%" : "45%" }}
               validate={false}
               label="Loan Amount"
@@ -1693,7 +1772,8 @@ const ARMvsFixed = (props) => {
             />
             <InputBox
               disabled={screenStatus === "showOutput"}
-              type="number"
+              type="text"
+              inputMode="numeric"
               style={{ width: isMobile ? "100%" : "45%" }}
               validate={false}
               label="Term (Years)"
@@ -1720,7 +1800,8 @@ const ARMvsFixed = (props) => {
                 <div className="blueHeader">Fixed</div>
                 <InputBox
                   disabled={screenStatus === "showOutput"}
-                  type="float"
+                  type="text"
+                  format="percentage"
                   validate={false}
                   label="Annual Fixed Interest Rate"
                   placeholder="Interest Rate"
@@ -1732,7 +1813,6 @@ const ARMvsFixed = (props) => {
                   }}
                   onChangeText={({ target }) => {
                     const { value } = target;
-                    console.log(value);
                     handleFieldValueChange({
                       name: "fixedRate",
                       value,
@@ -1743,7 +1823,7 @@ const ARMvsFixed = (props) => {
               </div>
               <div style={{ width: isMobile ? "100%" : "49%" }}>
                 <div className="blueHeader">ARM</div>
-                <Dropdown
+                {/* <Dropdown
                   disabled={screenStatus === "showOutput"}
                   isValid={false}
                   label="ARM Term"
@@ -1762,10 +1842,34 @@ const ARMvsFixed = (props) => {
                     });
                   }}
                   isMap={false}
+                /> */}
+                <InputBox
+                  disabled={screenStatus === "showOutput"}
+                  type="text"
+                  format="numeric"
+                  validate={false}
+                  label="Initial Adjustment (months)"
+                  placeholder="Initial Adjustment (months)"
+                  onBlur={() => {
+                    handleFieldValueChange({
+                      name: "initialAdjustmentMonths",
+                      value: inputDetails["initialAdjustmentMonths"],
+                    });
+                  }}
+                  onChangeText={({ target }) => {
+                    const { value } = target;
+                    handleFieldValueChange({
+                      name: "initialAdjustmentMonths",
+                      value,
+                    });
+                    setArmAdjustmentYears(value / 12);
+                  }}
+                  value={inputDetails["initialAdjustmentMonths"]?.toString()}
                 />
                 <InputBox
                   disabled={screenStatus === "showOutput"}
-                  type="float"
+                  type="text"
+                  format="percentage"
                   validate={false}
                   label="ARM Rate"
                   placeholder="ARM Rate"
@@ -1786,54 +1890,6 @@ const ARMvsFixed = (props) => {
                 />
               </div>
             </div>
-            {armAdjustmentYears.length ? (
-              <div
-                style={{
-                  backgroundColor: "#f7f6f6",
-                  padding: "25px 15px 0",
-                  margin: "0 -15px",
-                  width: "100%",
-                }}
-              >
-                <div className="blueHeader" style={{ marginBottom: 25 }}>
-                  Rate Adjustments
-                </div>
-                <div>
-                  {armAdjustmentYears.map((year, index) => {
-                    return (
-                      <Fragment key={index}>
-                        <InputBox
-                          disabled={screenStatus === "showOutput"}
-                          type="float"
-                          style={{
-                            width: isMobile ? "23%" : "27%",
-                            minWidth: 60,
-                            marginRight: 10,
-                            display: "inline-block",
-                          }}
-                          validate={false}
-                          label={`Year(${year})`}
-                          // placeholder={`Year(${year})`}
-                          onBlur={() => {}}
-                          onChangeText={({ target }) => {
-                            const { value } = target;
-                            handleFieldValueChange({
-                              name: `Year(${year})`,
-                              value,
-                            });
-                          }}
-                          value={(
-                            inputDetails[`Year(${year})`] || ""
-                          )?.toString()}
-                        />
-                      </Fragment>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <></>
-            )}
 
             <div
               style={{
@@ -1872,6 +1928,14 @@ const ARMvsFixed = (props) => {
                     {type === 1 ? (
                       <>
                         <InputBox
+                          format={
+                            formatType === "$"
+                              ? "Currency"
+                              : formatType === "%"
+                              ? "percentage"
+                              : null
+                          }
+                          type="text"
                           style={{ width: isMobile ? "100%" : "45%" }}
                           disabled={screenStatus === "showOutput" || disabled}
                           validate={false}
@@ -1918,6 +1982,7 @@ const ARMvsFixed = (props) => {
                             width: isMobile ? "100%" : "45%",
                             maxWidth: isMobile ? "95%" : "45%",
                           }}
+                          fieldStyle={{ height: 24 }}
                           disabled={screenStatus === "showOutput" || disabled}
                           isValid={false}
                           label={name}

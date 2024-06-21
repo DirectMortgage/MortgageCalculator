@@ -394,6 +394,27 @@ const handleCalculateARP = async ({
   noteRate,
   ltvRatio = 0,
 }) => {
+  console.log({
+    cashFlow,
+    loanType,
+    appraisedValue,
+    purchasePrice,
+    loanAmount,
+    upFrontMIPFactor,
+    loanTerm,
+    fhaCaseDate,
+    iMiPercent,
+    mipAmt,
+    monthlyPayment,
+    movingRate,
+    PropertyBe,
+    propType,
+    amortizeType,
+    zeroFlow,
+    oddFactor,
+    noteRate,
+    ltvRatio,
+  });
   const valueForLtv =
     appraisedValue > purchasePrice && purchasePrice !== 0
       ? purchasePrice
@@ -533,7 +554,6 @@ const handleCalculateARP = async ({
     oddFactor,
     noteRate
   );
-  console.log({ cashFlow, guessAmount });
 
   return roundValue(guessAmount * 100, 4) || 0;
 };

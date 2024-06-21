@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import Autocomplete from "react-autocomplete";
-import { formatCurrency } from "./GeneralCalculations";
+import { formatCurrency, formatPercentage } from "./GeneralCalculations";
 import { cleanValue } from "./CalcLibrary";
-
+import { handleAPI } from "./CommonFunctions";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 const styles = {
   inputBoxLabel: {
     position: "absolute",
@@ -139,8 +141,8 @@ const InputBox = (props) => {
     inputMode = "",
   } = props;
 
-  const [iValue, setIValue] = useState(value || "");
-  const [isFocused, setIsFocused] = useState(false);
+  const [iValue, setIValue] = useState(value || ""),
+    [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     setIValue(value);
@@ -194,6 +196,8 @@ const InputBox = (props) => {
         value={
           format === "Currency" && !isFocused
             ? formatCurrency(iValue || "")
+            : format === "percentage" && !isFocused
+            ? formatPercentage(cleanValue(iValue) || 0)
             : iValue || ""
         }
         placeholder={placeholder || ""}
@@ -227,6 +231,8 @@ const InputBox = (props) => {
               cleanValue(text) == 0
                 ? ""
                 : text?.toString()?.replaceAll("$", "").replaceAll(",", "");
+          } else if (format == "percentage") {
+            text = cleanValue(text);
           }
           setIValue(text);
           setIsFocused(true);
@@ -252,29 +258,42 @@ const AutoCompleteInputBox = (props) => {
     symbolPosition = "left",
     inputBoxStyle = {},
     inputBoxLabel = {},
-    options = [],
     listIcon = <></>,
   } = props;
 
-  const [searchText, setSearchText] = useState(value || "");
+  const [searchText, setSearchText] = useState(value || ""),
+    [isFocus, setIsFocus] = useState(false),
+    [elementPosition, setElementPosition] = useState({ top: 0, width: 0 }),
+    [filteredOption, setFilteredOption] = useState([]),
+    [processingStatus, setProcessingStatus] = useState(null);
+
   useEffect(() => {
     setSearchText(value);
   }, [value]);
-  const [isFocus, setIsFocus] = useState(false);
-  const [elementPosition, setElementPosition] = useState({ top: 0, width: 0 });
-  const [filteredOption, setFilteredOption] = useState([]);
 
   useEffect(() => {
-    let iFilteredOption = [];
-    if (searchText?.length > 2) {
-      iFilteredOption = options.filter((item) =>
-        item.label.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())
-      );
-    }
-    setFilteredOption(iFilteredOption);
-    if (searchText == "") {
-      onSelect({ label: "" });
-    }
+    const handler = setTimeout(() => {
+      if (searchText?.length > 2 && !searchText.includes(",")) {
+        setProcessingStatus("searching");
+        handleAPI({
+          name: "GetLocationData",
+          params: { text: searchText },
+        })
+          .then((response) => {
+            setFilteredOption(JSON.parse(response || '{"Table":[]}')["Table"]);
+            setProcessingStatus(null);
+          })
+          .catch((e) => console.error("Error From GetLocationData ====>", e));
+      }
+      if (searchText === "") {
+        onSelect({ label: "" });
+        setFilteredOption([]);
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [searchText]);
 
   return (
@@ -334,6 +353,17 @@ const AutoCompleteInputBox = (props) => {
           }}
         />
         {symbolPosition == "right" && symbol}
+        {processingStatus == "searching" && (
+          <span
+            className="spinner"
+            style={{
+              position: "absolute",
+              right: 13,
+            }}
+          >
+            <FontAwesomeIcon icon={faSpinner} color="#508bc9" />
+          </span>
+        )}
       </div>
       {searchText?.length > 2 && isFocus && (
         <>
@@ -341,23 +371,38 @@ const AutoCompleteInputBox = (props) => {
             className="autoCompleteOptionWrapper"
             style={{ width: elementPosition["width"] }}
           >
-            {filteredOption.map((item, index) => {
-              return (
-                <div
-                  onClick={() => onSelect(item)}
-                  className="autoCompleteOptionList"
-                  key={index}
-                  style={{
-                    background: "white",
-                    padding: "15px",
-                    borderBottom: "1px solid #b2b2b2c0",
-                  }}
-                >
-                  {listIcon} <span>{item.label}</span>
-                </div>
-              );
-            })}
-            {filteredOption.length == 0 && (
+            {processingStatus == "searching" ? (
+              <div
+                className="autoCompleteOptionList"
+                key={-2}
+                style={{
+                  background: "white",
+                  padding: "15px",
+                  borderBottom: "1px solid #b2b2b2c0",
+                  textAlign: "center",
+                }}
+              >
+                <span>Searching...</span>
+              </div>
+            ) : filteredOption.length > 0 ? (
+              filteredOption.map((item, index) => {
+                return (
+                  <div
+                    onClick={() => onSelect(item)}
+                    className="autoCompleteOptionList"
+                    key={index}
+                    style={{
+                      background: "white",
+                      padding: "15px",
+                      borderBottom: "1px solid #b2b2b2c0",
+                    }}
+                  >
+                    {listIcon} <span>{item.label}</span>
+                  </div>
+                );
+              })
+            ) : filteredOption.length == 0 &&
+              processingStatus != "searching" ? (
               <div
                 className="autoCompleteOptionList"
                 key={-1}
@@ -370,6 +415,8 @@ const AutoCompleteInputBox = (props) => {
               >
                 <span>No result found.</span>
               </div>
+            ) : (
+              <></>
             )}
           </div>
         </>
@@ -466,6 +513,7 @@ const Dropdown = (props) => {
     disabled = false,
     isSearchable = false,
     width = "100%",
+    fieldStyle = {},
   } = props;
 
   return (
@@ -488,6 +536,7 @@ const Dropdown = (props) => {
           ...(disabled
             ? { backgroundColor: "#dddddd8c", cursor: "not-allowed" }
             : {}),
+          ...fieldStyle,
         }}
         value={value || ""}
         onChange={(e) => {

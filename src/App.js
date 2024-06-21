@@ -5,6 +5,7 @@ import { queryStringToObject } from "./CommonFunctions/GeneralCalculations";
 import ARMvsFixed from "./Components/ArmVsFixed/ARMvsFixed";
 import BlendedRate from "./Components/BlendedRate/BlendedRate";
 import BuyRent from "./Components/BuyvsRent/BuyvsRent";
+import Affordability from "./Components/Affordability/Affordability";
 
 const { type = "aF", w, f } = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
@@ -17,6 +18,7 @@ const calculatorComponents = {
   aF: <ARMvsFixed isMobile={isMobile} screenWidth={screenWidth} />,
   bR: <BlendedRate isMobile={isMobile} screenWidth={screenWidth} />,
   rB: <BuyRent isMobile={isMobile} screenWidth={screenWidth} />,
+  aFF: <Affordability isMobile={isMobile} screenWidth={screenWidth} />,
 };
 
 function App() {

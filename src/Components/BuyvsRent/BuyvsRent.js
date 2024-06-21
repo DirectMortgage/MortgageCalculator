@@ -37,621 +37,103 @@ import { calculateFirstDate } from "../../CommonFunctions/CalcLibrary";
 import { cleanValue } from "../../CommonFunctions/CalcLibrary";
 import { handleCalculateNetGain, stateTaxRate } from "./Function";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  handleAPI,
+  handleGetLoanData,
+} from "../../CommonFunctions/CommonFunctions";
 
-const { type, w, f } = queryStringToObject(window.location?.href || "");
+const { type, w, f, loanId } = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
 
 const headerTabs = [
-    "Purchase Price",
-    "Desired Monthly Payment",
-    "Military BAH",
-  ],
-  locationJson = [
+  "Purchase Price",
+  "Desired Monthly Payment",
+  "Military BAH",
+]; //\n(Basic Allowance for Housing)
+const loanTypeOption = [
     {
-      city: "Salt Lake City",
-      county: "SALT LAKE",
-      state: "UT",
-      zipcode: "84081",
+      text: "Select",
+      value: 0,
     },
     {
-      city: "Edinburg ",
-      county: "Hidalgo",
-      state: "TX",
-      zipcode: "78542",
+      text: "Fixed Rate",
+      value: 1,
     },
     {
-      city: "Chicago  ",
-      county: "Cook",
-      state: "IL",
-      zipcode: "60642",
+      text: "GPM – Graduated Payment Mortgage",
+      value: 2,
     },
     {
-      city: "Sugar Land",
-      county: "FORT BEND ",
-      state: "TX",
-      zipcode: "77498",
+      text: "ARM – Adjustable Rate Mortgage",
+      value: 3,
     },
     {
-      city: "Pinal",
-      county: "Casa Grande ",
-      state: "AZ",
-      zipcode: "85122",
+      text: "Fixed - Interest Only",
+      value: 5,
     },
-    { city: "Florence", county: "Pinal", state: "AZ", zipcode: "85142" },
     {
-      city: "PINAL",
-      county: "San Tan Valley  ",
-      state: "AZ",
-      zipcode: "85140",
+      text: "Other",
+      value: 4,
     },
     {
-      city: "PINAL",
-      county: "Apache Junction ",
-      state: "AZ",
-      zipcode: "85120",
+      text: "Buydown",
+      value: 6,
     },
-    { city: "Florence", county: "Pinal", state: "AZ", zipcode: "85143" },
-    { city: "Florence", county: "Pinal", state: "AZ", zipcode: "85138" },
     {
-      city: "Salt Lake City",
-      county: "SALT LAKE",
-      state: "UT",
-      zipcode: "84129",
+      text: "ARM - Interest Only",
+      value: 7,
     },
     {
-      city: "Richmond ",
-      county: "FORT BEND ",
-      state: "TX",
-      zipcode: "77407",
+      text: "Balloon",
+      value: 8,
     },
     {
-      city: "Montrose ",
-      county: "Montrose",
-      state: "CO",
-      zipcode: "81403",
-    },
-    { city: "Salinas", county: "Monterey", state: "CA", zipcode: "93950" },
-    {
-      city: "Los Angeles",
-      county: "Los Angeles",
-      state: "CA",
-      zipcode: "90703",
-    },
-    { city: "Fresno", county: "Fresno", state: "CA", zipcode: "93737" },
-    {
-      city: "Fort Payne",
-      county: "DEKALB",
-      state: "AL",
-      zipcode: "35968",
-    },
-    {
-      city: "Pinal",
-      county: "Florence ",
-      state: "AZ",
-      zipcode: "85132",
-    },
-    {
-      city: "Pinal",
-      county: "Eloy ",
-      state: "AZ",
-      zipcode: "85131",
-    },
-    {
-      city: "Salt Lake City",
-      county: "SALT LAKE",
-      state: "UT",
-      zipcode: "84009",
-    },
-    { city: "Phoenix", county: "Maricopa", state: "AZ", zipcode: "85027" },
-    {
-      city: "Maywood  ",
-      county: "Cook",
-      state: "IL",
-      zipcode: "60153",
-    },
-    {
-      city: "Queenstown",
-      county: "Queen Annes",
-      state: "MD",
-      zipcode: "21658",
-    },
-    {
-      city: "Quenemo  ",
-      county: "OSAGE ",
-      state: "KS",
-      zipcode: "66528",
-    },
-    {
-      city: "Quimby   ",
-      county: "CHEROKEE  ",
-      state: "IA",
-      zipcode: "51049",
-    },
-    {
-      city: "Quinault ",
-      county: "Grays Harbor",
-      state: "WA",
-      zipcode: "98575",
-    },
-    {
-      city: "Quinby   ",
-      county: "ACCOMACK  ",
-      state: "VA",
-      zipcode: "23423",
-    },
-    {
-      city: "Quincy   ",
-      county: "GADSDEN   ",
-      state: "FL",
-      zipcode: "32351",
-    },
-    {
-      city: "Quincy   ",
-      county: "GADSDEN   ",
-      state: "FL",
-      zipcode: "32353",
-    },
-    {
-      city: "Quincy   ",
-      county: "ADAMS ",
-      state: "IL",
-      zipcode: "62306",
-    },
-    {
-      city: "Quincy   ",
-      county: "LEWIS ",
-      state: "KY",
-      zipcode: "41166",
-    },
-    {
-      city: "Quincy   ",
-      county: "Norfolk",
-      state: "MA",
-      zipcode: "02269",
-    },
-    {
-      city: "Quincy   ",
-      county: "BRANCH",
-      state: "MI",
-      zipcode: "49082",
-    },
-    {
-      city: "Quincy   ",
-      county: "HICKORY   ",
-      state: "MO",
-      zipcode: "65735",
-    },
-    {
-      city: "Quincy   ",
-      county: "LOGAN ",
-      state: "OH",
-      zipcode: "43343",
-    },
-    {
-      city: "Quincy   ",
-      county: "Franklin",
-      state: "PA",
-      zipcode: "17247",
-    },
-    {
-      city: "Quinebaug",
-      county: "WINDHAM ",
-      state: "CT",
-      zipcode: "06262",
-    },
-    {
-      city: "Quinhagak",
-      county: "BETHEL  ",
-      state: "AK",
-      zipcode: "99655",
-    },
-    {
-      city: "Quinnesec",
-      county: "DICKINSON ",
-      state: "MI",
-      zipcode: "49876",
-    },
-    {
-      city: "Quinque  ",
-      county: "Greene",
-      state: "VA",
-      zipcode: "22965",
-    },
-    {
-      city: "Quinter  ",
-      county: "GOVE",
-      state: "KS",
-      zipcode: "67752",
-    },
-    {
-      city: "Quinton  ",
-      county: "Salem",
-      state: "NJ",
-      zipcode: "08072",
-    },
-    {
-      city: "Quinton  ",
-      county: "PITTSBURG ",
-      state: "OK",
-      zipcode: "74561",
-    },
-    {
-      city: "Quinton  ",
-      county: "New Kent",
-      state: "VA",
-      zipcode: "23141",
-    },
-    {
-      city: "Quitaque ",
-      county: "BRISCOE   ",
-      state: "TX",
-      zipcode: "79255",
-    },
-    {
-      city: "Quitman  ",
-      county: "BROOKS",
-      state: "GA",
-      zipcode: "31643",
-    },
-    {
-      city: "Quitman  ",
-      county: "NODAWAY   ",
-      state: "MO",
-      zipcode: "64487",
-    },
-    {
-      city: "Quitman  ",
-      county: "CLARKE",
-      state: "MS",
-      zipcode: "39355",
-    },
-    {
-      city: "Qulin",
-      county: "BUTLER",
-      state: "MO",
-      zipcode: "63961",
-    },
-    {
-      city: "Quogue   ",
-      county: "Suffolk",
-      state: "NY",
-      zipcode: "11959",
-    },
-    {
-      city: "Rabun Gap",
-      county: "RABUN ",
-      state: "GA",
-      zipcode: "30568",
-    },
-    {
-      city: "Raceland ",
-      county: "LAFOURCHE ",
-      state: "LA",
-      zipcode: "70394",
-    },
-    {
-      city: "Rachel   ",
-      county: "MARION",
-      state: "WV",
-      zipcode: "26587",
-    },
-    {
-      city: "Racine   ",
-      county: "MOWER ",
-      state: "MN",
-      zipcode: "55967",
-    },
-    {
-      city: "Racine   ",
-      county: "NEWTON",
-      state: "MO",
-      zipcode: "64858",
-    },
-    {
-      city: "Racine   ",
-      county: "MEIGS ",
-      state: "OH",
-      zipcode: "45771",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53401",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53402",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53403",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53404",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53405",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53406",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53407",
-    },
-    {
-      city: "Racine   ",
-      county: "Racine",
-      state: "WI",
-      zipcode: "53408",
-    },
-    {
-      city: "Racine   ",
-      county: "BOONE ",
-      state: "WV",
-      zipcode: "25165",
-    },
-    { city: "Marysville", county: "Yuba", state: "CA", zipcode: "95972" },
-    {
-      city: "Radcliff ",
-      county: "HARDIN",
-      state: "KY",
-      zipcode: "40159",
-    },
-    {
-      city: "Radcliff ",
-      county: "HARDIN",
-      state: "KY",
-      zipcode: "40160",
-    },
-    {
-      city: "Radcliff ",
-      county: "VINTON",
-      state: "OH",
-      zipcode: "45695",
-    },
-    {
-      city: "Radcliffe",
-      county: "HARDIN",
-      state: "IA",
-      zipcode: "50230",
-    },
-    {
-      city: "Radersburg",
-      county: "BROADWATER",
-      state: "MT",
-      zipcode: "59641",
-    },
-    {
-      city: "Radford  ",
-      county: "Radford City",
-      state: "VA",
-      zipcode: "24142",
-    },
-    {
-      city: "Radford  ",
-      county: "Radford City",
-      state: "VA",
-      zipcode: "24143",
-    },
-    {
-      city: "Radiant  ",
-      county: "Madison",
-      state: "VA",
-      zipcode: "22732",
-    },
-    {
-      city: "Radisson ",
-      county: "SAWYER",
-      state: "WI",
-      zipcode: "54867",
-    },
-    {
-      city: "Radium Springs  ",
-      county: "Dona Ana",
-      state: "NM",
-      zipcode: "88054",
-    },
-    {
-      city: "Radnor   ",
-      county: "Delaware",
-      state: "OH",
-      zipcode: "43066",
-    },
-    {
-      city: "Radom",
-      county: "WASHINGTON",
-      state: "IL",
-      zipcode: "62876",
-    },
-    {
-      city: "Raeford  ",
-      county: "HOKE",
-      state: "NC",
-      zipcode: "28376",
-    },
-    {
-      city: "Ragland  ",
-      county: "SAINT CLAIR",
-      state: "AL",
-      zipcode: "35131",
-    },
-    {
-      city: "Ragland  ",
-      county: "MINGO ",
-      state: "WV",
-      zipcode: "25690",
-    },
-    {
-      city: "Ragley   ",
-      county: "BEAUREGARD",
-      state: "LA",
-      zipcode: "70657",
-    },
-    {
-      city: "Ragsdale ",
-      county: "KNOX",
-      state: "IN",
-      zipcode: "47573",
-    },
-    {
-      city: "Rahway   ",
-      county: "Union",
-      state: "NJ",
-      zipcode: "07065",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09494",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09496",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09509",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09510",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09554",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09589",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09601",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09602",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09603",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09604",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09605",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09606",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09610",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09613",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09617",
-    },
-    {
-      city: "APO",
-      state: "AE",
-      zipcode: "09623",
+      text: "HELOC",
+      value: 9,
     },
   ],
-  statePropertyTax = [
-    { Id: 1, StateCode: "AK", RETaxRate: 0.0118 },
-    { Id: 2, StateCode: "AL", RETaxRate: 0.0043 },
-    { Id: 3, StateCode: "AR", RETaxRate: 0.0062 },
-    { Id: 4, StateCode: "AZ", RETaxRate: 0.0081 },
-    { Id: 5, StateCode: "CA", RETaxRate: 0.0081 },
-    { Id: 6, StateCode: "CO", RETaxRate: 0.006 },
-    { Id: 7, StateCode: "CT", RETaxRate: 0.0197 },
-    { Id: 8, StateCode: "DC", RETaxRate: 0.0056 },
-    { Id: 9, StateCode: "DE", RETaxRate: 0.0054 },
-    { Id: 10, StateCode: "FL", RETaxRate: 0.0106 },
-    { Id: 11, StateCode: "GA", RETaxRate: 0.0094 },
-    { Id: 12, StateCode: "HI", RETaxRate: 0.0027 },
-    { Id: 13, StateCode: "IA", RETaxRate: 0.0148 },
-    { Id: 14, StateCode: "ID", RETaxRate: 0.0076 },
-    { Id: 15, StateCode: "IL", RETaxRate: 0.023 },
-    { Id: 16, StateCode: "IN", RETaxRate: 0.0087 },
-    { Id: 17, StateCode: "KS", RETaxRate: 0.014 },
-    { Id: 18, StateCode: "KY", RETaxRate: 0.0085 },
-    { Id: 19, StateCode: "LA", RETaxRate: 0.0049 },
-    { Id: 20, StateCode: "MA", RETaxRate: 0.012 },
-    { Id: 21, StateCode: "MD", RETaxRate: 0.011 },
-    { Id: 22, StateCode: "ME", RETaxRate: 0.013 },
-    { Id: 23, StateCode: "MI", RETaxRate: 0.0178 },
-    { Id: 24, StateCode: "MN", RETaxRate: 0.0118 },
-    { Id: 25, StateCode: "MO", RETaxRate: 0.01 },
-    { Id: 26, StateCode: "MS", RETaxRate: 0.0079 },
-    { Id: 27, StateCode: "MT", RETaxRate: 0.0085 },
-    { Id: 28, StateCode: "NC", RETaxRate: 0.0085 },
-    { Id: 29, StateCode: "ND", RETaxRate: 0.0112 },
-    { Id: 30, StateCode: "NE", RETaxRate: 0.0185 },
-    { Id: 31, StateCode: "NH", RETaxRate: 0.0215 },
-    { Id: 32, StateCode: "NJ", RETaxRate: 0.0235 },
-    { Id: 33, StateCode: "NM", RETaxRate: 0.0074 },
-    { Id: 34, StateCode: "NV", RETaxRate: 0.0085 },
-    { Id: 35, StateCode: "NY", RETaxRate: 0.0162 },
-    { Id: 36, StateCode: "OH", RETaxRate: 0.0156 },
-    { Id: 37, StateCode: "OK", RETaxRate: 0.0088 },
-    { Id: 38, StateCode: "OR", RETaxRate: 0.0108 },
-    { Id: 39, StateCode: "PA", RETaxRate: 0.0153 },
-    { Id: 40, StateCode: "PR", RETaxRate: 0.08 },
-    { Id: 41, StateCode: "RI", RETaxRate: 0.0163 },
-    { Id: 42, StateCode: "SC", RETaxRate: 0.0057 },
-    { Id: 43, StateCode: "SD", RETaxRate: 0.0134 },
-    { Id: 44, StateCode: "TN", RETaxRate: 0.0075 },
-    { Id: 45, StateCode: "TX", RETaxRate: 0.019 },
-    { Id: 46, StateCode: "UT", RETaxRate: 0.0068 },
-    { Id: 47, StateCode: "VA", RETaxRate: 0.008 },
-    { Id: 48, StateCode: "VT", RETaxRate: 0.0174 },
-    { Id: 49, StateCode: "WA", RETaxRate: 0.0108 },
-    { Id: 50, StateCode: "WI", RETaxRate: 0.0196 },
-    { Id: 51, StateCode: "WV", RETaxRate: 0.0058 },
-    { Id: 52, StateCode: "WY", RETaxRate: 0.0061 },
+  agencyTypeOptions = [
+    {
+      text: "Select",
+      value: 0,
+    },
+    {
+      text: "VA",
+      value: 1,
+    },
+    {
+      text: "FHA",
+      value: 2,
+    },
+    {
+      text: "Conventional",
+      value: 3,
+    },
+    {
+      text: "USDA/RHS",
+      value: 4,
+    },
+    {
+      text: "Utah Housing",
+      value: 6,
+    },
+    {
+      text: "Chenoa",
+      value: 7,
+    },
+    {
+      text: "Non-QM",
+      value: 8,
+    },
+    {
+      text: "Jumbo",
+      value: 9,
+    },
+    // {
+    //   text: "Other >>",
+    //   value: 5,
+    // },
   ];
-
 const inputDetails = {
   clientName: "",
   location: "",
@@ -670,7 +152,7 @@ const inputDetails = {
   propTaxIncrease: 2,
   costToSell: 6,
   appCalcCustomRate: 4,
-  monthlyRent: 2000,
+  monthlyRent: 13000,
   rentersInsurance: 30,
   annualRentIncrease: 4.5,
   appCalcType: "custom",
@@ -895,7 +377,7 @@ const AmortSchedule = ({ amortSchedule }) => {
         { Amount: 0, Principal: 0, Interest: 0, Balance: 0 }
       );
 
-      totals["stBalance"] = yearArr[11]["Balance"];
+      totals["Balance"] = yearArr[11]["Balance"];
       totals["paymentNumber"] =
         (iTableData[iTableData.length - 1]?.["paymentNumber"] || 0) + 1;
       totals["isYearly"] = true;
@@ -907,7 +389,6 @@ const AmortSchedule = ({ amortSchedule }) => {
 
       iTableData.push(totals);
     }
-
     setTableData([...iTableData]);
   }, [activeTab]);
 
@@ -980,10 +461,14 @@ const AmortSchedule = ({ amortSchedule }) => {
               {activeTab !== 0 ? (
                 <tr>
                   <td>{payment.paymentNumber}</td>
-                  <td>{formatCurrency(Math.round(payment.Amount))}</td>
-                  <td>{formatCurrency(Math.round(payment.Interest))}</td>
-                  <td>{formatCurrency(Math.round(payment.Principal))}</td>
-                  <td>{formatCurrency(Math.round(payment.stBalance))}</td>
+                  <td>{formatCurrency(parseInt(payment.Amount))}</td>
+                  <td>{formatCurrency(parseInt(payment.Interest))}</td>
+                  <td>{formatCurrency(parseInt(payment.Principal))}</td>
+                  <td>
+                    {formatCurrency(
+                      parseInt(payment.Balance > 0 ? payment.Balance : 0)
+                    )}
+                  </td>
                 </tr>
               ) : (
                 <CollapsibleRow payment={payment} defaultIsOpen={true}>
@@ -991,10 +476,16 @@ const AmortSchedule = ({ amortSchedule }) => {
                     return (
                       <tr key={row.paymentNumber}>
                         <td>{row.paymentNumber}</td>
-                        <td>{formatCurrency(Math.round(row.Amount))}</td>
-                        <td>{formatCurrency(Math.round(row.Interest))}</td>
-                        <td>{formatCurrency(Math.round(row.Principal))}</td>
-                        <td>{formatCurrency(Math.round(row.stBalance))}</td>
+                        <td>{formatCurrency(parseInt(row.Amount))}</td>
+                        <td>{formatCurrency(parseInt(row.Interest))}</td>
+                        <td>{formatCurrency(parseInt(row.Principal))}</td>
+                        <td>
+                          {formatCurrency(
+                            parseInt(
+                              row.Balance > 0 ? row.Balance : row.Balance
+                            )
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
@@ -1454,6 +945,7 @@ const TaxRateTableRow = ({
 
 const BuyRent = () => {
   const [year, setYear] = useState(5),
+    [statePropertyTax, setStatePropertyTax] = useState([]),
     handleChange = (newValues) => {
       setYear(newValues[1]);
     },
@@ -1500,6 +992,90 @@ const BuyRent = () => {
     });
   };
 
+  useEffect(() => {
+    (async () => {
+      setStatePropertyTax(await handleGetData("GetStateTax"));
+    })();
+    (async () => {
+      let response = await handleGetLoanData(loanId),
+        {
+          "Purchase Price": purValue,
+          "Mortgage Insurance Premium": miAmt,
+          ltv,
+          loanTerm,
+          rate,
+          loanAmount: loanAmt,
+          ["Appraised Value"]: appraisedValue,
+          ["Monthly Payment Factor %"]: iMiPercent,
+          ["Til Prepayment"]: tilPrePay,
+          zipCode,
+          "Agency (Loan) Type": loanType,
+          amortizeType,
+        } = response;
+
+      amortizeType = Number(amortizeType);
+      loanType = Number(loanType);
+      let loanTypeText = agencyTypeOptions.filter(
+          ({ value }) => value == loanType
+        )[0]["text"],
+        amortizeTypeText = loanTypeOption.filter(
+          ({ value }) => value == amortizeType
+        )[0]["text"];
+
+      handleAPI({
+        name: "GetLocationData",
+        params: { text: zipCode },
+      })
+        .then((response) => {
+          const location = JSON.parse(response || '{"Table":[]}')["Table"][0][
+            "label"
+          ];
+          setInputSource((prevInputSource) => {
+            return {
+              ...prevInputSource,
+              location,
+            };
+          });
+        })
+        .catch((e) => console.error("Error From GetLocationData ====>", e));
+
+      loanTerm = loanTerm / 12;
+      rate = formatPercentage(rate * 100);
+      ltv = formatPercentage(ltv);
+
+      setInputSource((prevInputSource) => {
+        return {
+          ...prevInputSource,
+          ...response,
+          rate,
+          loanTerm,
+          ltvRatio: ltv,
+          purValue,
+          miAmt,
+          loanAmt,
+          appraisedValue,
+          iMiPercent,
+          tilPrePay,
+          loanTypeText,
+          amortizeTypeText,
+        };
+      });
+
+      console.log(response);
+    })();
+  }, []);
+
+  const handleGetData = async (name, params) => {
+    return await handleAPI({
+      name,
+      params,
+    })
+      .then((response) => {
+        response = JSON["parse"](response)["Table"];
+        return response;
+      })
+      .catch((e) => console.error("Error From GetLoanDetails ====>", e));
+  };
   const getComparisonYearArray = (year) => {
     return year == 1
       ? [1]
@@ -1597,10 +1173,10 @@ const BuyRent = () => {
       { location, purValue } = iTempInputSource;
     if (location) {
       purValue = cleanValue(purValue);
-      location = location.split(", ").slice(1, 4);
+      location = location.split(", ");
 
       const statePropertyObj = statePropertyTax.filter(
-          (taxDetails) => taxDetails["StateCode"] === location[1]?.trim()
+          (taxDetails) => taxDetails["StateCode"] === location[2]?.trim()
         ),
         estPropTaxPercent = statePropertyObj[0]["RETaxRate"];
 
@@ -1626,19 +1202,29 @@ const BuyRent = () => {
         miAmt,
         desMonthlyPayment,
         amortizeType,
+        amortizetype,
         loanAmt,
         loanType,
+        appraisedValue,
         upfrontMI = 0,
         armRateInitialAdj = 12,
+        iMiPercent,
+        tilPrePay,
+        ["First Payment Date"]: firstPaymentDate,
       } = iInputSource,
-      firstPaymentDate = formatNewDate(
-        getFirstDateFormDisbursement(calculateFirstDate(new Date(), true, 2))
-      ),
+      finalAdjRate = 0,
       ratesArray = [];
-    let loanTerm = term * 12;
 
-    amortizeType = Number(amortizeType);
+    let loanTerm = term * 12;
+    firstPaymentDate =
+      new Date(firstPaymentDate) ||
+      formatNewDate(
+        getFirstDateFormDisbursement(calculateFirstDate(new Date(), true, 2))
+      );
+    amortizeType = Number(amortizetype || amortizeType);
     armRateInitialAdj = Number(armRateInitialAdj);
+    loanAmt = Number(cleanValue(loanAmt));
+    purValue = Number(cleanValue(purValue));
 
     //Non ARM loans block
     if (amortizeType !== 3 && amortizeType !== 7) {
@@ -1652,11 +1238,15 @@ const BuyRent = () => {
     // ARM loans block
     else {
       rate = parseFloat(rate);
-      let armGrossMargin = 2,
-        armLifeCap = 0.05,
-        armIndexValue = 0, //check this value
-        armRateSubAdj = 12,
-        newRate = parseFloat(rate / 100);
+      let newRate = parseFloat(rate / 100),
+        {
+          armGrossMargin = 0.2,
+          armLifeCap = 0.5,
+          armIndexValue = 0,
+          armRateInitialAdj = 12,
+          armRateSubAdj = 12,
+          armRateAdjCap = 0,
+        } = iInputSource;
 
       armLifeCap = armLifeCap + rate;
       //=============== Initial ===============
@@ -1669,9 +1259,10 @@ const BuyRent = () => {
       //=============== Initial - End ===============
 
       //=============== 1st ===============
+
       newRate = updateARMRate(
         newRate,
-        0,
+        armRateAdjCap,
         armGrossMargin,
         armIndexValue,
         armLifeCap
@@ -1687,7 +1278,7 @@ const BuyRent = () => {
       //=============== 2nd ===============
       newRate = updateARMRate(
         newRate,
-        0,
+        armRateSubAdj,
         armGrossMargin,
         armIndexValue,
         armLifeCap
@@ -1699,25 +1290,27 @@ const BuyRent = () => {
         totalTerm: loanTerm,
         noteRate: newRate,
       });
-      //=============== 2nd - End ===============
+
+      finalAdjRate = newRate;
     }
 
     const cashFlow = calculateCashFlows(
-      cleanValue(purValue),
-      loanTerm,
-      firstPaymentDate,
-      ratesArray,
-      miAmt
-    );
-    const {
-      Amount: monthlyPayment,
-      intRate: movingRate,
-      intRate: noteRate,
-    } = cashFlow[0];
+        loanAmt,
+        loanTerm,
+        firstPaymentDate,
+        ratesArray,
+        miAmt
+      ),
+      {
+        Amount: monthlyPayment,
+        intRate: movingRate,
+        intRate: noteRate,
+      } = cashFlow[0];
+
     let zeroFlow = 0,
       disbursementDates = formatDate(calculateFirstDate(new Date(), true, 2)); //getFirstDateFormDisbursement(disbursementDates)
 
-    zeroFlow = 0 - loanAmt;
+    zeroFlow = tilPrePay - loanAmt;
 
     if (zeroFlow >= 0) {
       console.error("Invalid zeroFlow");
@@ -1731,12 +1324,12 @@ const BuyRent = () => {
       cashFlow,
       loanType,
       purchasePrice: cleanValue(purValue),
-      appraisedValue: loanAmt,
+      appraisedValue: appraisedValue || loanAmt,
       loanAmount: loanAmt,
       upFrontMIPFactor: upfrontMI,
       loanTerm,
       fhaCaseDate: undefined,
-      iMiPercent: miAmt / loanAmt / 100,
+      iMiPercent: iMiPercent || miAmt / loanAmt / 100,
       mipAmt: miAmt,
       monthlyPayment: monthlyPayment || desMonthlyPayment,
       movingRate,
@@ -1752,13 +1345,9 @@ const BuyRent = () => {
     }
     const ARP = await handleCalculateARP(aprParams);
 
-    console.log("ARP ===> ", { ARP });
     iInputSource["purValue"] = cleanValue(iInputSource["purValue"]);
     inputSource["apr"] = ARP;
     const iOutPutDetails = handleCalculateNetGain(iInputSource, cashFlow, year);
-
-    console.log("cashFlow ===> ", cashFlow);
-    console.log("outPutDetails ===> ", iOutPutDetails);
 
     setNetGainDetails(iOutPutDetails["yearlyValues"]);
     setOutPutDetails(iOutPutDetails);
@@ -1773,17 +1362,16 @@ const BuyRent = () => {
 
   const [downPaymentDetails, setDownPaymentDetails] = useState([]);
 
-  const handleGetDownPaymentDetails = ({ loanAmt }) => {
-    const downPaymentPercent = [3, 3.5, 5, 10, 15, 20, 25, 100];
-
-    const iDownPaymentDetails = downPaymentPercent.map((percentage) => {
-      const downPayment = loanAmt * (percentage / 100);
-      return {
-        percentage,
-        downPayment,
-        loanAmt: loanAmt - downPayment,
-      };
-    });
+  const handleGetDownPaymentDetails = ({ loanAmt, purValue }) => {
+    const downPaymentPercent = [3, 3.5, 5, 10, 15, 20, 25, 100],
+      iDownPaymentDetails = downPaymentPercent.map((percentage) => {
+        const downPayment = purValue * (percentage / 100);
+        return {
+          percentage,
+          downPayment,
+          loanAmt: purValue - downPayment,
+        };
+      });
     return iDownPaymentDetails;
   };
 
@@ -1904,6 +1492,9 @@ const BuyRent = () => {
                       name: "location",
                     });
                   }}
+                  onChangeText={(test) => {
+                    console.log(test);
+                  }}
                   inputBoxStyle={{ fontFamily: "Inter" }}
                   validate={false}
                   style={{ marginBottom: 25, paddingLeft: 10 }}
@@ -1913,20 +1504,6 @@ const BuyRent = () => {
                     icon={faLocationDot}
                     style={{ marginRight: 5 }}
                   />
-                  options={locationJson.map((item) => {
-                    return {
-                      label:
-                        item.city +
-                        ", " +
-                        item.county +
-                        ", " +
-                        item.state +
-                        ", " +
-                        item.zipcode +
-                        ", USA",
-                      //,                      value: item.zipcode.toString(),
-                    };
-                  })}
                   value={inputSource["location"]}
                   symbol={
                     <span
@@ -1986,19 +1563,6 @@ const BuyRent = () => {
                         handleInputSource({ value, name: "ltvRatio" });
                       }}
                       value={inputSource["ltvRatio"]}
-                      symbol={
-                        <span
-                          style={{
-                            position: "absolute",
-                            right: 15,
-                            fontFamily: "inter",
-                            fontSize: 14,
-                          }}
-                        >
-                          %
-                        </span>
-                      }
-                      symbolPosition="right"
                     />
                   </>
                 ) : activeTab === 2 ? (
@@ -2027,37 +1591,23 @@ const BuyRent = () => {
                   >
                     <InputBox
                       type="text"
+                      format="percentage"
                       style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
                       label="Rate"
-                      format="percentage"
                       placeholder="Rate"
                       onChangeText={({ target }) => {
                         const { value } = target;
                         handleInputSource({ value, name: "rate" });
                       }}
                       value={inputSource["rate"]}
-                      symbol={
-                        <span
-                          style={{
-                            position: "absolute",
-                            right: 15,
-                            fontFamily: "inter",
-                            fontSize: 14,
-                          }}
-                        >
-                          %
-                        </span>
-                      }
-                      symbolPosition="right"
                     />
                     <InputBox
                       type="text"
                       style={{ marginBottom: 25 }}
                       inputBoxStyle={{ fontFamily: "Inter" }}
                       validate={false}
-                      format="percentage"
                       label="Term"
                       placeholder="Term"
                       onChangeText={({ target }) => {
@@ -2101,19 +1651,18 @@ const BuyRent = () => {
                 disabled={handleValidateFields()}
                 onClick={() => {
                   try {
-                    let iInputSource = inputSource;
-
-                    if (activeTab !== 0) iInputSource["purValue"] = 336905;
-
-                    let { purValue } = iInputSource;
+                    let iInputSource = inputSource,
+                      { purValue, loanAmt } = iInputSource;
                     purValue = Number(cleanValue(purValue));
+                    loanAmt = Number(cleanValue(loanAmt));
                     const iDownPaymentDetails = handleGetDownPaymentDetails({
-                        loanAmt: purValue,
+                        loanAmt,
+                        purValue,
                       }),
-                      location = iInputSource.location.split(", ").slice(1, 4),
+                      location = iInputSource.location.split(", "),
                       statePropertyObj = statePropertyTax.filter(
                         (taxDetails) =>
-                          taxDetails["StateCode"] === location[1]?.trim()
+                          taxDetails["StateCode"] === location[2]?.trim()
                       ),
                       estPropTaxPercent = statePropertyObj[0]["RETaxRate"];
 
@@ -2124,7 +1673,10 @@ const BuyRent = () => {
                     );
                     iInputSource["estPropTaxPercent"] = estPropTaxPercent;
                     iInputSource["estPropTaxPercentStatic"] = estPropTaxPercent;
-                    iInputSource["loanAmt"] = iDownPaymentDetails[2]["loanAmt"];
+                    if (!loanAmt) {
+                      iInputSource["loanAmt"] =
+                        iDownPaymentDetails[2]["loanAmt"];
+                    }
                     iInputSource["locationText"] = location.join(", ");
 
                     setTempInputSource((prevTempInputSource) => {
@@ -2241,7 +1793,7 @@ const BuyRent = () => {
                     <div className="rbWord">{inputSource["term"]} Years</div>
                     <div className="rbWord">
                       {inputSource["loanTypeText"]},
-                      {inputSource["amortizeTypeText"]}, {inputSource["rate"]}%
+                      {inputSource["amortizeTypeText"]}, {inputSource["rate"]}
                     </div>
                   </div>
                   <button
@@ -2769,19 +2321,6 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              right: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            %
-                          </span>
-                        }
-                        symbolPosition="right"
                         style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -2892,20 +2431,6 @@ const BuyRent = () => {
                           // size={25}
                           style={{ marginRight: 5 }}
                         />
-                        options={locationJson.map((item) => {
-                          return {
-                            label:
-                              item.city +
-                              ", " +
-                              item.county +
-                              ", " +
-                              item.state +
-                              ", " +
-                              item.zipcode +
-                              ", USA",
-                            //   value: item.zipcode.toString(),
-                          };
-                        })}
                         value={tempInputSource["location"]}
                         symbol={
                           <span
@@ -3056,19 +2581,6 @@ const BuyRent = () => {
                             parseFloat(tempInputSource["estPropTaxPercent"]) *
                               100
                           )}
-                          symbol={
-                            <span
-                              style={{
-                                position: "absolute",
-                                right: 15,
-                                fontFamily: "inter",
-                                fontSize: 14,
-                              }}
-                            >
-                              %
-                            </span>
-                          }
-                          symbolPosition="right"
                         />
                       </div>
                       <InputBox
@@ -3123,19 +2635,6 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              right: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            %
-                          </span>
-                        }
-                        symbolPosition="right"
                         style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3153,19 +2652,6 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              right: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            %
-                          </span>
-                        }
-                        symbolPosition="right"
                         style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3224,19 +2710,6 @@ const BuyRent = () => {
                                 });
                               }}
                               value={tempInputSource["appCalcCustomRate"]}
-                              symbol={
-                                <span
-                                  style={{
-                                    position: "absolute",
-                                    right: 15,
-                                    fontFamily: "inter",
-                                    fontSize: 14,
-                                  }}
-                                >
-                                  %
-                                </span>
-                              }
-                              symbolPosition="right"
                             />
                           </>
                         ) : (
@@ -3296,19 +2769,6 @@ const BuyRent = () => {
                       </div>
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              right: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            %
-                          </span>
-                        }
-                        symbolPosition="right"
                         style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3439,48 +2899,7 @@ const BuyRent = () => {
                       <Dropdown
                         isValid={false}
                         label="Agency Type"
-                        options={[
-                          {
-                            text: "Select",
-                            value: 0,
-                          },
-                          {
-                            text: "VA",
-                            value: 1,
-                          },
-                          {
-                            text: "FHA",
-                            value: 2,
-                          },
-                          {
-                            text: "Conventional",
-                            value: 3,
-                          },
-                          {
-                            text: "USDA/RHS",
-                            value: 4,
-                          },
-                          {
-                            text: "Utah Housing",
-                            value: 6,
-                          },
-                          {
-                            text: "Chenoa",
-                            value: 7,
-                          },
-                          {
-                            text: "Non-QM",
-                            value: 8,
-                          },
-                          {
-                            text: "Jumbo",
-                            value: 9,
-                          },
-                          // {
-                          //   text: "Other >>",
-                          //   value: 5,
-                          // },
-                        ]}
+                        options={agencyTypeOptions}
                         value={tempInputSource["loanType"]}
                         onSelect={({ value, text }) => {
                           handleTempInputSource({
@@ -3516,48 +2935,7 @@ const BuyRent = () => {
                         style={{ marginBottom: 25 }}
                         isValid={false}
                         label="Loan Type"
-                        options={[
-                          {
-                            text: "Select",
-                            value: "0",
-                          },
-                          {
-                            text: "Fixed Rate",
-                            value: "1",
-                          },
-                          {
-                            text: "GPM – Graduated Payment Mortgage",
-                            value: "2",
-                          },
-                          {
-                            text: "ARM – Adjustable Rate Mortgage",
-                            value: "3",
-                          },
-                          {
-                            text: "Fixed - Interest Only",
-                            value: "5",
-                          },
-                          {
-                            text: "Other",
-                            value: "4",
-                          },
-                          {
-                            text: "Buydown",
-                            value: "6",
-                          },
-                          {
-                            text: "ARM - Interest Only",
-                            value: "7",
-                          },
-                          {
-                            text: "Balloon",
-                            value: "8",
-                          },
-                          {
-                            text: "HELOC",
-                            value: "9",
-                          },
-                        ]}
+                        options={loanTypeOption}
                         value={tempInputSource["amortizeType"]}
                         onSelect={({ value, text }) => {
                           handleTempInputSource({
@@ -3593,19 +2971,6 @@ const BuyRent = () => {
                       )}
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              right: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            %
-                          </span>
-                        }
-                        symbolPosition="right"
                         style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
@@ -3767,19 +3132,6 @@ const BuyRent = () => {
                       />
                       <InputBox
                         type="text"
-                        symbol={
-                          <span
-                            style={{
-                              position: "absolute",
-                              right: 15,
-                              fontFamily: "inter",
-                              fontSize: 14,
-                            }}
-                          >
-                            %
-                          </span>
-                        }
-                        symbolPosition="right"
                         style={{ marginBottom: 25 }}
                         inputBoxStyle={{ fontFamily: "Inter" }}
                         validate={false}
