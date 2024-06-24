@@ -997,71 +997,73 @@ const BuyRent = () => {
       setStatePropertyTax(await handleGetData("GetStateTax"));
     })();
     (async () => {
-      let response = await handleGetLoanData(loanId),
-        {
-          "Purchase Price": purValue,
-          "Mortgage Insurance Premium": miAmt,
-          ltv,
-          loanTerm,
-          rate,
-          loanAmount: loanAmt,
-          ["Appraised Value"]: appraisedValue,
-          ["Monthly Payment Factor %"]: iMiPercent,
-          ["Til Prepayment"]: tilPrePay,
-          zipCode,
-          "Agency (Loan) Type": loanType,
-          amortizeType,
-        } = response;
+      if (loanId !== "undefined") {
+        let response = await handleGetLoanData(loanId),
+          {
+            "Purchase Price": purValue,
+            "Mortgage Insurance Premium": miAmt,
+            ltv,
+            loanTerm,
+            rate,
+            loanAmount: loanAmt,
+            ["Appraised Value"]: appraisedValue,
+            ["Monthly Payment Factor %"]: iMiPercent,
+            ["Til Prepayment"]: tilPrePay,
+            zipCode,
+            "Agency (Loan) Type": loanType,
+            amortizeType,
+          } = response;
 
-      amortizeType = Number(amortizeType);
-      loanType = Number(loanType);
-      let loanTypeText = agencyTypeOptions.filter(
-          ({ value }) => value == loanType
-        )[0]["text"],
-        amortizeTypeText = loanTypeOption.filter(
-          ({ value }) => value == amortizeType
-        )[0]["text"];
+        amortizeType = Number(amortizeType);
+        loanType = Number(loanType);
+        let loanTypeText = agencyTypeOptions.filter(
+            ({ value }) => value == loanType
+          )[0]["text"],
+          amortizeTypeText = loanTypeOption.filter(
+            ({ value }) => value == amortizeType
+          )[0]["text"];
 
-      handleAPI({
-        name: "GetLocationData",
-        params: { text: zipCode },
-      })
-        .then((response) => {
-          const location = JSON.parse(response || '{"Table":[]}')["Table"][0][
-            "label"
-          ];
-          setInputSource((prevInputSource) => {
-            return {
-              ...prevInputSource,
-              location,
-            };
-          });
+        handleAPI({
+          name: "GetLocationData",
+          params: { text: zipCode },
         })
-        .catch((e) => console.error("Error From GetLocationData ====>", e));
+          .then((response) => {
+            const location = JSON.parse(response || '{"Table":[]}')["Table"][0][
+              "label"
+            ];
+            setInputSource((prevInputSource) => {
+              return {
+                ...prevInputSource,
+                location,
+              };
+            });
+          })
+          .catch((e) => console.error("Error From GetLocationData ====>", e));
 
-      loanTerm = loanTerm / 12;
-      rate = formatPercentage(rate * 100);
-      ltv = formatPercentage(ltv);
+        loanTerm = loanTerm / 12;
+        rate = formatPercentage(rate * 100);
+        ltv = formatPercentage(ltv);
 
-      setInputSource((prevInputSource) => {
-        return {
-          ...prevInputSource,
-          ...response,
-          rate,
-          loanTerm,
-          ltvRatio: ltv,
-          purValue,
-          miAmt,
-          loanAmt,
-          appraisedValue,
-          iMiPercent,
-          tilPrePay,
-          loanTypeText,
-          amortizeTypeText,
-        };
-      });
+        setInputSource((prevInputSource) => {
+          return {
+            ...prevInputSource,
+            ...response,
+            rate,
+            loanTerm,
+            ltvRatio: ltv,
+            purValue,
+            miAmt,
+            loanAmt,
+            appraisedValue,
+            iMiPercent,
+            tilPrePay,
+            loanTypeText,
+            amortizeTypeText,
+          };
+        });
 
-      console.log(response);
+        console.log(response);
+      }
     })();
   }, []);
 

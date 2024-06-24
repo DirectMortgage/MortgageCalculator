@@ -590,56 +590,67 @@ const ARMvsFixed = (props) => {
 
   useEffect(() => {
     (async () => {
-      let response = await handleGetLoanData(loanId);
+      if (loanId !== "undefined") {
+        let response = await handleGetLoanData(loanId);
+        let {
+          loanAmount,
+          "Monthly Payment Factor %": monthlyPaymentFactorPercent,
+          amortizeType,
+          loanTerm,
+          rate,
+          armGrossMargin = 0.2,
+          armRateInitialAdj = 84,
+          armLifeCap = 0.5,
+          armIndexValue = 0,
+          armRateSubAdj = 12,
+          armRateAdjCap = 0,
+        } = response;
+        armGrossMargin = armGrossMargin || 0.2;
+        armRateInitialAdj = armRateInitialAdj || 84;
+        armLifeCap = armLifeCap || 0.5;
+        armIndexValue = armIndexValue || 0;
+        armRateSubAdj = armRateSubAdj || 12;
+        armRateAdjCap = armRateAdjCap || 0;
 
-      let {
-        loanAmount,
-        "Monthly Payment Factor %": monthlyPaymentFactorPercent,
-        amortizeType,
-        loanTerm,
-        armGrossMargin = 0.2,
-        rate,
-        armRateInitialAdj = 12,
-        armLifeCap = 0.5,
-        armIndexValue = 0,
-        armRateSubAdj = 12,
-        armRateAdjCap = 0,
-      } = response;
+        response["Monthly Payment Factor %"] =
+          monthlyPaymentFactorPercent * 100;
 
-      response["Monthly Payment Factor %"] = monthlyPaymentFactorPercent * 100;
+        loanTerm = loanTerm / 12;
+        debugger;
+        setInputDetails({
+          loanAmount: formatCurrency(loanAmount),
+          loanTerm,
+          armGrossMargin,
+          armRateInitialAdj,
+          armTerm: 7,
+          armLifeCap,
+          armIndexValue,
+          armRateSubAdj,
+          armRateAdjCap,
+          [[3, 7].includes(parseInt(amortizeType)) ? "armRate" : "fixedRate"]:
+            formatPercentage(rate * 100),
+          [![3, 7].includes(parseInt(amortizeType)) ? "armRate" : "fixedRate"]:
+            formatPercentage(
+              ![3, 7].includes(parseInt(amortizeType)) ? 6 : 6.75
+            ),
+          initialAdjustmentMonths: armRateInitialAdj,
+        });
+        setArmAdjustmentYears(armRateInitialAdj / 12);
+        const iLoanInputDetails = loanInputDetails;
+        iLoanInputDetails.forEach((field) => {
+          const { name, formatType } = field,
+            value = response[name];
 
-      loanTerm = loanTerm / 12;
+          field["value"] =
+            formatType === "%"
+              ? formatCurrency(value)
+              : formatType === "$"
+              ? formatCurrency(value)
+              : value;
+        });
 
-      setInputDetails({
-        loanAmount: formatCurrency(loanAmount),
-        loanTerm,
-        armGrossMargin,
-        armRateInitialAdj,
-        armTerm: 7,
-        armLifeCap,
-        armIndexValue,
-        armRateSubAdj,
-        armRateAdjCap,
-        [[3, 7].includes(parseInt(amortizeType)) ? "armRate" : "fixedRate"]:
-          formatPercentage(rate * 100),
-        [![3, 7].includes(parseInt(amortizeType)) ? "armRate" : "fixedRate"]:
-          formatPercentage(![3, 7].includes(parseInt(amortizeType)) ? 6 : 6.75),
-        initialAdjustmentMonths: armRateInitialAdj,
-      });
-      const iLoanInputDetails = loanInputDetails;
-      iLoanInputDetails.forEach((field) => {
-        const { name, formatType } = field,
-          value = response[name];
-
-        field["value"] =
-          formatType === "%"
-            ? formatCurrency(value)
-            : formatType === "$"
-            ? formatCurrency(value)
-            : value;
-      });
-
-      setLoanInputDetails([...iLoanInputDetails]);
+        setLoanInputDetails([...iLoanInputDetails]);
+      }
     })();
   }, []);
 
