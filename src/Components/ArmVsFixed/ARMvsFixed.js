@@ -590,7 +590,7 @@ const ARMvsFixed = (props) => {
 
   useEffect(() => {
     (async () => {
-      if (loanId !== "undefined") {
+      if (loanId !== "undefined" && loanId) {
         let response = await handleGetLoanData(loanId);
         let {
           loanAmount,

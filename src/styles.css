@@ -219,7 +219,9 @@ g.xy {
   background-color: #fff;
   border-radius: 50px;
 }
-.fa-circle-play path {
+.fa-circle-play path,
+.svg-inline--fa.fa-house path,
+.svg-inline--fa.fa-chart-simple path {
   color: #508bc9;
 }
 .brResultSection {
@@ -923,5 +925,57 @@ path.xdivider.crisp {
   overflow: hidden;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
   margin-top: 15px;
+}
+#tblTotalPayment {
+  width: 100%;
+}
+table#tblTotalPayment tr:nth-child(odd) td {
+  background-color: #eee;
+  padding: 5px;
+}
+table#tblTotalPayment td:first-child {
+  display: flex;
+  justify-content: center;
+}
+.aFFContainer .tableWrapper {
+  border: 1px solid #e5e5e5;
+  height: auto;
+  width: auto;
+  margin: 2px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.affordTable {
+  width: 100%;
+}
+table.altTable.affordTable tr:nth-child(odd) td {
+  background-color: #eee;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.affordTable td {
+  text-align: center;
+  padding: 5px;
+  width: 25%;
+}
+.tblOverview {
+  width: 100%;
+}
+.tblOverview th {
+  text-align: left;
+  padding: 5px;
+  font-size: 21px;
+}
+table.altTable tr:nth-child(odd) td {
+  background-color: #eee;
+}
+.shortDownSpacer .altTable td {
+  padding: 3px;
 }
 /* Aff */

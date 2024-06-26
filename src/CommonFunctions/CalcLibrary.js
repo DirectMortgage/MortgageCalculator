@@ -564,6 +564,22 @@ const getValuePercentage = ({ totalValue, amount }) => {
   return (amount / totalValue) * 100;
 };
 
+function loanAmtFromPayment(monthPay, annualRate, term, arrPerRates) {
+  console.log({ monthPay, annualRate, term, arrPerRates });
+  arrPerRates = arrPerRates || [];
+  var reduced =
+    arrPerRates.length > 0
+      ? arrPerRates.reduce(function (total, num) {
+          return total + num;
+        })
+      : 0;
+  var a1 =
+    (1 - Math.pow(1 + annualRate / 1200, -(12 * term))) / (annualRate / 1200);
+  var modsPerYear = reduced / 12;
+  var loanAmt = (monthPay * a1) / (1 + modsPerYear * a1);
+  return loanAmt;
+}
+
 export {
   calculatePMT,
   cleanValue,
@@ -580,4 +596,5 @@ export {
   calculateBlendedRate,
   getPercentageValue,
   getValuePercentage,
+  loanAmtFromPayment,
 };
