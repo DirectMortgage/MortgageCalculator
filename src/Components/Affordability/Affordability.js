@@ -4,11 +4,16 @@ import { InputBox } from "../../CommonFunctions/Accessories";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartSimple, faHomeAlt } from "@fortawesome/free-solid-svg-icons";
 import {
-  formatCurrency,
+  formatCurrency as handleFormatCurrency,
   formatPercentage,
 } from "../../CommonFunctions/GeneralCalculations";
 import Plot from "react-plotly.js";
 import { loanAmtFromPayment } from "../../CommonFunctions/CalcLibrary";
+import { useMemo } from "react";
+
+const formatCurrency = (value) => {
+  return handleFormatCurrency(Math.round(value), 0);
+};
 
 const Affordability = () => {
   const [inputSource, setInputSource] = useState({
@@ -21,7 +26,7 @@ const Affordability = () => {
       homeownerInsurance: 1000,
       DTITolerance: 43,
       maintenanceFee: 0,
-      includeMI: 1,
+      includeMI: 0,
       miPercent: 0.5,
     }),
     [activeTab, setActiveTab] = useState(0),
@@ -32,7 +37,7 @@ const Affordability = () => {
         inputMode: "Currency",
         name: "annualIncome",
         min: 0,
-        max: 6000,
+        max: 500000,
       },
       {
         label: "Interest Rate",
@@ -56,7 +61,7 @@ const Affordability = () => {
         inputMode: "Currency",
         name: "downPayment",
         min: 0,
-        max: 20000,
+        max: 200000,
       },
       {
         label: "Monthly Obligations",
@@ -126,37 +131,35 @@ const Affordability = () => {
       return { ...prevInputSource, [name]: value };
     });
   };
-  useEffect(() => {
-    console.log(inputSource);
-  }, [inputSource]);
 
   useEffect(() => {
     let {
-        annualIncome: income,
-        interestRate: rate,
-        term,
-        downPayment: downPay,
-        monthlyObligations: debts,
-        propertyTax: tax,
-        homeownerInsurance: insurance,
-        DTITolerance: topRange,
-        maintenanceFee: maint,
-        includeMI,
-        miPercent: ratePMI,
-      } = inputSource,
-      debtsRatio = debts / income;
-    debugger;
+      annualIncome: income,
+      interestRate: rate,
+      term,
+      downPayment: downPay,
+      monthlyObligations: debts,
+      propertyTax: tax,
+      homeownerInsurance: insurance,
+      DTITolerance: topRange,
+      maintenanceFee: maint,
+      includeMI,
+      miPercent: ratePMI,
+    } = inputSource;
+
     term = term * 12;
-    income = income / 12;
+    income = parseInt(income / 12);
     tax = tax / 12;
     insurance = insurance / 12;
 
     rate = rate / 100;
+    // topRange = topRange / 100;
+
+    let debtsRatio = debts / income;
+
+    topRange = (includeMI ? topRange - ratePMI : topRange) / 100;
+
     ratePMI = ratePMI / 100;
-    topRange = topRange / 100;
-
-    topRange = includeMI ? topRange - ratePMI : topRange / 100;
-
     var comfortRatio = 0;
     var affordRatio = 0;
     var realRange = topRange;
@@ -180,7 +183,10 @@ const Affordability = () => {
       pieInsurance = 0,
       pieTax = 0,
       piePMI = 0,
-      piePI = 0;
+      piePI = 0,
+      totalPayment = 0,
+      pieLabels = [],
+      pieValues = [];
 
     if (includeMI) {
       comfortTop =
@@ -210,12 +216,77 @@ const Affordability = () => {
     pieTax = Math.round(tax);
     piePMI = Math.round(affordPMI);
     piePI = Math.round(affordPrin);
+    affordTop = Math.round(affordTop);
+    totalPayment = piePI + pieTax + pieInsurance + piePMI + pieMaintenance;
+    pieLabels = ["P&I", "Taxes", "Homeowners Insurance"];
+    pieValues = [piePI, pieTax, pieInsurance];
+    if (includeMI) {
+      pieLabels = [...pieLabels, ...["MI"]];
+      pieValues = [...pieValues, ...[piePMI]];
+    }
+    if (pieMaintenance > 0) {
+      pieLabels = [...pieLabels, ...["Maintenance"]];
+      pieValues = [...pieValues, ...[pieMaintenance]];
+    }
 
-    console.log({ homeWorth: affordTop, piePMI, pieTax, pieInsurance });
-    setOutPutDetails({ homeWorth: affordTop, piePMI, pieTax, pieInsurance });
+    setOutPutDetails({
+      homeWorth: affordTop,
+      affordTop,
+      piePI,
+      piePMI,
+      pieTax,
+      pieInsurance,
+      totalPayment,
+      pieMaintenance,
+      pieLabels,
+      pieValues,
+      toleranceBelowMax: Math.round(lowRange * 100),
+      toleranceWithinMax: Math.round(realRange * 100),
+      comfortTop,
+      affordTop,
+      debtToIncomeRatio: ((totalPayment + debts) / income) * 100,
+      currentHomePrice: affordPayDown,
+      debts,
+      income,
+    });
   }, [inputSource]);
 
-  const BudgetRangeSelector = () => {
+  const BudgetRangeSelector = useMemo(() => {
+    const {
+        homeWorth,
+        affordTop,
+        debts,
+        income,
+        comfortTop,
+        budgetRangeValue = homeWorth,
+        piePI,
+        pieTax,
+        pieInsurance,
+        piePMI,
+        pieMaintenance,
+      } = outPutDetails,
+      debtToIncomeRatio =
+        ((piePI + pieTax + pieInsurance + piePMI + pieMaintenance + debts) /
+          income) *
+        100,
+      max = affordTop * 1.5,
+      status =
+        budgetRangeValue > affordTop
+          ? "over"
+          : budgetRangeValue >= comfortTop
+          ? "normal"
+          : "good",
+      color =
+        status === "over" ? "red" : status === "normal" ? "#508bc9" : "#46a558",
+      message =
+        status === "over"
+          ? "is over your budget"
+          : status === "normal"
+          ? "is within your budget"
+          : "is well within your budget.";
+
+    console.log("test", budgetRangeValue, affordTop, comfortTop);
+
     return (
       <div style={{ margin: "30px 0" }} className="BudgetRangeSelector">
         <div style={{ display: "flex" }}>
@@ -230,38 +301,35 @@ const Affordability = () => {
           />
           <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 28, marginBottom: 5 }}>
-              <span>
-                A home worth {formatCurrency(outPutDetails["homeWorth"])}
-              </span>{" "}
-              <span style={{ fontWeight: "bold", color: "#508bc9" }}>
-                is within your budget.
-              </span>
+              <span>A home worth {formatCurrency(budgetRangeValue)}</span>{" "}
+              <span style={{ fontWeight: "bold", color }}>{message}.</span>
             </div>
             <div>
               Your debt to income ratio:{" "}
-              <span style={{ fontWeight: "bold", color: "#508bc9" }}>
-                {formatPercentage(93.77)}
-                {/* check */}
+              <span style={{ fontWeight: "bold", color }}>
+                {formatPercentage(debtToIncomeRatio, 2)}
               </span>
             </div>
           </div>
         </div>
         <RangeSlider
-          defaultValue={[0, 65]}
+          defaultValue={[0, budgetRangeValue]}
+          value={[0, budgetRangeValue]}
           min={0}
-          max={100}
-          step={1}
+          max={max}
+          step={10}
           onInput={(event) => {
             const [, value] = event;
-
-            handleInputSource({ value });
+            setOutPutDetails((prevOutPutDetails) => {
+              return { ...prevOutPutDetails, budgetRangeValue: value };
+            });
           }}
           thumbsDisabled={[true, false]}
           rangeSlideDisabled={true}
           id="rbRangeSelector"
         />
         <div style={{ display: "flex" }}>
-          <div style={{ flex: 3 }}></div>
+          <div style={{ width: "66%" }}></div>
           <div
             style={{
               borderLeft: "1px solid #508bc9",
@@ -271,14 +339,14 @@ const Affordability = () => {
             }}
           >
             <div>Suggested Max</div>
-            <div>{formatCurrency(2806904)}</div>
+            <div>{formatCurrency(affordTop)}</div>
           </div>
         </div>
       </div>
     );
-  };
+  }, [outPutDetails]);
 
-  const PaymentBreakdown = () => {
+  const PaymentBreakdown = ({ labels = [], values = [] }) => {
     return (
       <div>
         <div
@@ -286,12 +354,12 @@ const Affordability = () => {
             fontSize: 32,
             fontWeight: 600,
             color: "#508bc9",
-            margin: "45px 0",
+            margin: "45px 0 0",
           }}
         >
           Mortgage Payment Breakdown
         </div>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <Plot
             style={{
               width: "100%",
@@ -299,43 +367,42 @@ const Affordability = () => {
               width: "50%",
               display: "inline-block",
             }}
-            className="netGainChart"
             data={[
               {
                 type: "pie",
-                values: [15.99, 12.87, 6.66, 3.2, 61.28],
-                labels: ["Maintenance", "MI", "Taxes", "Insurance", "P&I"],
+                values,
+                labels,
                 textinfo: "label+percent",
                 textposition: "outside",
                 automargin: true,
                 hole: 0.5,
                 marker: {
                   colors: [
-                    "#6dcde3",
-                    "#b6b7bb",
+                    "#053d5d",
                     "#fcb21e",
                     "#84329b",
-                    "#053d5d",
+                    "#b6b7bb",
+                    "#6dcde3",
                   ],
                 },
               },
             ]}
             layout={{
-              height: 250,
-              width: 250,
+              height: 320,
+              width: 320,
               margin: { t: 0, b: 0, l: 0, r: 0 },
               showlegend: false,
             }}
             // config={config}
           />
           <div style={{ width: "50%", display: "inline-block" }}>
-            <table id="tblTotalPayment" className="altTable fullWidth spacer">
+            <table className="totalPayment altTable fullWidth spacer">
               <thead>
                 <tr>
                   <th>&nbsp;</th>
-                  <th className="h3 tp-title">Total Payment</th>
-                  <th className="h3" id="tdTotal" val={31265}>
-                    $31,265
+                  <th className="title">Total Payment</th>
+                  <th className="title">
+                    <td>{formatCurrency(outPutDetails["totalPayment"])}</td>
                   </th>
                 </tr>
               </thead>
@@ -352,7 +419,7 @@ const Affordability = () => {
                     />
                   </td>
                   <td className="tp-field1">Principal and Interest</td>
-                  <td>{formatCurrency(outPutDetails["piePMI"])}</td>
+                  <td>{formatCurrency(outPutDetails["piePI"])}</td>
                 </tr>
                 <tr>
                   <td>
@@ -382,41 +449,51 @@ const Affordability = () => {
                   <td className="tp-field3">Homeowners Insurance</td>
                   <td>{formatCurrency(outPutDetails["pieInsurance"])}</td>
                 </tr>
-                <tr className="trPMI" style={{}}>
-                  <td>
-                    <div
-                      style={{
-                        backgroundColor: "#b6b7bb",
-                        borderRadius: "50%",
-                        width: 20,
-                        height: 20,
-                      }}
-                    />
-                  </td>
-                  <td>MI</td>
-                  <td>{formatCurrency(outPutDetails["piePI"])}</td>
-                </tr>
-                <tr className="trPMI" style={{}}>
-                  <td>&nbsp;</td>
-                  <td>Months until MI can be removed:</td>
-                  <td id="tdPMIMonths">65</td>
-                </tr>
-                <tr className="trMaint" style={{}}>
-                  <td>
-                    <div
-                      style={{
-                        backgroundColor: "#6dcde3",
-                        borderRadius: "50%",
-                        width: 20,
-                        height: 20,
-                      }}
-                    />
-                  </td>
-                  <td>Maintenance Fee</td>
-                  <td id="tdMaint" val={5000}>
-                    $5,000
-                  </td>
-                </tr>
+                {Number(inputSource["includeMI"]) === 1 && (
+                  <>
+                    <tr>
+                      <td>
+                        <div
+                          style={{
+                            backgroundColor: "#b6b7bb",
+                            borderRadius: "50%",
+                            width: 20,
+                            height: 20,
+                          }}
+                        />
+                      </td>
+                      <td>MI</td>
+                      <td>{formatCurrency(outPutDetails["piePMI"])}</td>
+                    </tr>
+
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td>Months until MI can be removed:</td>
+                      <td>
+                        {Math.round(
+                          (outPutDetails["homeWorth"] * 0.78) /
+                            outPutDetails["totalPayment"]
+                        )}
+                      </td>
+                    </tr>
+                  </>
+                )}
+                {inputSource["maintenanceFee"] > 0 && (
+                  <tr>
+                    <td>
+                      <div
+                        style={{
+                          backgroundColor: "#6dcde3",
+                          borderRadius: "50%",
+                          width: 20,
+                          height: 20,
+                        }}
+                      />
+                    </td>
+                    <td>Maintenance Fee</td>
+                    <td>{formatCurrency(inputSource["maintenanceFee"])}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -426,6 +503,8 @@ const Affordability = () => {
   };
 
   const BudgetRangesTable = () => {
+    const { toleranceBelowMax, toleranceWithinMax, comfortTop, affordTop } =
+      outPutDetails;
     return (
       <div className="col-md-12 shortDownSpacer" style={{ marginTop: 45 }}>
         <div style={{ fontSize: 30, fontWeight: 500, marginBottom: 10 }}>
@@ -440,9 +519,9 @@ const Affordability = () => {
             <tbody>
               <tr>
                 <th>&nbsp;</th>
-                <th className="at-dti-tolerance">DTI Tolerance</th>
-                <th className="at-lowrange">Low Range</th>
-                <th className="at-highrange">High Range</th>
+                <th>DTI Tolerance</th>
+                <th>Low Range</th>
+                <th>High Range</th>
               </tr>
               <tr>
                 <td>
@@ -450,35 +529,24 @@ const Affordability = () => {
                     Below
                   </h4>
                 </td>
-                <td>
-                  0 - <span className="maxGoodTolerance">59%</span>
-                </td>
+                <td>0 - {toleranceBelowMax}%</td>
                 <td>$0</td>
                 <td>
-                  <span className="maxGoodRange" val={1114971}>
-                    $1,114,971
-                  </span>
+                  <td>{formatCurrency(comfortTop)}</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <h4 className="at-within" style={{ color: "#053d5d" }}>
-                    Within
-                  </h4>
+                  <h4 style={{ color: "#053d5d" }}>Within</h4>
                 </td>
                 <td>
-                  <span className="maxGoodTolerance">59%</span>-{" "}
-                  <span className="maxStretchTolerance">100%</span>
+                  {toleranceBelowMax}% - {toleranceWithinMax}%
                 </td>
                 <td>
-                  <span className="maxGoodRange" val={1114971}>
-                    $1,114,971
-                  </span>
+                  <td>{formatCurrency(comfortTop)}</td>
                 </td>
                 <td>
-                  <span className="maxStretchRange" val={2806904}>
-                    $2,806,904
-                  </span>
+                  <td>{formatCurrency(affordTop)}</td>
                 </td>
               </tr>
               <tr>
@@ -487,13 +555,9 @@ const Affordability = () => {
                     Over
                   </h4>
                 </td>
+                <td>{toleranceWithinMax}% - 100%</td>
                 <td>
-                  <span className="maxStretchTolerance">100%</span>- 100%
-                </td>
-                <td>
-                  <span className="maxStretchRange" val={2806904}>
-                    $2,806,904
-                  </span>
+                  <td>{formatCurrency(affordTop)}</td>
                 </td>
                 <td>∞</td>
               </tr>
@@ -504,16 +568,27 @@ const Affordability = () => {
     );
   };
 
-  const FundsNeeded = () => {
+  const FundsNeeded = useMemo(() => {
+    const { currentHomePrice } = outPutDetails,
+      { downPayment, closingCostRange = 0.3 } = inputSource,
+      closingCostAmt = currentHomePrice * (closingCostRange / 10),
+      totalFundNeeded = closingCostAmt + downPayment,
+      downPayPercent = (downPayment / totalFundNeeded) * 100,
+      closingCostPercent = 100 - downPayPercent;
+
     return (
       <div style={{ margin: "45px 0" }}>
         <div>
           <div style={{ fontSize: 23, width: "50%", display: "inline-block" }}>
-            <span class="closingEstText">Closing Costs Estimate:</span>
-            <span class="closingMoney" val="71810">
-              $71,810
+            <span className="closingEstText">Closing Costs Estimate:</span>
+            <span className="closingMoney">
+              {formatCurrency(closingCostAmt)}
             </span>
-            (<span class="closingPercent">{formatPercentage(2.98)}</span>)
+            (
+            <span className="closingPercent">
+              {formatPercentage(closingCostRange * 10, 2)}
+            </span>
+            )
             <FontAwesomeIcon
               icon={faChartSimple}
               style={{ fontSize: 25, marginLeft: 5 }}
@@ -523,13 +598,14 @@ const Affordability = () => {
             style={{ width: "30%", display: "inline-block", float: "right" }}
           >
             <RangeSlider
-              defaultValue={[0, 65]}
-              min={0}
-              max={100}
-              step={1}
+              defaultValue={[0, closingCostRange || 0]}
+              value={[0, closingCostRange || 0]}
+              min={0.1}
+              max={0.8}
+              step={0.02}
               onInput={(event) => {
                 const [, value] = event;
-                console.log(value);
+                handleInputSource({ value, name: "closingCostRange" });
               }}
               thumbsDisabled={[true, false]}
               rangeSlideDisabled={true}
@@ -539,14 +615,12 @@ const Affordability = () => {
         </div>
         <div style={{ display: "flex", marginTop: 50 }}>
           <div style={{ width: "50%", display: "inline-block" }}>
-            <table id="tblTotalPayment" className="altTable fullWidth spacer">
+            <table className="totalPayment altTable fullWidth spacer">
               <thead>
                 <tr>
                   <th>&nbsp;</th>
-                  <th className="h3 tp-title">Total Funds Needed</th>
-                  <th className="h3" id="tdTotal" val={31265}>
-                    $250,629
-                  </th>
+                  <th className="title">Total Funds Needed</th>
+                  <th className="title">{formatCurrency(totalFundNeeded)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -562,9 +636,7 @@ const Affordability = () => {
                     />
                   </td>
                   <td className="tp-field1">Down Payment</td>
-                  <td id="tdPI" val={19159}>
-                    $200,000
-                  </td>
+                  <td>{formatCurrency(downPayment)}</td>
                 </tr>
                 <tr>
                   <td>
@@ -578,9 +650,7 @@ const Affordability = () => {
                     />
                   </td>
                   <td className="tp-field2">Closing Costs</td>
-                  <td id="tdTax" val={2083}>
-                    $50,629
-                  </td>
+                  <td id="tdTax">{formatCurrency(closingCostAmt)}</td>
                 </tr>
               </tbody>
             </table>
@@ -597,7 +667,7 @@ const Affordability = () => {
             data={[
               {
                 type: "pie",
-                values: [20.2, 79.8],
+                values: [closingCostPercent, downPayPercent],
                 labels: ["Closing Cost", "Down Payment"],
                 textinfo: "label+percent",
                 textposition: "outside",
@@ -619,9 +689,21 @@ const Affordability = () => {
         </div>
       </div>
     );
-  };
+  }, [outPutDetails, inputSource]);
 
   const Overview = () => {
+    const { homeWorth, currentHomePrice } = outPutDetails,
+      {
+        interestRate,
+        term,
+        annualIncome,
+        monthlyObligations,
+        DTITolerance,
+        downPayment,
+        closingCostRange = 0.3,
+      } = inputSource,
+      closingCostAmt = currentHomePrice * (closingCostRange / 10);
+
     return (
       <div>
         <div style={{ fontSize: 30, fontWeight: 500, marginBottom: 10 }}>
@@ -648,41 +730,40 @@ const Affordability = () => {
                 <tbody>
                   <tr>
                     <td className="tof-homeprice">Home Price</td>
-                    <td align="center" className="currentValue" val={2806904}>
-                      $2,806,904
+                    <td align="center" className="currentValue">
+                      {formatCurrency(homeWorth)}
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-interestrate">Interest Rate</td>
                     <td align="center" className="ovRate">
-                      9.29%
+                      {formatPercentage(interestRate, 2)}
                     </td>
                   </tr>
-                  <tr>
+                  {/* <tr>
                     <td className="tof-apr">APR</td>
                     <td align="center" className="ovAPR">
                       9.294%
                     </td>
-                  </tr>
+                  </tr> */}
                   <tr>
                     <td className="tof-lengthofloan">Length of Loan</td>
                     <td align="center" className="ovLength">
-                      40 yrs
+                      {term} years
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-downpayment">Down Payment</td>
                     <td align="center" className="ovDown">
-                      $200,000 (7.13%)
+                      {formatCurrency(downPayment)} (
+                      {formatPercentage((downPayment / homeWorth) * 100, 2)})
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-closingcosts">Closing Costs</td>
                     <td align="center">
-                      <span className="closingMoney" val={78207}>
-                        $78,207
-                      </span>
-                      (<span className="closingPercent">3.00</span>%)
+                      {formatCurrency(closingCostAmt)} (
+                      {formatPercentage(closingCostRange * 10, 2)})
                     </td>
                   </tr>
                 </tbody>
@@ -703,28 +784,28 @@ const Affordability = () => {
                   </tr>
                   <tr>
                     <td className="tof-annual-income">Annual Income</td>
-                    <td align="center" className="ovInc" val={500000}>
-                      $500,000
+                    <td align="center" className="ovInc">
+                      {formatCurrency(annualIncome)}
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-monthly-obligations">
                       Monthly Obligations
                     </td>
-                    <td align="center" className="ovDebts" val={7712}>
-                      $7,712
+                    <td align="center" className="ovDebts">
+                      {formatCurrency(monthlyObligations)}
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-currentdti">Current DTI</td>
                     <td align="center" className="ovDTI">
-                      98.00%
+                      {formatPercentage(DTITolerance, 2)}
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-dtitolerance">DTI Tolerance</td>
                     <td align="center">
-                      0 - <span className="maxStretchTolerance">100%</span>
+                      0 - {formatPercentage(DTITolerance, 0)}
                     </td>
                   </tr>
                 </tbody>
@@ -857,10 +938,13 @@ const Affordability = () => {
       </div>
 
       <div>
-        <BudgetRangeSelector />
-        <PaymentBreakdown />
+        {BudgetRangeSelector}
+        <PaymentBreakdown
+          labels={outPutDetails["pieLabels"]}
+          values={outPutDetails["pieValues"]}
+        />
         <BudgetRangesTable />
-        <FundsNeeded />
+        {FundsNeeded}
         <Overview />
       </div>
     </div>

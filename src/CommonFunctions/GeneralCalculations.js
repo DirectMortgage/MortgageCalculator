@@ -103,11 +103,11 @@ const getValueByKey = (array, key) => {
   return array.map((item) => item[key]);
 };
 
-const formatCurrency = (value) => {
+const formatCurrency = (value, floatCount = 2) => {
   let num = parseFloat(
       (value || "").toString().replace("$", "").replace(",", "")
     )
-      ?.toFixed(2)
+      ?.toFixed(floatCount)
       .toString(),
     numParts = num.split("."),
     dollars = numParts[0],
@@ -116,7 +116,11 @@ const formatCurrency = (value) => {
   dollars = dollars.replace(/\$|\,/g, "");
   if (isNaN(dollars)) dollars = "0";
   dollars = dollars.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  let val = "$" + ((sign ? "" : "-") + dollars + (cents ? "." + cents : ".00"));
+  let val =
+    "$" +
+    ((sign ? "" : "-") +
+      dollars +
+      (floatCount ? (cents ? "." + cents : ".00") : ""));
   val = val.replaceAll("--", "");
   if (val == "$-0.00") val = "$0.00";
   return val;

@@ -926,16 +926,14 @@ path.xdivider.crisp {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
   margin-top: 15px;
 }
-#tblTotalPayment {
+.totalPayment {
   width: 100%;
 }
-table#tblTotalPayment tr:nth-child(odd) td {
-  background-color: #eee;
-  padding: 5px;
+.totalPayment .title {
+  text-align: left;
 }
-table#tblTotalPayment td:first-child {
-  display: flex;
-  justify-content: center;
+.totalPayment .title * {
+  background-color: #fff !important;
 }
 .aFFContainer .tableWrapper {
   border: 1px solid #e5e5e5;
@@ -975,7 +973,13 @@ table {
 table.altTable tr:nth-child(odd) td {
   background-color: #eee;
 }
+table.altTable tr td {
+  padding: 5px;
+}
 .shortDownSpacer .altTable td {
   padding: 3px;
+}
+.modebar-container {
+  display: none;
 }
 /* Aff */
