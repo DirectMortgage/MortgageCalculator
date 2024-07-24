@@ -598,19 +598,19 @@ const ARMvsFixed = (props) => {
           amortizeType,
           loanTerm,
           rate,
-          armGrossMargin = 0.2,
-          armRateInitialAdj = 84,
-          armLifeCap = 0.5,
-          armIndexValue = 0,
-          armRateSubAdj = 12,
-          armRateAdjCap = 0,
+          armGrossMargin,
+          armRateInitialAdj,
+          armLifeCap,
+          armIndexValue,
+          armRateSubAdj,
+          armRateAdjCap,
         } = response;
-        armGrossMargin = armGrossMargin || 0.2;
-        armRateInitialAdj = armRateInitialAdj || 84;
-        armLifeCap = armLifeCap || 0.5;
-        armIndexValue = armIndexValue || 0;
-        armRateSubAdj = armRateSubAdj || 12;
-        armRateAdjCap = armRateAdjCap || 0;
+        armGrossMargin = armGrossMargin ?? 0.2;
+        armRateInitialAdj = armRateInitialAdj ?? 12;
+        armLifeCap = armLifeCap ?? 0.5;
+        armIndexValue = armIndexValue ?? 0;
+        armRateSubAdj = armRateSubAdj ?? 12;
+        armRateAdjCap = armRateAdjCap ?? 0;
 
         response["Monthly Payment Factor %"] =
           monthlyPaymentFactorPercent * 100;
@@ -1144,8 +1144,9 @@ const ARMvsFixed = (props) => {
       <>
         {armAdjustmentYears.map((year, index) => {
           FixedArmDifferent = index === 0 ? index : FixedArmDifferent;
-          const sIndex = (year - 1) * 12 - 1,
-            eIndex = sIndex + 12,
+          let sIndex = (year - 1) * 12 - 1;
+          sIndex = sIndex < 0 ? 0 : sIndex;
+          const eIndex = sIndex + 12,
             { Balance: fixedStartBalance } = fixedPayments[sIndex],
             { Balance: adjStartBalance } = armPayments[sIndex],
             { Balance: fixedEndBalance, Amount: fixedEndPayment } =

@@ -1236,13 +1236,21 @@ const BuyRent = () => {
       rate = parseFloat(rate);
       let newRate = parseFloat(rate / 100),
         {
-          armGrossMargin = 0.2,
-          armLifeCap = 0.5,
-          armIndexValue = 0,
-          armRateInitialAdj = 12,
-          armRateSubAdj = 12,
-          armRateAdjCap = 0,
+          armGrossMargin,
+          armLifeCap,
+          armIndexValue,
+          armRateInitialAdj,
+          armRateSubAdj,
+          armRateAdjCap,
         } = iInputSource;
+
+      armGrossMargin = armGrossMargin ?? 0.2;
+      armRateInitialAdj = armRateInitialAdj ?? 12;
+      armLifeCap = armLifeCap ?? 0.5;
+      armIndexValue = armIndexValue ?? 0;
+      armRateSubAdj = armRateSubAdj ?? 12;
+      armRateAdjCap = armRateAdjCap ?? 0;
+
       armRateInitialAdj = Number(armRateInitialAdj);
 
       armLifeCap = armLifeCap + rate;

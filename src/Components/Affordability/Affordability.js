@@ -2,19 +2,26 @@ import { useEffect, useState } from "react";
 import RangeSlider from "react-range-slider-input";
 import { InputBox } from "../../CommonFunctions/Accessories";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartSimple, faHomeAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChartSimple,
+  faChevronLeft,
+  faChevronRight,
+  faHomeAlt,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   formatCurrency as handleFormatCurrency,
   formatPercentage,
+  queryStringToObject,
 } from "../../CommonFunctions/GeneralCalculations";
 import Plot from "react-plotly.js";
 import { loanAmtFromPayment } from "../../CommonFunctions/CalcLibrary";
 import { useMemo } from "react";
 
 const formatCurrency = (value) => {
-  return handleFormatCurrency(Math.round(value), 0);
+  return handleFormatCurrency(Math.round(Math.abs(value)), 0);
 };
-
+const { type, w, f, loanId } = queryStringToObject(window.location?.href || "");
+const isMobile = f == "m";
 const Affordability = () => {
   const [inputSource, setInputSource] = useState({
       annualIncome: 65000,
@@ -120,10 +127,50 @@ const Affordability = () => {
         max: 100,
         stepValue: 0.02,
       },
-    ];
-  const [outPutDetails, setOutPutDetails] = useState({});
+    ],
+    [outPutDetails, setOutPutDetails] = useState({}),
+    [tooltipTableDetails, setTooltipTableDetails] = useState({
+      x: 0,
+      y: 0,
+      isShow: false,
+    });
+
+  useEffect(() => {
+    const onScroll = () => {
+      setTooltipTableDetails({
+        x: 0,
+        y: 0,
+        isShow: false,
+      });
+    };
+    window?.addEventListener("scroll", onScroll);
+    return () => {
+      window?.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
   useEffect(() => {
     require("react-range-slider-input/dist/style.css");
+  }, []);
+
+  useEffect(() => {
+    const styleElement = document.createElement("style");
+
+    styleElement.innerHTML = `
+    *{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif}
+    @media screen and (max-width: ${parseInt(w)}px) {
+      .dashboardCard > div{
+        width:100%;
+      }
+        .affordTable tr *{
+        font-size:12px;
+    }
+    `;
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.head.removeChild(styleElement);
+    };
   }, []);
 
   const handleInputSource = ({ name, value }) => {
@@ -218,7 +265,7 @@ const Affordability = () => {
     piePI = Math.round(affordPrin);
     affordTop = Math.round(affordTop);
     totalPayment = piePI + pieTax + pieInsurance + piePMI + pieMaintenance;
-    pieLabels = ["P&I", "Taxes", "Homeowners Insurance"];
+    pieLabels = ["Principal and Interest", "Taxes", "Homeowners Insurance"];
     pieValues = [piePI, pieTax, pieInsurance];
     if (includeMI) {
       pieLabels = [...pieLabels, ...["MI"]];
@@ -250,6 +297,105 @@ const Affordability = () => {
       income,
     });
   }, [inputSource]);
+
+  const handleBudgetRangeChange = (value) => {
+    let {
+        interestRate: rate,
+        term,
+        propertyTax: tax,
+        homeownerInsurance: insurance,
+        downPayment: downPay,
+        maintenanceFee: maint,
+        miPercent: ratePMI,
+        includeMI,
+      } = inputSource,
+      thisHomePrice = value;
+
+    term = term * 12;
+    tax = tax / 12;
+    insurance = insurance / 12;
+    ratePMI = ratePMI / 100;
+
+    let newHomePrice = thisHomePrice - downPay,
+      pmiCheck = 0,
+      pmi = 0;
+
+    if (includeMI) {
+      pmiCheck = downPay / newHomePrice;
+      if (pmiCheck < 0.2) {
+        pmi = newHomePrice * ratePMI;
+      }
+    }
+    pmi = pmi / 12;
+
+    let newPayment = mortgageMonthPay(newHomePrice, rate, term),
+      piePI = Math.round(newPayment),
+      piePMI = Math.round(pmi),
+      pieMaintenance = Math.round(maint),
+      totalPayment =
+        piePI +
+        outPutDetails["pieTax"] +
+        outPutDetails["pieInsurance"] +
+        piePMI +
+        pieMaintenance,
+      pieLabels = ["Principal and Interest", "Taxes", "Homeowners Insurance"],
+      pieValues = [
+        piePI,
+        outPutDetails["pieTax"],
+        outPutDetails["pieInsurance"],
+      ];
+    // affordPayDown = affordTop - downPay;
+    if (includeMI) {
+      pieLabels = [...pieLabels, ...["MI"]];
+      pieValues = [...pieValues, ...[piePMI]];
+    }
+    if (pieMaintenance > 0) {
+      pieLabels = [...pieLabels, ...["Maintenance"]];
+      pieValues = [...pieValues, ...[pieMaintenance]];
+    }
+
+    setOutPutDetails((prevOutPutDetails) => {
+      return {
+        ...prevOutPutDetails,
+        ...{
+          currentHomePrice: newHomePrice,
+          budgetRangeValue: value,
+          piePI,
+          piePMI,
+          pieMaintenance,
+          totalPayment,
+          pieLabels,
+          pieValues,
+        },
+      };
+    });
+  };
+  const mortgageMonthPay = (balance, annualRate, months) => {
+    let result = 0,
+      pmts = months,
+      monthlyRateInDec = annualRate / 1200;
+    if (annualRate != 0) {
+      var topEq = monthlyRateInDec * Math.pow(1 + monthlyRateInDec, pmts);
+      var botEq = Math.pow(1 + monthlyRateInDec, pmts) - 1;
+      result = balance * (topEq / botEq);
+    } else {
+      result = balance / months;
+    }
+    return result || 0;
+  };
+  const handleHover = (params) => {
+    const { label, value, color, text } = params.points[0];
+
+    setTooltipTableDetails({
+      x: params.event.clientX + 20,
+      y: params.event.clientY + 20,
+      isShow: true,
+      label,
+      value: formatCurrency(value),
+      color,
+      text,
+    });
+  };
 
   const BudgetRangeSelector = useMemo(() => {
     const {
@@ -285,7 +431,7 @@ const Affordability = () => {
           ? "is within your budget"
           : "is well within your budget.";
 
-    console.log("test", budgetRangeValue, affordTop, comfortTop);
+    document.documentElement.style.setProperty("--budgetRangeSelector", color);
 
     return (
       <div style={{ margin: "30px 0" }} className="BudgetRangeSelector">
@@ -294,13 +440,14 @@ const Affordability = () => {
             icon={faHomeAlt}
             style={{
               fontWeight: "bold",
-              fontSize: 45,
+              fontSize: isMobile ? 35 : 45,
               marginBottom: 10,
-              marginRight: 40,
+              marginRight: isMobile ? 20 : 40,
+              marginLeft: isMobile ? 20 : 0,
             }}
           />
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 28, marginBottom: 5 }}>
+          <div style={{ marginBottom: isMobile ? 20 : 10 }}>
+            <div style={{ fontSize: isMobile ? 20 : 28, marginBottom: 5 }}>
               <span>A home worth {formatCurrency(budgetRangeValue)}</span>{" "}
               <span style={{ fontWeight: "bold", color }}>{message}.</span>
             </div>
@@ -317,16 +464,14 @@ const Affordability = () => {
           value={[0, budgetRangeValue]}
           min={0}
           max={max}
-          step={10}
+          // step={10}
           onInput={(event) => {
             const [, value] = event;
-            setOutPutDetails((prevOutPutDetails) => {
-              return { ...prevOutPutDetails, budgetRangeValue: value };
-            });
+            handleBudgetRangeChange(value);
           }}
           thumbsDisabled={[true, false]}
           rangeSlideDisabled={true}
-          id="rbRangeSelector"
+          id="rbBudgetRangeSelector"
         />
         <div style={{ display: "flex" }}>
           <div style={{ width: "66%" }}></div>
@@ -336,6 +481,7 @@ const Affordability = () => {
               paddingLeft: 10,
               marginTop: 8,
               flex: 1,
+              fontSize: isMobile ? 14 : 18,
             }}
           >
             <div>Suggested Max</div>
@@ -344,36 +490,53 @@ const Affordability = () => {
         </div>
       </div>
     );
-  }, [outPutDetails]);
+  }, [inputSource, outPutDetails]);
 
-  const PaymentBreakdown = ({ labels = [], values = [] }) => {
+  const PaymentBreakdown = useMemo(() => {
+    let { pieLabels: labels = [], pieValues: values = [] } = outPutDetails;
+    values = values.map((value) => (value > 0 ? value : 0));
     return (
       <div>
         <div
           style={{
-            fontSize: 32,
+            fontSize: isMobile ? 25 : 32,
             fontWeight: 600,
             color: "#508bc9",
-            margin: "45px 0 0",
+            margin: isMobile ? "30px 0 30px 0" : "45px 0 0",
           }}
         >
           Mortgage Payment Breakdown
         </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: isMobile ? "column" : "row",
+          }}
+        >
           <Plot
             style={{
               width: "100%",
               overflowX: "auto",
-              width: "50%",
-              display: "inline-block",
+              width: isMobile ? "100%" : "50%",
+              display: isMobile ? "contents" : "inline-block",
+            }}
+            onHover={!isMobile ? handleHover : () => {}}
+            onClick={isMobile ? handleHover : () => {}}
+            onUnhover={() => {
+              setTooltipTableDetails({
+                x: 0,
+                y: 0,
+                isShow: false,
+              });
             }}
             data={[
               {
                 type: "pie",
                 values,
                 labels,
-                textinfo: "label+percent",
-                textposition: "outside",
+                // textinfo: "label+percent",
+                // textposition: "outside",
                 automargin: true,
                 hole: 0.5,
                 marker: {
@@ -385,17 +548,26 @@ const Affordability = () => {
                     "#6dcde3",
                   ],
                 },
+                hoverinfo: "none",
               },
             ]}
             layout={{
-              height: 320,
-              width: 320,
-              margin: { t: 0, b: 0, l: 0, r: 0 },
+              height: 250,
+              width: 250,
+              margin: { t: isMobile ? 0 : 30, b: 0, l: 0, r: 0 },
+              autosize: false,
               showlegend: false,
             }}
             // config={config}
           />
-          <div style={{ width: "50%", display: "inline-block" }}>
+          <div
+            style={{
+              width: isMobile ? "100%" : "50%",
+              display: "inline-block",
+              marginTop: isMobile ? 20 : 0,
+              fontSize: isMobile ? 15 : 18,
+            }}
+          >
             <table className="totalPayment altTable fullWidth spacer">
               <thead>
                 <tr>
@@ -500,8 +672,7 @@ const Affordability = () => {
         </div>
       </div>
     );
-  };
-
+  }, [outPutDetails, tooltipTableDetails]);
   const BudgetRangesTable = () => {
     const { toleranceBelowMax, toleranceWithinMax, comfortTop, affordTop } =
       outPutDetails;
@@ -569,17 +740,28 @@ const Affordability = () => {
   };
 
   const FundsNeeded = useMemo(() => {
-    const { currentHomePrice } = outPutDetails,
+    let { currentHomePrice } = outPutDetails,
       { downPayment, closingCostRange = 0.3 } = inputSource,
       closingCostAmt = currentHomePrice * (closingCostRange / 10),
       totalFundNeeded = closingCostAmt + downPayment,
       downPayPercent = (downPayment / totalFundNeeded) * 100,
       closingCostPercent = 100 - downPayPercent;
 
+    closingCostPercent = closingCostPercent > 0 ? closingCostPercent : 0;
+    downPayPercent = downPayPercent > 0 ? downPayPercent : 0;
+
     return (
       <div style={{ margin: "45px 0" }}>
-        <div>
-          <div style={{ fontSize: 23, width: "50%", display: "inline-block" }}>
+        <div
+          style={isMobile ? { display: "flex", flexDirection: "column" } : {}}
+        >
+          <div
+            style={{
+              fontSize: isMobile ? 18 : 23,
+              width: isMobile ? "100%" : "50%",
+              display: "inline-block",
+            }}
+          >
             <span className="closingEstText">Closing Costs Estimate:</span>
             <span className="closingMoney">
               {formatCurrency(closingCostAmt)}
@@ -591,30 +773,99 @@ const Affordability = () => {
             )
             <FontAwesomeIcon
               icon={faChartSimple}
-              style={{ fontSize: 25, marginLeft: 5 }}
+              style={{ fontSize: isMobile ? 18 : 25, marginLeft: 5 }}
             />
           </div>
           <div
-            style={{ width: "30%", display: "inline-block", float: "right" }}
+            style={{
+              width: isMobile ? "100%" : "35%",
+              display: "inline-flex",
+              float: "right",
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: isMobile ? 20 : 0,
+            }}
           >
-            <RangeSlider
-              defaultValue={[0, closingCostRange || 0]}
-              value={[0, closingCostRange || 0]}
-              min={0.1}
-              max={0.8}
-              step={0.02}
-              onInput={(event) => {
-                const [, value] = event;
-                handleInputSource({ value, name: "closingCostRange" });
+            <FontAwesomeIcon
+              onClick={() => {
+                handleInputSource({
+                  value: closingCostRange - 0.01,
+                  name: "closingCostRange",
+                });
+                setOutPutDetails((prevOutPutDetails) => {
+                  return {
+                    ...prevOutPutDetails,
+                    budgetRangeValue: outPutDetails["budgetRangeValue"],
+                  };
+                });
               }}
-              thumbsDisabled={[true, false]}
-              rangeSlideDisabled={true}
-              id="rbRangeSelector"
+              className="closingCostChevronLeft"
+              icon={faChevronLeft}
+              style={{
+                fontWeight: "bold",
+                marginRight: 10,
+              }}
+            />
+            <div style={{ width: "80%" }}>
+              <RangeSlider
+                defaultValue={[0, closingCostRange || 0]}
+                value={[0, closingCostRange || 0]}
+                min={0.1}
+                max={0.8}
+                step={0.02}
+                onInput={(event) => {
+                  const [, value] = event;
+                  handleInputSource({ value, name: "closingCostRange" });
+                  outPutDetails["budgetRangeValue"] &&
+                    setOutPutDetails((prevOutPutDetails) => {
+                      return {
+                        ...prevOutPutDetails,
+                        budgetRangeValue: outPutDetails["budgetRangeValue"],
+                      };
+                    });
+                }}
+                thumbsDisabled={[true, false]}
+                rangeSlideDisabled={true}
+                id="rbRangeSelector"
+              />
+            </div>
+            <FontAwesomeIcon
+              onClick={() => {
+                handleInputSource({
+                  value: closingCostRange + 0.01,
+                  name: "closingCostRange",
+                });
+                setOutPutDetails((prevOutPutDetails) => {
+                  return {
+                    ...prevOutPutDetails,
+                    budgetRangeValue: outPutDetails["budgetRangeValue"],
+                  };
+                });
+              }}
+              className="closingCostChevronRight"
+              icon={faChevronRight}
+              style={{
+                fontWeight: "bold",
+                marginLeft: 10,
+              }}
             />
           </div>
         </div>
-        <div style={{ display: "flex", marginTop: 50 }}>
-          <div style={{ width: "50%", display: "inline-block" }}>
+        <div
+          style={{
+            display: "flex",
+            marginTop: 50,
+            flexDirection: isMobile ? "column" : "row",
+          }}
+        >
+          <div
+            style={{
+              width: isMobile ? "100%" : "50%",
+              display: "inline-block",
+              marginBottom: isMobile ? 20 : 0,
+              fontSize: isMobile ? 15 : 18,
+            }}
+          >
             <table className="totalPayment altTable fullWidth spacer">
               <thead>
                 <tr>
@@ -659,37 +910,48 @@ const Affordability = () => {
             style={{
               width: "100%",
               overflowX: "auto",
-              width: "50%",
+              width: isMobile ? "100%" : "50%",
               display: "flex",
-              justifyContent: "flex-end",
+              justifyContent: isMobile ? "center" : "flex-end",
             }}
-            className="netGainChart"
+            onHover={!isMobile ? handleHover : () => {}}
+            onClick={isMobile ? handleHover : () => {}}
+            onUnhover={() => {
+              setTooltipTableDetails({
+                x: 0,
+                y: 0,
+                isShow: false,
+              });
+            }}
             data={[
               {
                 type: "pie",
-                values: [closingCostPercent, downPayPercent],
+                values: [closingCostAmt, downPayment].map((val) =>
+                  Math.round(val)
+                ),
                 labels: ["Closing Cost", "Down Payment"],
-                textinfo: "label+percent",
-                textposition: "outside",
+                // textinfo: "label+percent",
+                // textposition: "outside",
                 automargin: true,
                 hole: 0.5,
                 marker: {
-                  colors: ["#053d5d", "#6dcde3"],
+                  colors: ["#6dcde3", "#053d5d"],
                 },
+                hoverinfo: "none",
               },
             ]}
             layout={{
-              height: 250,
-              width: 250,
-              margin: { t: 0, b: 0, l: 0, r: 0 },
+              height: 220,
+              width: 220,
+              margin: { t: 0, b: 0, l: 0, r: 25 },
               showlegend: false,
+              autosize: false,
             }}
-            // config={config}
           />
         </div>
       </div>
     );
-  }, [outPutDetails, inputSource]);
+  }, [outPutDetails, inputSource, tooltipTableDetails]);
 
   const Overview = () => {
     const { homeWorth, currentHomePrice } = outPutDetails,
@@ -712,11 +974,19 @@ const Affordability = () => {
 
         <div
           className="row"
-          style={{ display: "flex", justifyContent: "space-between" }}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexDirection: isMobile ? "column" : "row",
+          }}
         >
           <div
             className="shortDownSpacer"
-            style={{ width: "49%", display: "inline-block" }}
+            style={{
+              width: isMobile ? "100%" : "49%",
+              display: "inline-block",
+              fontSize: isMobile ? 14 : 18,
+            }}
           >
             <div className="tableWrapper">
               <table className="altTable tblOverview fullWidth">
@@ -772,7 +1042,11 @@ const Affordability = () => {
           </div>
           <div
             className="col-md-6 shortDownSpacer"
-            style={{ width: "49%", display: "inline-block" }}
+            style={{
+              width: isMobile ? "100%" : "49%",
+              display: "inline-block",
+              fontSize: isMobile ? 14 : 18,
+            }}
           >
             <div className="tableWrapper">
               <table className="altTable tblOverview fullWidth">
@@ -871,7 +1145,7 @@ const Affordability = () => {
         })}
       </div>
 
-      <div className="dashboardCard" style={{ marginTop: 25 }}>
+      <div className="dashboardCard">
         {fields
           .splice(
             0,
@@ -939,14 +1213,37 @@ const Affordability = () => {
 
       <div>
         {BudgetRangeSelector}
-        <PaymentBreakdown
-          labels={outPutDetails["pieLabels"]}
-          values={outPutDetails["pieValues"]}
-        />
+        {PaymentBreakdown}
         <BudgetRangesTable />
         {FundsNeeded}
         <Overview />
       </div>
+      {tooltipTableDetails["isShow"] && (
+        <div
+          className="toolTipTable"
+          style={{
+            ...{
+              top: tooltipTableDetails.y,
+              position: "fixed",
+              zIndex: 2,
+              padding: 10,
+              fontSize: 15,
+            },
+            ...(isMobile
+              ? {
+                  alignSelf: "center",
+                }
+              : {
+                  left: tooltipTableDetails.x,
+                }),
+          }}
+        >
+          {tooltipTableDetails["label"]}:{" "}
+          <b style={{ color: tooltipTableDetails["color"] || "#508bc9" }}>
+            {tooltipTableDetails["value"]} ({tooltipTableDetails["text"]})
+          </b>
+        </div>
+      )}
     </div>
   );
 };

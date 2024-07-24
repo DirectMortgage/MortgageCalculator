@@ -122,7 +122,7 @@ const formatCurrency = (value, floatCount = 2) => {
       dollars +
       (floatCount ? (cents ? "." + cents : ".00") : ""));
   val = val.replaceAll("--", "");
-  if (val == "$-0.00") val = "$0.00";
+  if (["$-0.00", "$-0"].includes(val)) val = "$0.00";
   return val;
 };
 function formatPercentage(value, prefix = 4, exp) {

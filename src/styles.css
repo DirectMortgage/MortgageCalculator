@@ -2,7 +2,9 @@
   font-family: "Inter", "Roboto Thin", Roboto, Arial, sans-serif !important;
   color: #4e4f51;
 }
-
+:root {
+  --budgetRangeSelector: #508bc9;
+}
 button {
   box-sizing: border-box !important;
 }
@@ -220,7 +222,6 @@ g.xy {
   border-radius: 50px;
 }
 .fa-circle-play path,
-.svg-inline--fa.fa-house path,
 .svg-inline--fa.fa-chart-simple path {
   color: #508bc9;
 }
@@ -504,24 +505,48 @@ g.xy {
   text-transform: none;
   color: rgb(13, 33, 33);
 }
-#rbRangeSelector .range-slider__thumb[data-lower] {
+#rbRangeSelector .range-slider__thumb[data-lower],
+#rbBudgetRangeSelector .range-slider__thumb[data-lower] {
   width: 0 !important;
   background-color: #508bc9;
   transition: transform 0.3s;
 }
-#rbRangeSelector .range-slider__range {
+#rbRangeSelector .range-slider__range,
+#rbBudgetRangeSelector .range-slider__range {
   border-radius: 10px;
   background-color: #508bc9 !important;
   transition: height 0.3s;
 }
-#rbRangeSelector {
+#rbRangeSelector,
+#rbBudgetRangeSelector {
   height: 12px;
 }
-#rbRangeSelector .range-slider__thumb {
+.closingCostChevronRight path {
+  color: #111;
+}
+.closingCostChevronLeft,
+.closingCostChevronRight {
+  font-weight: bold;
+  margin-right: 10px;
+  border: 1px solid #e4e0e0;
+  padding: 5px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  background-color: #eeeeee;
+}
+#rbRangeSelector .range-slider__thumb,
+#rbBudgetRangeSelector .range-slider__thumb {
   background: #508bc9;
   width: 25px;
   height: 25px;
   transition: transform 0.3s;
+}
+#rbBudgetRangeSelector .range-slider__range,
+#rbBudgetRangeSelector .range-slider__thumb,
+.svg-inline--fa.fa-house path {
+  background-color: var(--budgetRangeSelector) !important;
+  background: var(--budgetRangeSelector);
+  color: var(--budgetRangeSelector);
 }
 .sliderContainerWrapper {
   padding: 50px 0;
@@ -895,7 +920,7 @@ path.xdivider.crisp {
   padding-left: 15px;
   margin-right: auto;
   margin-left: auto;
-  width: 970px;
+  max-width: 970px;
 }
 .largeTitle {
   font-size: 30px;
@@ -913,9 +938,9 @@ path.xdivider.crisp {
   margin-bottom: 10px;
 }
 .dashboardCard {
-  display: grid;
-  grid-template-columns: auto auto auto auto;
-  gap: 15px;
+  display: flex;
+  flex-flow: wrap;
+  gap: 20px 40px;
   border: 1px solid #e5e5e5;
   margin: 2px;
   border-radius: 2px;
@@ -924,7 +949,7 @@ path.xdivider.crisp {
   background: #fff;
   overflow: hidden;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
-  margin-top: 15px;
+  margin-top: 25px;
 }
 .totalPayment {
   width: 100%;
