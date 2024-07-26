@@ -17,7 +17,7 @@ const handleAPI = async ({
     .join("&");
 
   if (window.location.host.includes("localhost")) {
-    url = url.replace("../../..", "http://www.solutioncenter.biz");
+    url = url.replace("../../..", "https://www.solutioncenter.biz");
   }
   if (apiName) {
     url = url.replace(API_CONTROLLER_NAME, apiName);

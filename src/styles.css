@@ -635,7 +635,7 @@ g.xy {
   line-height: 40px;
 }
 .rbDifferenceTable tbody td p {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: unset;
   letter-spacing: 1px;
 }
@@ -667,7 +667,7 @@ g.xy {
   padding: 5px 10px;
 }
 .rbDifferenceTable tbody tr:last-child td p {
-  font-size: 16px;
+  font-size: 13px;
 }
 .rbDifferenceTable thead th div:first-child {
   font-size: 12px;

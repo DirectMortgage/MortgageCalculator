@@ -874,11 +874,10 @@ const DifferenceTable = ({
                         <Fragment key={iIndex}>
                           <td>
                             <div>
-                              {/* <p>$</p> */}
                               <p>
                                 {formatCurrency(
                                   Math.round(rData["buy"]) || 0,
-                                  2,
+                                  0,
                                   !false
                                 )}
                               </p>
@@ -890,7 +889,7 @@ const DifferenceTable = ({
                               <p>
                                 {formatCurrency(
                                   Math.round(rData["rent"]) || 0,
-                                  2,
+                                  0,
                                   !false
                                 )}
                               </p>
@@ -1038,9 +1037,9 @@ const BuyRent = () => {
         .catch((e) => console.error("Error From GetLocationData ====>", e));
 
       loanTerm = loanTerm / 12;
-      rate = formatPercentage(rate * 100);
+      rate = formatPercentage(cleanValue(rate) * 100);
       ltv = formatPercentage(ltv);
-
+      debugger;
       setInputSource((prevInputSource) => {
         return {
           ...prevInputSource,
@@ -1221,6 +1220,7 @@ const BuyRent = () => {
     amortizeType = Number(amortizetype || amortizeType);
     loanAmt = Number(cleanValue(loanAmt));
     purValue = Number(cleanValue(purValue));
+    rate = cleanValue(rate);
 
     //Non ARM loans block
     if (amortizeType !== 3 && amortizeType !== 7) {

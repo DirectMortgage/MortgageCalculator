@@ -7,6 +7,7 @@ import {
   faChevronLeft,
   faChevronRight,
   faHomeAlt,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   formatCurrency as handleFormatCurrency,
@@ -14,29 +15,55 @@ import {
   queryStringToObject,
 } from "../../CommonFunctions/GeneralCalculations";
 import Plot from "react-plotly.js";
-import { loanAmtFromPayment } from "../../CommonFunctions/CalcLibrary";
+import {
+  cleanValue,
+  loanAmtFromPayment,
+} from "../../CommonFunctions/CalcLibrary";
 import { useMemo } from "react";
+import { handleGetLoanData } from "../../CommonFunctions/CommonFunctions";
 
 const formatCurrency = (value) => {
   return handleFormatCurrency(Math.round(Math.abs(value)), 0);
 };
-const { type, w, f, loanId } = queryStringToObject(window.location?.href || "");
-const isMobile = f == "m";
+const {
+    type,
+    w,
+    f,
+    loanId = 0,
+  } = queryStringToObject(window.location?.href || ""),
+  isMobile = f == "m",
+  helpDescriptions = {
+    "Annual Income":
+      "Enter the total annual income for you and your co-borrower before taxes. Include any commission, overtime, investment income, etc.",
+    "Interest Rate": "This will be the rate for the loan you will receive.",
+    "Length of Loan":
+      "This determines how many years that the loan will be paid off. We assume a 30 year loan in this situation.",
+    "Down Payment":
+      "The amount of money you can afford to put towards a home. We recommend you have more savings in case of repairs needed or any unexpected financial emergency.",
+
+    "Monthly Obligations":
+      "The amount of debts you pay on a monthly basis. Include things such as student loans, credit card payments, car payments, etc.",
+    "Property Tax":
+      "This is the estimated property taxes you would pay yearly.",
+    "Homeowner's Insurance":
+      "Also known as hazard insurance, Homeowner's Insurance provides protection for your home burglary, storms, fire and more. The value represented would be the yearly cost of the insurance policy.",
+    "DTI Tolerance":
+      "Our Debt-To-Income tolerance allows you to set the threshold for your total monthly Debt-To-Income ratio. This takes into consideration your monthly obligations, insurance, taxes and other expenses to suit your needs. The assumed Tolerance is 43%, some loans may allow up to 55%.",
+    "Mortgage Insurance":
+      "Mortgage Insurance is typically required when the down payment is below 20%. This is a policy to protect lenders against losses that may occur when a borrower defaults on their mortgage. There is an option to include Mortgage Insurance, and then set the annual rate to be paid.",
+    "Maintenance Fee":
+      "This field can be used as a monthly expense for an investment property or for an HOA fee normally comes along with buying an apartment or condominium.",
+  };
+
 const Affordability = () => {
   const [inputSource, setInputSource] = useState({
-      annualIncome: 65000,
-      interestRate: 6.75,
-      term: 30,
-      downPayment: 20000,
       monthlyObligations: 500,
-      propertyTax: 5000,
       homeownerInsurance: 1000,
       DTITolerance: 43,
-      maintenanceFee: 0,
-      includeMI: 0,
-      miPercent: 0.5,
+      maintenanceFee: 100,
     }),
     [activeTab, setActiveTab] = useState(0),
+    [processingStatus, setProcessingStatus] = useState("pageLoad"),
     fields = [
       {
         label: "Annual Income",
@@ -151,9 +178,7 @@ const Affordability = () => {
 
   useEffect(() => {
     require("react-range-slider-input/dist/style.css");
-  }, []);
 
-  useEffect(() => {
     const styleElement = document.createElement("style");
 
     styleElement.innerHTML = `
@@ -171,6 +196,65 @@ const Affordability = () => {
     return () => {
       document.head.removeChild(styleElement);
     };
+  }, []);
+
+  const handleSetDefaultValues = () => {
+    setInputSource((prevInputSource) => {
+      setProcessingStatus(null);
+      return {
+        ...prevInputSource,
+        annualIncome: 65000,
+        interestRate: 6.75,
+        term: 30,
+        downPayment: 2000,
+        monthlyObligations: 500,
+        propertyTax: 5000,
+        homeownerInsurance: 1000,
+        DTITolerance: 43,
+        maintenanceFee: 100,
+        includeMI: 0,
+        miPercent: 0.5,
+      };
+    });
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (loanId !== "undefined" && loanId) {
+        let response = await handleGetLoanData(loanId);
+
+        let {
+          totalIncome: annualIncome = 0,
+          rate = 0,
+          loanTerm = 0,
+          propertyTax = 0,
+          "MIP %": MIP = 0,
+          DownPayment = 0,
+        } = response;
+
+        annualIncome = parseFloat(annualIncome || 0);
+        rate = parseFloat(cleanValue(rate || 0)) * 100;
+        loanTerm = parseInt(loanTerm || 0) / 12;
+        propertyTax = parseFloat(cleanValue(propertyTax || 0));
+        DownPayment = parseFloat(cleanValue(DownPayment || 0));
+        MIP = parseFloat(cleanValue(MIP || 0));
+
+        setInputSource((prevInputSource) => {
+          setProcessingStatus(null);
+          return {
+            ...prevInputSource,
+            annualIncome,
+            interestRate: rate,
+            term: loanTerm,
+            propertyTax,
+            downPayment: DownPayment,
+            miPercent: MIP,
+          };
+        });
+      } else {
+        handleSetDefaultValues();
+      }
+    })();
   }, []);
 
   const handleInputSource = ({ name, value }) => {
@@ -239,6 +323,7 @@ const Affordability = () => {
       comfortTop =
         loanAmtFromPayment(comfortMort, rate * 100, term / 12, [ratePMI]) +
         downPay;
+      comfortTop = comfortTop > 0 ? Math.round(comfortTop) : 0;
       affordTop =
         loanAmtFromPayment(affordMort, rate * 100, term / 12, [ratePMI]) +
         downPay;
@@ -260,10 +345,11 @@ const Affordability = () => {
     globalPay = affordPrin;
     pieMaintenance = Math.round(maint);
     pieInsurance = Math.round(insurance);
-    pieTax = Math.round(tax);
-    piePMI = Math.round(affordPMI);
-    piePI = Math.round(affordPrin);
-    affordTop = Math.round(affordTop);
+    pieTax = tax > 0 ? Math.round(tax) : 0;
+    piePMI = affordPMI > 0 ? Math.round(affordPMI) : 0;
+    piePI = affordPrin > 0 ? Math.round(affordPrin) : 0;
+
+    // affordTop = affordTop > 0 ? Math.round(affordTop) : 0;
     totalPayment = piePI + pieTax + pieInsurance + piePMI + pieMaintenance;
     pieLabels = ["Principal and Interest", "Taxes", "Homeowners Insurance"];
     pieValues = [piePI, pieTax, pieInsurance];
@@ -275,7 +361,7 @@ const Affordability = () => {
       pieLabels = [...pieLabels, ...["Maintenance"]];
       pieValues = [...pieValues, ...[pieMaintenance]];
     }
-
+    pieValues = pieValues.map((value) => (value > 0 ? value : 0));
     setOutPutDetails({
       homeWorth: affordTop,
       affordTop,
@@ -329,9 +415,9 @@ const Affordability = () => {
     pmi = pmi / 12;
 
     let newPayment = mortgageMonthPay(newHomePrice, rate, term),
-      piePI = Math.round(newPayment),
-      piePMI = Math.round(pmi),
-      pieMaintenance = Math.round(maint),
+      piePI = newPayment > 0 ? Math.round(newPayment) : 0,
+      piePMI = pmi > 0 ? Math.round(pmi) : 0,
+      pieMaintenance = maint > 0 ? Math.round(maint) : 0,
       totalPayment =
         piePI +
         outPutDetails["pieTax"] +
@@ -353,7 +439,7 @@ const Affordability = () => {
       pieLabels = [...pieLabels, ...["Maintenance"]];
       pieValues = [...pieValues, ...[pieMaintenance]];
     }
-
+    pieValues = pieValues.map((value) => (value > 0 ? value : 0));
     setOutPutDetails((prevOutPutDetails) => {
       return {
         ...prevOutPutDetails,
@@ -494,7 +580,7 @@ const Affordability = () => {
 
   const PaymentBreakdown = useMemo(() => {
     let { pieLabels: labels = [], pieValues: values = [] } = outPutDetails;
-    values = values.map((value) => (value > 0 ? value : 0));
+
     return (
       <div>
         <div
@@ -742,11 +828,14 @@ const Affordability = () => {
   const FundsNeeded = useMemo(() => {
     let { currentHomePrice } = outPutDetails,
       { downPayment, closingCostRange = 0.3 } = inputSource,
-      closingCostAmt = currentHomePrice * (closingCostRange / 10),
-      totalFundNeeded = closingCostAmt + downPayment,
+      closingCostAmt = currentHomePrice * (closingCostRange / 10);
+
+    downPayment = downPayment > 0 ? Math.round(downPayment) : 0;
+    closingCostAmt = closingCostAmt > 0 ? Math.round(closingCostAmt) : 0;
+
+    let totalFundNeeded = closingCostAmt + downPayment,
       downPayPercent = (downPayment / totalFundNeeded) * 100,
       closingCostPercent = 100 - downPayPercent;
-
     closingCostPercent = closingCostPercent > 0 ? closingCostPercent : 0;
     downPayPercent = downPayPercent > 0 ? downPayPercent : 0;
 
@@ -1026,14 +1115,20 @@ const Affordability = () => {
                     <td className="tof-downpayment">Down Payment</td>
                     <td align="center" className="ovDown">
                       {formatCurrency(downPayment)} (
-                      {formatPercentage((downPayment / homeWorth) * 100, 2)})
+                      {formatPercentage(
+                        (downPayment && homeWorth
+                          ? downPayment / homeWorth
+                          : 1) * 100,
+                        0
+                      )}
+                      )
                     </td>
                   </tr>
                   <tr>
                     <td className="tof-closingcosts">Closing Costs</td>
                     <td align="center">
                       {formatCurrency(closingCostAmt)} (
-                      {formatPercentage(closingCostRange * 10, 2)})
+                      {formatPercentage(closingCostRange * 10, 0)})
                     </td>
                   </tr>
                 </tbody>
@@ -1091,6 +1186,38 @@ const Affordability = () => {
     );
   };
 
+  const HelpDescriptions = () => {
+    return (
+      <div
+        style={{
+          marginTop: 30,
+        }}
+      >
+        <div style={{ fontSize: 30, fontWeight: 500, marginBottom: 10 }}>
+          Affordability Help
+        </div>
+        {Object.keys(helpDescriptions).map((key, index) => {
+          return (
+            <div key={index}>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                  fontWeight: "bold",
+                }}
+              >
+                {key}
+              </div>
+              <div style={{ fontSize: 18, marginTop: 0, marginBottom: 20 }}>
+                {helpDescriptions[key]}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
   return (
     <div className="aFFContainer">
       <div className="shortDownSpacer divDescript">
@@ -1211,13 +1338,43 @@ const Affordability = () => {
           })}
       </div>
 
-      <div>
-        {BudgetRangeSelector}
-        {PaymentBreakdown}
-        <BudgetRangesTable />
-        {FundsNeeded}
-        <Overview />
-      </div>
+      {processingStatus === "pageLoad" ? (
+        <div
+          style={{
+            position: "relative",
+            height: 30,
+            textAlign: "center",
+            marginTop: 30,
+          }}
+        >
+          <span
+            className="spinner"
+            style={{
+              position: "absolute",
+            }}
+          >
+            <FontAwesomeIcon icon={faSpinner} size="2x" color="#508bc9" />
+          </span>
+          <span
+            style={{
+              marginLeft: 45,
+              position: "absolute",
+              bottom: 0,
+            }}
+          >
+            Calculating...
+          </span>
+        </div>
+      ) : (
+        <div>
+          {BudgetRangeSelector}
+          {PaymentBreakdown}
+          <BudgetRangesTable />
+          {FundsNeeded}
+          <Overview />
+          <HelpDescriptions />
+        </div>
+      )}
       {tooltipTableDetails["isShow"] && (
         <div
           className="toolTipTable"
