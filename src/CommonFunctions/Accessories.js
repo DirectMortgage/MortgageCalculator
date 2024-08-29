@@ -33,7 +33,10 @@ const styles = {
     backgroundColor: "rgba(0,0,0,.04)",
     color: "#51575d",
     width: "-webkit-fill-available",
-    padding: 5,
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 5,
+    paddingRight: 5,
     height: 24,
     outline: "none",
   },
@@ -259,6 +262,7 @@ const AutoCompleteInputBox = (props) => {
     inputBoxStyle = {},
     inputBoxLabel = {},
     listIcon = <></>,
+    iProcessingStatus = null,
   } = props;
 
   const [searchText, setSearchText] = useState(value || ""),
@@ -270,6 +274,9 @@ const AutoCompleteInputBox = (props) => {
   useEffect(() => {
     setSearchText(value);
   }, [value]);
+  useEffect(() => {
+    setProcessingStatus(iProcessingStatus);
+  }, [iProcessingStatus]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -583,7 +590,7 @@ const useScrollIndicator = (
     const onScroll = ({ target: { scrollLeft, scrollWidth, clientWidth } }) => {
       let left = (scrollLeft / (scrollWidth - clientWidth)) * 100;
       left = left >= 88 ? 88 : left; // Ensure left does not exceed 88%
-      scrollIndicator.style.left = left + "%";
+      if (scrollIndicator) scrollIndicator.style.left = left + "%";
     };
 
     scrollContainer?.addEventListener("scroll", onScroll);

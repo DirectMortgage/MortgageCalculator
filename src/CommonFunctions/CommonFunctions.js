@@ -57,4 +57,16 @@ const handleGetLoanData = async (loanId) =>
     })
     .catch((e) => console.error("Error From GetLoanDetails ====>", e));
 
-export { handleAPI, handleGetLoanData };
+const handleGetDownPaymentDetails = ({ loanAmt, purValue }) => {
+  const downPaymentPercent = [3, 3.5, 5, 10, 15, 20, 25, 100],
+    iDownPaymentDetails = downPaymentPercent.map((percentage) => {
+      const downPayment = purValue * (percentage / 100);
+      return {
+        percentage,
+        downPayment,
+        loanAmt: purValue - downPayment,
+      };
+    });
+  return iDownPaymentDetails;
+};
+export { handleAPI, handleGetLoanData, handleGetDownPaymentDetails };

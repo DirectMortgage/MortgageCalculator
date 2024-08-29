@@ -9,7 +9,12 @@ import Affordability from "./Components/Affordability/Affordability";
 import BidOverAsk from "./Components/BidOverAsk/BidOverAsk";
 import Appreciation from "./Components/Appreciation/Appreciation";
 
-const { type = "aF", w, f } = queryStringToObject(window.location?.href || "");
+const {
+  type = "aF",
+  w,
+  f,
+  p,
+} = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
 let screenWidth = (parseInt(w) || window.innerWidth) - 10;
 window.addEventListener("resize", () => {

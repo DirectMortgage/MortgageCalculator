@@ -39,11 +39,15 @@ import { handleCalculateNetGain, stateTaxRate } from "./Function";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   handleAPI,
+  handleGetDownPaymentDetails,
   handleGetLoanData,
 } from "../../CommonFunctions/CommonFunctions";
 
-const { type, w, f, loanId } = queryStringToObject(window.location?.href || "");
-const isMobile = f == "m";
+const { type, w, f, loanId, p } = queryStringToObject(
+  window.location?.href || ""
+);
+const isMobile = f == "m",
+  isApp = Boolean(parseInt(p));
 
 const headerTabs = [
   "Purchase Price",
@@ -258,9 +262,7 @@ const NetGainBarChart = ({ year, netGainValue = [] }) => {
     })),
   };
   if (isMobile) {
-    layout["width"] =
-      // w - 80 ||
-      "unset";
+    layout["width"] = "unset";
   }
   const config = {
     displayModeBar: false,
@@ -310,7 +312,7 @@ const NetGainBarChart = ({ year, netGainValue = [] }) => {
         layout={layout}
         config={config}
       />
-      {isMobile && (
+      {isMobile && isApp && (
         <div
           className="scrollIndicatorWrapper"
           style={{ backgroundColor: "#f4f8f8" }}
@@ -665,7 +667,7 @@ const BuyRentDifferenceBarChart = ({
           });
         }}
       />
-      {isMobile && (
+      {isMobile && isApp && (
         <div className="scrollIndicatorWrapper">
           <div className="buyRentChartScrollIndicator scrollIndicator"></div>
         </div>
@@ -833,6 +835,7 @@ const DifferenceTable = ({
       amount: estimate,
     },
   ];
+
   useScrollIndicator(".rbDifferenceTable", ".differenceTableScrollIndicator");
 
   return (
@@ -905,7 +908,7 @@ const DifferenceTable = ({
           </tbody>
         </table>
       </div>
-      {isMobile && (
+      {isMobile && isApp && (
         <div className="scrollIndicatorWrapper">
           <div className="differenceTableScrollIndicator scrollIndicator"></div>
         </div>
@@ -1207,7 +1210,7 @@ const BuyRent = () => {
         upfrontMI = 0,
         iMiPercent,
         tilPrePay,
-        ["First Payment Date"]: firstPaymentDate,
+        ["First Payment Date"]: firstPaymentDate = new Date(),
       } = iInputSource,
       ratesArray = [];
 
@@ -1364,19 +1367,6 @@ const BuyRent = () => {
   };
 
   const [downPaymentDetails, setDownPaymentDetails] = useState([]);
-
-  const handleGetDownPaymentDetails = ({ loanAmt, purValue }) => {
-    const downPaymentPercent = [3, 3.5, 5, 10, 15, 20, 25, 100],
-      iDownPaymentDetails = downPaymentPercent.map((percentage) => {
-        const downPayment = purValue * (percentage / 100);
-        return {
-          percentage,
-          downPayment,
-          loanAmt: purValue - downPayment,
-        };
-      });
-    return iDownPaymentDetails;
-  };
 
   const handleValidateFields = () => {
     let isValid = false,

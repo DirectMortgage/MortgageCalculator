@@ -1750,6 +1750,7 @@ const ARMvsFixed = (props) => {
             style={{
               fontSize: isMobile ? "1.8em" : "2.5em",
               fontWeight: "bold",
+              textAlign: "center",
             }}
           >
             ARM vs Fixed Calculator
@@ -1757,7 +1758,7 @@ const ARMvsFixed = (props) => {
 
           <div
             className="container"
-            style={{ width: isMobile ? "80%" : "450px" }}
+            // style={{ width: isMobile ? "95%" : "450px" }}
           >
             <InputBox
               disabled={screenStatus === "showOutput"}
