@@ -1154,7 +1154,9 @@ const Appreciation = () => {
       closingCosts: "",
       appCalcCustomRate: 4,
     }),
-    [processingStatus, setProcessingStatus] = useState("location,closingCosts"),
+    [processingStatus, setProcessingStatus] = useState(
+      loanId ? "location,closingCosts" : ""
+    ),
     [currentScreen, setCurrentScreen] = useState("inputBlock"), //inputBlock
     [year, setYear] = useState(5),
     [editScreen, setEditScreen] = useState(null),
@@ -1239,34 +1241,35 @@ const Appreciation = () => {
           })
           .catch((e) => console.error("Error From GetLocationData ====>", e));
       })();
-    }
-    (async () => {
-      handleAPI({
-        name: "GetClosingCostDetails",
-        params: { loanId },
-      })
-        .then((response) => {
-          const closingCosts = JSON.parse(response) || 0;
-          setInputSource((prevInputSource) => {
-            return {
-              ...prevInputSource,
-              closingCosts,
-            };
-          });
-          setTempInputSource((prevInputSource) => {
-            return {
-              ...prevInputSource,
-              closingCosts,
-            };
-          });
-          setProcessingStatus((prevProcessingStatus) => {
-            return prevProcessingStatus
-              .replace("closingCosts", "")
-              .replace(",", "");
-          });
+
+      (async () => {
+        handleAPI({
+          name: "GetClosingCostDetails",
+          params: { loanId },
         })
-        .catch((e) => console.error("Error From GetLocationData ====>", e));
-    })();
+          .then((response) => {
+            const closingCosts = JSON.parse(response) || 0;
+            setInputSource((prevInputSource) => {
+              return {
+                ...prevInputSource,
+                closingCosts,
+              };
+            });
+            setTempInputSource((prevInputSource) => {
+              return {
+                ...prevInputSource,
+                closingCosts,
+              };
+            });
+            setProcessingStatus((prevProcessingStatus) => {
+              return prevProcessingStatus
+                .replace("closingCosts", "")
+                .replace(",", "");
+            });
+          })
+          .catch((e) => console.error("Error From GetLocationData ====>", e));
+      })();
+    }
     require("react-range-slider-input/dist/style.css");
     const styleElement = document.createElement("style");
 
