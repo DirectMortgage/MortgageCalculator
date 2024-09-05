@@ -105,7 +105,7 @@ const getValueByKey = (array, key) => {
 
 const formatCurrency = (value, floatCount = 2) => {
   let num = parseFloat(
-      (value || "").toString().replace("$", "").replace(",", "")
+      (value || "").toString().replaceAll("$", "").replaceAll(",", "")
     )
       ?.toFixed(floatCount)
       .toString(),

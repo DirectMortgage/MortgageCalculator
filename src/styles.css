@@ -1077,7 +1077,8 @@ table.altTable tr td {
 .bold {
   font-weight: bold;
 }
-.appreciation-container .section-box .green-text {
+.appreciation-container .section-box .green-text,
+.boa .green-text {
   color: #216c2a;
 }
 .chart-legend {
@@ -1095,4 +1096,80 @@ table.altTable tr td {
 }
 .appreciation-container .js-plotly-plot {
   pointer-events: none; /* Disables all mouse events */
+}
+.boa .box-container {
+  padding: 25px;
+  border: 1px solid rgb(193, 208, 206);
+  border-radius: 4px;
+  text-align: center;
+  background: transparent;
+  margin-bottom: 20px;
+}
+.boa .box-container h5,
+.boa .chart-title {
+  margin: 0px;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  font-weight: 700;
+}
+.boa .box-container h2 {
+  font-size: 34px;
+  margin: 15px auto;
+}
+.boa .box-container p {
+  margin: 0px;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  font-weight: 500;
+}
+.boa .table-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid #c1d0ce;
+}
+.boa .table-row:last-child {
+  border: none;
+}
+.boa .table-container {
+  margin: 15px 0 0 0;
+  padding: 0 20px;
+}
+.boa .bold-border {
+  border-top: 2px solid #111 !important;
+}
+.bold {
+  font-weight: bolder !important;
+}
+.boa .table-container .table-row div:first-child {
+  padding: 14px;
+  margin: 0px;
+  font-size: 16px;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  font-weight: 400;
+}
+.boa .table-container-headlight {
+  background-color: #f4f8f8;
+  padding: 25px;
+}
+.boa .table-container .table-row div:nth-child(2) {
+  padding: 14px;
+  margin: 0px;
+  font-size: 16px;
+  letter-spacing: 0.4px;
+  text-transform: none;
+  font-weight: 700;
+}
+.imagelayer {
+  transform: translate(-8px, -8px);
+}
+.imagelayer image {
+  min-height: 20px;
+  width: 16px;
+  height: auto;
 }

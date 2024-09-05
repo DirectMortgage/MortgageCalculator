@@ -242,13 +242,13 @@ const NetGainBarChart = ({ year, netGainValue = [] }) => {
 
     annotations: chartData["Years"].map((val, i) => ({
       x: val,
-      y: chartData["amt"][i] + 20000,
+      y: chartData["amt"][i] + (chartData["amt"][i] > 0 ? 20000 : -20000),
       text: formatCurrency(chartData["amt"][i]),
       xanchor: "center",
-      yanchor: "bottom",
+      yanchor: chartData["amt"][i] > 0 ? "bottom" : "top",
       showarrow: !false,
       ax: 0,
-      ay: -6,
+      ay: chartData["amt"][i] > 0 ? -6 : 6,
       bgcolor: "white",
       arrowcolor: "#c1d0ce",
       font: {

@@ -976,9 +976,17 @@ const { w, f, loanId, p } = queryStringToObject(window.location?.href || ""),
 
     medianHomePrice =
       medianHomePriceObj[matchedKeys[0]] || medianHomePriceObj["United States"];
-    console.log({ county, stateCode, medianHomePrice });
+    // console.log({ county, stateCode, medianHomePrice });
 
     return medianHomePrice;
+  },
+  handleChartStyle = () => {
+    const annotationElements = Array.from(
+      document.querySelectorAll(".infolayer .annotation")
+    );
+    annotationElements.forEach(
+      (e) => (e.style.transform = `translate(0px, -15px)`)
+    );
   };
 
 const homeBase64 =
@@ -1019,31 +1027,22 @@ const ChartComponent = ({
     .filter((_, index) => showIndex.includes(index))
     .map((value) => Number(value));
   let size = 4000;
+
   const [visibleTraces, setVisibleTraces] = useState(true),
     data = [
       {
         x: xValues,
         y: yValues,
-        mode: "lines+markers+text",
+        mode: "lines+markers",
         line: { color: "#508bc9", width: 2 },
         marker: {
-          size: isMobile ? 20 : 30,
+          size: isMobile ? 25 : 30,
           color: "#508bc9",
           symbol: "circle",
         },
         textposition: showIndex.map((_, index) => {
-          // if (showIndexLength >= 4)
           if (showIndexLength - 1 === index) return "bottom center";
           return "top center";
-          if (
-            [
-              showIndexLength - 1,
-              showIndexLength - 2,
-              showIndexLength - 3,
-            ].includes(index)
-          )
-            return "left center";
-          else return "right center";
         }),
         hoverinfo: "none",
         visible: visibleTraces ? true : "legendonly",
@@ -1067,8 +1066,8 @@ const ChartComponent = ({
       yref: "y",
       x: x,
       y: yValues[index],
-      sizex: 0.3,
-      sizey: sizeyArray[showIndexLength - 2],
+      // sizex: 0.3,
+      // sizey: sizeyArray[showIndexLength - 2],
       xanchor: "center",
       yanchor: "middle",
       layer: "above",
@@ -1097,6 +1096,25 @@ const ChartComponent = ({
       staticPlot: true,
       dragmode: false,
       margin: { t: 30, b: 70, l: 40, r: 0 },
+      annotations: yValues.map((val, i) => ({
+        x: xValues[i],
+        y: yValues[i],
+        text: formatCurrency(yValues[i], 0),
+        xanchor: "center",
+        yanchor: "bottom",
+        showarrow: true,
+        ax: 0,
+        ay: -6,
+        bgcolor: "white",
+        arrowcolor: "#c1d0ce",
+        font: {
+          color: year === val ? "#31a156" : "black",
+          size: 13,
+          weight: "bold",
+        },
+        borderpad: 4,
+        bordercolor: "#c1d0ce",
+      })),
     };
   if (isMobile) {
     layout["width"] = "unset";
@@ -1131,7 +1149,8 @@ const ChartComponent = ({
           className="netGainChart"
           data={data}
           layout={layout}
-          config={{ displayModeBar: false }}
+          config={{ displayModeBar: false, doubleClick: false }}
+          onUpdate={handleChartStyle}
         />
         {isMobile && isApp && (
           <div
@@ -1723,6 +1742,27 @@ const Appreciation = () => {
               // flexDirection: isMobile ? "column" : "row",
             }}
           >
+            <div style={{ padding: "0 15px" }}>
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={() => {
+                  const iInputSource = {
+                    clientName: "",
+                    location: "",
+                    price: "",
+                    downPayment: "",
+                    closingCosts: "",
+                    appCalcCustomRate: 4,
+                  };
+                  setCurrentScreen("inputBlock");
+                  setInputSource(iInputSource);
+                  setTempInputSource(iInputSource);
+                }}
+              >
+                Create New
+              </button>
+            </div>
             <div
               className={
                 isMobile ? "rbResultBodyWrapperMobile" : "rbResultBodyWrapper"
