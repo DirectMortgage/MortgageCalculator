@@ -1687,6 +1687,11 @@ const BuyRent = () => {
                     handleCalculation({ iInputSource });
 
                     setCurrentScreen("outputBlock");
+                    setTimeout(() => {
+                      document.querySelector("#btn-card-edit")?.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                    }, 300);
                   } catch (e) {
                     console.error(e);
                   }
@@ -1805,33 +1810,12 @@ const BuyRent = () => {
                       textDecoration: "underline",
                       textAlign: "start",
                     }}
+                    id="btn-card-edit"
                     onClick={() => handleEditMode("Loan")}
                   >
                     Edit
                   </button>
                 </Card>
-                {/* Co-branding Info */}
-                {/* <Card title="Co-branding">
-                  <div>
-                    <span className="rbWord">
-                      Add co-branding to your Buy vs Rent.
-                    </span>
-                  </div>
-                  <button
-                    className="purpleSecButton"
-                    type="button"
-                    style={{
-                      display: "block",
-                      padding: 0,
-                      height: "auto",
-                      textDecoration: "underline",
-                      textAlign: "start",
-                    }}
-                    onClick={() => {}}
-                  >
-                    Add
-                  </button>
-                </Card> */}
               </div>
               <div
                 className={

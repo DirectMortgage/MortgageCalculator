@@ -1723,6 +1723,11 @@ const Appreciation = () => {
               disabled={handleValidateFields()}
               onClick={() => {
                 setCurrentScreen("resultBlock");
+                setTimeout(() => {
+                  document.querySelector("#btn-card-edit")?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }, 300);
               }}
             >
               Calculate{"  "}
@@ -1812,6 +1817,7 @@ const Appreciation = () => {
                       setTempInputSource({ ...inputSource });
                       handleEditMode("Property");
                     }}
+                    id="btn-card-edit"
                   >
                     Edit
                   </button>

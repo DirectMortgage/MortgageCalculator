@@ -1082,6 +1082,10 @@ table.altTable tr td {
 .boa .green-text {
   color: #216c2a;
 }
+.appreciation-container .section-box .red-text,
+.boa .red-text {
+  color: #d02537;
+}
 .chart-legend {
   margin: 0px;
   font-size: 15px;

@@ -1519,6 +1519,11 @@ const BidOverAsk = () => {
               disabled={handleValidateFields()}
               onClick={() => {
                 setCurrentScreen("outputBlock");
+                setTimeout(() => {
+                  document.querySelector("#btn-card-edit")?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }, 300);
               }}
             >
               Calculate{"  "}
@@ -1609,6 +1614,7 @@ const BidOverAsk = () => {
                       setTempInputSource({ ...inputSource });
                       handleEditMode("Property");
                     }}
+                    id="btn-card-edit"
                   >
                     Edit
                   </button>
@@ -1686,7 +1692,16 @@ const BidOverAsk = () => {
                 <div className="box-container" style={{ padding: 0 }}>
                   <div className="table-container-headlight">
                     <h5>{year}-yr Projected Value</h5>
-                    <h2 className="green-text">
+                    <h2
+                      className={`${
+                        outputSource["appreciationValue"]?.includes("-")
+                          ? "red"
+                          : "green"
+                      }-text`}
+                    >
+                      {outputSource["appreciationValue"]?.includes("-")
+                        ? "-"
+                        : ""}
                       {formatCurrency(outputSource["appreciationValue"], 0)}
                     </h2>
                     <p>Based on appreciation</p>
@@ -1719,10 +1734,23 @@ const BidOverAsk = () => {
                 <div className="box-container" style={{ padding: 0 }}>
                   <div className="table-container-headlight">
                     <h5>{year}-yr Custom Cumulative Gain</h5>
-                    <h2 className="green-text">
+                    <h2
+                      className={`${
+                        outputSource["cumulativeGain"]?.includes("-")
+                          ? "red"
+                          : "green"
+                      }-text`}
+                    >
+                      {outputSource["cumulativeGain"]?.includes("-") ? "-" : ""}
                       {formatCurrency(outputSource["cumulativeGain"], 0)}
                     </h2>
-                    <p className="green-text bold">
+                    <p
+                      className={`${
+                        outputSource["cumulativeGainPercent"]?.includes("-")
+                          ? "red"
+                          : "green"
+                      }-text bold`}
+                    >
                       {outputSource["cumulativeGainPercent"]}
                     </p>
                   </div>
