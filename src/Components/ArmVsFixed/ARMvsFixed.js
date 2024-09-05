@@ -20,6 +20,8 @@ import {
   updateARMRate,
 } from "../../CommonFunctions/CalcLibrary";
 import { handleGetLoanData } from "../../CommonFunctions/CommonFunctions";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons/faSpinner";
 
 const { w, f, loanId } = queryStringToObject(window.location?.href || "");
 const isMobile = f == "m";
@@ -210,6 +212,7 @@ const ARMvsFixed = (props) => {
   const [armPayments, setArmPayments] = useState([]);
   const [balanceDiff, setBalanceDiff] = useState([]);
   const [toggleView, setToggleView] = useState("Yearly");
+  const [processingStatus, setProcessingStatus] = useState("pageLoading");
   const [loanInputDetails, setLoanInputDetails] = useState([
     {
       name: "Monthly Payment Factor %",
@@ -616,7 +619,7 @@ const ARMvsFixed = (props) => {
           monthlyPaymentFactorPercent * 100;
 
         loanTerm = loanTerm / 12;
-        debugger;
+
         setInputDetails({
           loanAmount: formatCurrency(loanAmount),
           loanTerm,
@@ -648,7 +651,7 @@ const ARMvsFixed = (props) => {
               ? formatCurrency(value)
               : value;
         });
-
+        setProcessingStatus("");
         setLoanInputDetails([...iLoanInputDetails]);
       }
     })();
@@ -752,20 +755,27 @@ const ARMvsFixed = (props) => {
   };
 
   const handleCalculate = async () => {
-    console.time("handleCalculate");
-    const { cashFlow: fixedCashFlow, ARP } =
-        await handleGetAmortizationSchedule(1, true), //fixed
-      { cashFlow: armCashFlow, finalAdjRate } =
-        await handleGetAmortizationSchedule(3 || 7, !false); //ARM
+    try {
+      console.time("handleCalculate");
+      const { cashFlow: fixedCashFlow, ARP } =
+          await handleGetAmortizationSchedule(1, true), //fixed
+        { cashFlow: armCashFlow, finalAdjRate } =
+          await handleGetAmortizationSchedule(3 || 7, !false); //ARM
 
-    setFixedPayments(fixedCashFlow);
-    setArmPayments(armCashFlow);
-    setFixedAPRValue(ARP);
-    setInputDetails((prevInputDetails) => {
-      return { ...prevInputDetails, initialNoteRate: finalAdjRate * 100 };
-    });
-    setScreenStatus("showOutput");
-    console.timeEnd("handleCalculate");
+      setFixedPayments(fixedCashFlow);
+      setArmPayments(armCashFlow);
+      setFixedAPRValue(ARP);
+      setInputDetails((prevInputDetails) => {
+        return { ...prevInputDetails, initialNoteRate: finalAdjRate * 100 };
+      });
+      setScreenStatus("showOutput");
+      console.timeEnd("handleCalculate");
+      setTimeout(() => {
+        document.querySelector(".titleContent")?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 300);
+    } catch (error) {}
   };
 
   const getValuesFromLoanInputDetails = () => {
@@ -1748,7 +1758,7 @@ const ARMvsFixed = (props) => {
           <div
             className="screenTitle"
             style={{
-              fontSize: isMobile ? "1.8em" : "2.5em",
+              fontSize: isMobile ? "1.6em" : "2.5em",
               fontWeight: "bold",
               textAlign: "center",
             }}
@@ -1758,7 +1768,7 @@ const ARMvsFixed = (props) => {
 
           <div
             className="container"
-            // style={{ width: isMobile ? "95%" : "450px" }}
+            style={{ width: isMobile ? "95%" : "450px" }}
           >
             <InputBox
               disabled={screenStatus === "showOutput"}
@@ -2040,6 +2050,29 @@ const ARMvsFixed = (props) => {
               />
             </div>
           </div>
+          {processingStatus === "pageLoading" && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                height: "100%",
+                width: "100%",
+                backgroundColor: "#878d874d",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span
+                className="spinner"
+                style={{
+                  position: "absolute",
+                }}
+              >
+                <FontAwesomeIcon icon={faSpinner} size="2x" color="#508bc9" />
+              </span>
+            </div>
+          )}
         </div>
 
         {screenStatus === "showOutput" && (

@@ -763,7 +763,7 @@ const Affordability = () => {
     const { toleranceBelowMax, toleranceWithinMax, comfortTop, affordTop } =
       outPutDetails;
     return (
-      <div className="col-md-12 shortDownSpacer" style={{ marginTop: 45 }}>
+      <div className="shortDownSpacer" style={{ marginTop: 45 }}>
         <div style={{ fontSize: 30, fontWeight: 500, marginBottom: 10 }}>
           Budget Ranges
         </div>
@@ -1072,9 +1072,11 @@ const Affordability = () => {
           <div
             className="shortDownSpacer"
             style={{
-              width: isMobile ? "100%" : "49%",
+              width: isMobile ? "93%" : "49%",
               display: "inline-block",
               fontSize: isMobile ? 14 : 18,
+              padding: 0,
+              margin: "auto",
             }}
           >
             <div className="tableWrapper">
@@ -1136,11 +1138,14 @@ const Affordability = () => {
             </div>
           </div>
           <div
-            className="col-md-6 shortDownSpacer"
+            className="
+            shortDownSpacer"
             style={{
-              width: isMobile ? "100%" : "49%",
+              width: isMobile ? "93%" : "49%",
               display: "inline-block",
               fontSize: isMobile ? 14 : 18,
+              padding: 0,
+              margin: "auto",
             }}
           >
             <div className="tableWrapper">
@@ -1343,8 +1348,7 @@ const Affordability = () => {
           style={{
             position: "relative",
             height: 30,
-            textAlign: "center",
-            marginTop: 30,
+            margin: "40px 30%",
           }}
         >
           <span

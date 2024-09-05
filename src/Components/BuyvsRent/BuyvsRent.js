@@ -986,6 +986,7 @@ const BuyRent = () => {
     [netGainDetails, setNetGainDetails] = useState([]),
     [amortSchedule, setAmortSchedule] = useState([]),
     [outPutDetails, setOutPutDetails] = useState({}),
+    [processingStatus, setProcessingStatus] = useState("loanData,location"),
     [currentScreen, setCurrentScreen] = useState("inputBlock"); //inputBlock
 
   const handleInputSource = ({ name, value }) => {
@@ -1030,6 +1031,9 @@ const BuyRent = () => {
           const location = JSON.parse(response || '{"Table":[]}')["Table"][0][
             "label"
           ];
+          setProcessingStatus((prevProcessingStatus) => {
+            return prevProcessingStatus.replace("location", "");
+          });
           setInputSource((prevInputSource) => {
             return {
               ...prevInputSource,
@@ -1042,7 +1046,9 @@ const BuyRent = () => {
       loanTerm = loanTerm / 12;
       rate = formatPercentage(cleanValue(rate) * 100);
       ltv = formatPercentage(ltv);
-      debugger;
+      setProcessingStatus((prevProcessingStatus) => {
+        return prevProcessingStatus.replace("loanData,", "");
+      });
       setInputSource((prevInputSource) => {
         return {
           ...prevInputSource,
@@ -1485,9 +1491,9 @@ const BuyRent = () => {
                       name: "location",
                     });
                   }}
-                  onChangeText={(test) => {
-                    console.log(test);
-                  }}
+                  iProcessingStatus={
+                    processingStatus.includes("location") ? "searching" : null
+                  }
                   inputBoxStyle={{ fontFamily: "Inter" }}
                   validate={false}
                   style={{ marginBottom: 25, paddingLeft: 10 }}

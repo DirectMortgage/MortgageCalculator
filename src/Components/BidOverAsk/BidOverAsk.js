@@ -1174,7 +1174,6 @@ const BidOverAsk = () => {
             estimatedCurrentValue,
             appCalcCustomRate: 4,
           };
-        debugger;
         setInputSource(iInputSource);
         setTempInputSource(iInputSource);
 

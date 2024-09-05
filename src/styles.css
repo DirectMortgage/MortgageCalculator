@@ -45,6 +45,7 @@ g.xy {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  width: unset !important;
 }
 .blueHeader {
   color: #053d5d;
