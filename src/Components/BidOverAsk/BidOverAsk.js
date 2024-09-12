@@ -1267,7 +1267,7 @@ const BidOverAsk = () => {
           medianHomePrice,
         } = inputSource,
         yearArray = [];
-      medianHomePrice = 542010;
+      // medianHomePrice = 542010;
       bidAboveAsking = parseFloat(bidAboveAsking);
       askingPrice = parseFloat(askingPrice);
       estimatedCurrentValue = parseFloat(estimatedCurrentValue);

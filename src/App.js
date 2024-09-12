@@ -8,6 +8,7 @@ import BuyRent from "./Components/BuyvsRent/BuyvsRent";
 import Affordability from "./Components/Affordability/Affordability";
 import BidOverAsk from "./Components/BidOverAsk/BidOverAsk";
 import Appreciation from "./Components/Appreciation/Appreciation";
+import HousePayment from "./Components/Appreciation/HousePayment/HousePayment";
 
 const {
   type = "aF",
@@ -28,6 +29,7 @@ const calculatorComponents = {
   aFF: <Affordability isMobile={isMobile} screenWidth={screenWidth} />,
   bOA: <BidOverAsk isMobile={isMobile} screenWidth={screenWidth} />,
   aA: <Appreciation isMobile={isMobile} screenWidth={screenWidth} />,
+  hP: <HousePayment isMobile={isMobile} screenWidth={screenWidth} />,
 };
 
 function App() {
