@@ -842,7 +842,7 @@ path.xdivider.crisp {
 
 .amortSchedule th,
 .amortSchedule td {
-  font-size: 14px;
+  font-size: 10px;
   line-height: 24px;
   letter-spacing: 0.2px;
   text-transform: none;
@@ -862,6 +862,7 @@ path.xdivider.crisp {
   position: sticky;
   top: -15px;
   background-color: #fff;
+  z-index: 1;
 }
 .popUpTable {
   border: 1px solid #e0e0e0;
@@ -1177,4 +1178,8 @@ table.altTable tr td {
   min-height: 20px;
   width: 16px;
   height: auto;
+}
+.hPTable.amortSchedule th,
+.hPTable.amortSchedule td {
+  padding: 5px !important;
 }
