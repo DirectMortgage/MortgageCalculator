@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dropdown, InputBox } from "../../../CommonFunctions/Accessories";
 import {
   formatCurrency,
@@ -27,58 +27,47 @@ const { type, w, f, loanId, p } = queryStringToObject(
 const isMobile = f == "m",
   isApp = Boolean(parseInt(p));
 const loanTypeOption = [
-    {
-      text: "Select",
-      value: 0,
-    },
-    {
-      text: "Fixed Rate",
-      value: 1,
-    },
-    {
-      text: "GPM – Graduated Payment Mortgage",
-      value: 2,
-    },
-    {
-      text: "ARM – Adjustable Rate Mortgage",
-      value: 3,
-    },
-    {
-      text: "Fixed - Interest Only",
-      value: 5,
-    },
-    {
-      text: "Other",
-      value: 4,
-    },
-    {
-      text: "Buydown",
-      value: 6,
-    },
-    {
-      text: "ARM - Interest Only",
-      value: 7,
-    },
-    {
-      text: "Balloon",
-      value: 8,
-    },
-    {
-      text: "HELOC",
-      value: 9,
-    },
-  ],
-  armTypeOption = [
-    "ARM 6 months/6 months",
-    "ARM 1/1",
-    "ARM 3/1",
-    "ARM 5/1",
-    "ARM 7/1",
-    "ARM 9/1",
-    "ARM 10/1",
-    "ARM 11/1",
-    "ARM 15/1",
-  ];
+  {
+    text: "Select",
+    value: 0,
+  },
+  {
+    text: "Fixed Rate",
+    value: 1,
+  },
+  {
+    text: "GPM – Graduated Payment Mortgage",
+    value: 2,
+  },
+  {
+    text: "ARM – Adjustable Rate Mortgage",
+    value: 3,
+  },
+  {
+    text: "Fixed - Interest Only",
+    value: 5,
+  },
+  {
+    text: "Other",
+    value: 4,
+  },
+  {
+    text: "Buydown",
+    value: 6,
+  },
+  {
+    text: "ARM - Interest Only",
+    value: 7,
+  },
+  {
+    text: "Balloon",
+    value: 8,
+  },
+  {
+    text: "HELOC",
+    value: 9,
+  },
+];
 
 const AmortSchedule = ({ amortSchedule }) => {
   const [tabs] = useState(["Monthly", "Yearly"]),
@@ -291,22 +280,9 @@ const HousePayment = () => {
       loanTerm: 30,
       rate: "",
       loanType: "",
-      otherFinancing: 0,
-      propertyMonthlyTax: 0,
-      mortgageInsurance: 0,
-      HOADues: 0,
-      otherFees: 0,
-      armGrossMargin: 0.02,
-      armIndexValue: 0.05,
-      armRateInitialAdj: 6,
-      armRateSubAdj: 6,
-      armInitialCap: 0.05,
-      armRateAdjCap: 0.02,
-      armLifeCap: 0.05,
     }),
     [processingStatus, setProcessingStatus] = useState(""),
     [currentScreen, setCurrentScreen] = useState("inputBlock"),
-    [searchMode, setSearchMode] = useState("Simple"),
     [amortSchedule, setAmortSchedule] = useState([]);
 
   const handleInputSource = ({ name, value }) => {
@@ -321,6 +297,7 @@ const HousePayment = () => {
     loanType,
     miAmt = 0,
   }) => {
+    debugger;
     let ratesArray = [],
       firstPaymentDate = new Date();
     loanTerm = loanTerm * 12;
@@ -346,15 +323,23 @@ const HousePayment = () => {
       let newRate = parseFloat(rate / 100),
         {
           armGrossMargin,
+          armLifeCap,
           armIndexValue,
           armRateInitialAdj,
           armRateSubAdj,
-          armInitialCap,
           armRateAdjCap,
-          armLifeCap,
         } = inputSource;
 
-      armLifeCap = armLifeCap + newRate;
+      armGrossMargin = armGrossMargin || 0.2;
+      armRateInitialAdj = armRateInitialAdj || 12;
+      armLifeCap = armLifeCap || 0.5;
+      armIndexValue = armIndexValue || 0;
+      armRateSubAdj = armRateSubAdj || 12;
+      armRateAdjCap = armRateAdjCap || 0;
+
+      armRateInitialAdj = Number(armRateInitialAdj);
+
+      armLifeCap = armLifeCap + rate;
       //=============== Initial ===============
       ratesArray.push({
         startTerm: 1,
@@ -368,11 +353,10 @@ const HousePayment = () => {
 
       newRate = updateARMRate(
         newRate,
-        armInitialCap,
+        armRateAdjCap,
         armGrossMargin,
         armIndexValue,
-        armLifeCap,
-        100 //targetRate
+        armLifeCap
       );
       ratesArray.push({
         startTerm: armRateInitialAdj + 1,
@@ -388,8 +372,7 @@ const HousePayment = () => {
         armRateSubAdj,
         armGrossMargin,
         armIndexValue,
-        armLifeCap,
-        100 //targetRate
+        armLifeCap
       );
 
       ratesArray.push({
@@ -407,23 +390,9 @@ const HousePayment = () => {
       ratesArray,
       miAmt
     );
-    // console.table(cashFlow);
-    console.table(ratesArray);
-
+    console.log({ ratesArray, cashFlow });
     setAmortSchedule(cashFlow);
   };
-  const monthlyPayment = useMemo(() => {
-    if (searchMode === "Simple") return amortSchedule?.[0]?.["Amount"];
-    return (
-      amortSchedule?.[0]?.["Amount"] +
-      Number(inputSource["otherFinancing"]) +
-      Number(inputSource["propertyMonthlyTax"]) +
-      Number(inputSource["mortgageInsurance"]) +
-      Number(inputSource["HOADues"]) +
-      Number(inputSource["otherFees"])
-    );
-  }, [amortSchedule, searchMode]);
-
   const handlePageLoad = async () => {
     if (loanId !== "undefined" && loanId) {
       let response = await handleGetLoanData(loanId),
@@ -434,22 +403,13 @@ const HousePayment = () => {
           loanAmount,
           ["Monthly Payment Factor %"]: iMiPercent,
           amortizeType: loanType,
-        } = response,
-        armGrossMargin = 0.02,
-        armIndexValue = 0.05,
-        armRateInitialAdj = 6,
-        armRateSubAdj = 6,
-        armInitialCap = 0.05,
-        armRateAdjCap = 0.02,
-        armLifeCap = 0.05;
+        } = response;
 
       loanTerm = loanTerm / 12;
       rate = formatPercentage(cleanValue(rate) * 100);
       setProcessingStatus((prevProcessingStatus) => {
         return prevProcessingStatus.replace("loanData,", "");
       });
-      console.log("response", response);
-
       setInputSource((prevInputSource) => {
         return {
           ...prevInputSource,
@@ -460,13 +420,6 @@ const HousePayment = () => {
           loanAmount,
           iMiPercent,
           loanType,
-          armGrossMargin,
-          armIndexValue,
-          armRateInitialAdj,
-          armRateSubAdj,
-          armInitialCap,
-          armRateAdjCap,
-          armLifeCap,
         };
       });
     }
@@ -573,250 +526,6 @@ const HousePayment = () => {
                 }}
                 isMap={false}
               />
-              {[3, 7].includes(Number(inputSource["loanType"])) && (
-                <>
-                  <Dropdown
-                    isValid={false}
-                    label="ARM Type"
-                    options={armTypeOption.map((text, index) => ({
-                      text,
-                      value: index,
-                    }))}
-                    value={inputSource["armType"]}
-                    onSelect={({ value, text }) => {
-                      const [armRateInitialAdj, armRateSubAdj] =
-                        value === 0
-                          ? [72, 78]
-                          : text
-                              .replace("ARM ", "")
-                              .split("/")
-                              .map((e) => Number(e) * 12);
-                      handleInputSource({
-                        value,
-                        name: "armType",
-                      });
-
-                      handleInputSource({
-                        value: armRateInitialAdj,
-                        name: "armRateInitialAdj",
-                      });
-
-                      handleInputSource({
-                        value: armRateSubAdj,
-                        name: "armRateSubAdj",
-                      });
-                    }}
-                    isMap={false}
-                  />
-                  {/* <InputBox
-                    type="text"
-                    inputMode="numeric"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Initial Adjustment (months)"
-                    placeholder="0"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "armRateInitialAdj" });
-                    }}
-                    value={inputSource["armRateInitialAdj"]}
-                  /> 
-                  <InputBox
-                    type="text"
-                    inputMode="numeric"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Initial Adjustment Frequency (months)"
-                    placeholder="0"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "armRateSubAdj" });
-                    }}
-                    value={inputSource["armRateSubAdj"]}
-                  />
-                  */}
-                  <InputBox
-                    disabled={true}
-                    type="text"
-                    inputMode="numeric"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Initial Cap"
-                    placeholder="0"
-                    onChangeText={({ target }) => {
-                      let { value } = target;
-                      value = Number(value) / 100;
-                      handleInputSource({ value, name: "armInitialCap" });
-                    }}
-                    value={Number(inputSource["armInitialCap"]) * 100}
-                    symbol={
-                      <span
-                        style={{
-                          position: "absolute",
-                          right: 15,
-                          fontFamily: "inter",
-                          fontSize: 14,
-                        }}
-                      >
-                        %
-                      </span>
-                    }
-                    symbolPosition="right"
-                  />
-                  <InputBox
-                    disabled={true}
-                    type="text"
-                    inputMode="numeric"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Adjustment Cap"
-                    placeholder="0"
-                    onChangeText={({ target }) => {
-                      let { value } = target;
-                      value = Number(value) / 100;
-                      handleInputSource({ value, name: "armRateAdjCap" });
-                    }}
-                    value={Number(inputSource["armRateAdjCap"]) * 100}
-                    symbol={
-                      <span
-                        style={{
-                          position: "absolute",
-                          right: 15,
-                          fontFamily: "inter",
-                          fontSize: 14,
-                        }}
-                      >
-                        %
-                      </span>
-                    }
-                    symbolPosition="right"
-                  />
-                  <InputBox
-                    disabled={true}
-                    type="text"
-                    inputMode="numeric"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Lifetime Cap"
-                    placeholder="0"
-                    onChangeText={({ target }) => {
-                      let { value } = target;
-                      value = Number(value) / 100;
-                      handleInputSource({ value, name: "armLifeCap" });
-                    }}
-                    value={Number(inputSource["armLifeCap"]) * 100}
-                    symbol={
-                      <span
-                        style={{
-                          position: "absolute",
-                          right: 15,
-                          fontFamily: "inter",
-                          fontSize: 14,
-                        }}
-                      >
-                        %
-                      </span>
-                    }
-                    symbolPosition="right"
-                  />
-                </>
-              )}
-              <div
-                style={{
-                  fontSize: 14,
-                  marginBottom: 20,
-                  color: "#508bc9",
-                  textAlign: "right",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-                onClick={() => {
-                  setSearchMode(
-                    searchMode === "Simple" ? "Advanced" : "Simple"
-                  );
-                }}
-              >
-                {searchMode === "Simple" ? "Advanced" : "Simple"} Filter
-              </div>
-              {searchMode === "Advanced" && (
-                <>
-                  <InputBox
-                    type="text"
-                    format="Currency"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Other Financing"
-                    placeholder="Other Financing"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "otherFinancing" });
-                    }}
-                    value={inputSource["otherFinancing"]}
-                  />
-                  <InputBox
-                    type="text"
-                    format="Currency"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Property Tax"
-                    placeholder="Property Tax"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "propertyMonthlyTax" });
-                    }}
-                    value={inputSource["propertyMonthlyTax"]}
-                  />
-                  <InputBox
-                    type="text"
-                    format="Currency"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Mortgage Insurance"
-                    placeholder="Mortgage Insurance"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "mortgageInsurance" });
-                    }}
-                    value={inputSource["mortgageInsurance"]}
-                  />
-                  <InputBox
-                    type="text"
-                    format="Currency"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="HOA Dues"
-                    placeholder="HOA Dues"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "HOADues" });
-                    }}
-                    value={inputSource["HOADues"]}
-                  />
-                  <InputBox
-                    type="text"
-                    format="Currency"
-                    style={{ marginBottom: 25 }}
-                    inputBoxStyle={{ fontFamily: "Inter" }}
-                    validate={false}
-                    label="Other"
-                    placeholder="Other"
-                    onChangeText={({ target }) => {
-                      const { value } = target;
-                      handleInputSource({ value, name: "otherFees" });
-                    }}
-                    value={inputSource["otherFees"]}
-                  />
-                </>
-              )}
               <div style={{ textAlign: "center" }}>
                 <div
                   style={{
@@ -829,7 +538,7 @@ const HousePayment = () => {
                   Monthly Payment
                 </div>
                 <div style={{ fontSize: 30, color: "black", fontWeight: 700 }}>
-                  {formatCurrency(monthlyPayment)}
+                  {formatCurrency(amortSchedule?.[0]?.["Amount"])}
                 </div>
               </div>
             </div>
@@ -903,7 +612,7 @@ const HousePayment = () => {
                 Monthly Payment
               </div>
               <div style={{ fontSize: 25, color: "#216c2a", fontWeight: 700 }}>
-                {formatCurrency(monthlyPayment)}
+                {formatCurrency(amortSchedule?.[0]?.["Amount"])}
               </div>
             </div>
           </div>

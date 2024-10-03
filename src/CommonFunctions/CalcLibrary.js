@@ -83,10 +83,11 @@ const updateARMRate = (
   curArmRateAdj,
   armGrossMargin,
   armIndexValue,
-  armLifeCap
+  armLifeCap,
+  targetRate
 ) => {
-  let newRate = 0,
-    targetRate = roundNearestEighth(armGrossMargin + armIndexValue);
+  let newRate = 0;
+  targetRate = targetRate || roundNearestEighth(armGrossMargin + armIndexValue);
 
   if (rate == targetRate) {
     newRate = rate;
